@@ -1,0 +1,159 @@
+##########################################
+# Autor: Ernesto Lomar
+# Fecha de creación: 12/04/2022
+# Ultima modificación: 16/08/2022
+#
+# Script de la ventana corte.
+#
+##########################################
+
+#Librerías externas
+from PyQt5 import uic
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from time import strftime
+import logging
+import subprocess
+import time
+import RPi.GPIO as GPIO
+
+#Librerías propias
+import variables_globales as variables_globales
+from variables_globales import VentanaActual
+from enviar_vuelta import EnviarVuelta
+from queries import obtener_datos_aforo
+from asignaciones_queries import guardar_estado_del_viaje
+from ventas_queries import obtener_ultimo_folio_de_item_venta
+
+try:
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(12, GPIO.OUT)
+except Exception as e:
+    print("No se pudo inicializar el zumbador: "+str(e))
+
+class corte(QWidget):
+
+    close_signal = pyqtSignal()
+    close_signal_pasaje = pyqtSignal()
+    
+    def __init__(self,close_signal_para_enviar_vuelta):
+        super().__init__()
+        try:
+            uic.loadUi("/home/pi/Urban_Urbano//ui/corte.ui", self)
+
+            #Creamos nuestras variables para el control del corte.
+            self.close_signal_vuelta = close_signal_para_enviar_vuelta
+
+            #Realizamos configuración de la ventana corte.
+            self.setGeometry(0, 0, 800, 440)
+            self.setWindowFlags(Qt.FramelessWindowHint)
+            self.close_signal_vuelta.connect(self.close_me)
+            self.idUnidad = str(obtener_datos_aforo()[1])
+            self.settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat)
+            self.inicializar()
+        except Exception as e:
+            logging.info(f"Error en la ventana corte: {e}")
+
+    #Función para inicializar la ventana corte.
+    def inicializar(self):
+        try:
+            self.label_fin.mousePressEvent = self.terminar_vuelta
+            self.label_cancel.mousePressEvent = self.cancelar
+        except Exception as e:
+            logging.info(f"Error en la ventana corte: {e}")
+
+    def cargar_datos(self):
+        try:
+            self.settings.setValue('ventana_actual', "corte")
+            self.label_head.setText(f"{self.idUnidad} {str(self.settings.value('servicio')[6:])}") # Obneter todos los datos del servicio, etc, desde el archivo de settings.
+            self.label_vuelta.setText(f"Vuelta {str(self.settings.value('vuelta'))}")
+            
+            self.label_cantidad_boletos_estud.setText(f"{str(self.settings.value('info_estudiantes')).split(',')[0]}  $")
+            self.label_total_cobro_estud.setText(f"{str(self.settings.value('info_estudiantes')).split(',')[1]}")
+
+            self.label_cantidad_boletos_normal.setText(f"{str(self.settings.value('info_normales')).split(',')[0]}  $")
+            self.label_total_cobro_normal.setText(f"{str(self.settings.value('info_normales')).split(',')[1]}")
+
+            self.label_cantidad_boletos_ninio.setText(f"{str(self.settings.value('info_chicos')).split(',')[0]}  $")
+            self.label_total_cobro_ninio.setText(f"{str(self.settings.value('info_chicos')).split(',')[1]}")
+
+            self.label_cantidad_boletos_admayor.setText(f"{str(self.settings.value('info_ad_mayores')).split(',')[0]}  $")
+            self.label_total_cobro_admayor.setText(f"{str(self.settings.value('info_ad_mayores')).split(',')[1]}")
+            
+            self.label_total_a_liquidar.setText(self.settings.value('total_a_liquidar'))
+        except Exception as e:
+            logging.info(f"Error en la ventana corte: {e}")
+
+    #Función para cerrar la ventana de corte.
+    def terminar_vuelta(self, event):
+        try:
+            self.close()
+            try:
+                from impresora import imprimir_ticket_de_corte
+            except Exception as e:
+                print("No se importaron las librerias de impresora")
+            
+            hecho = imprimir_ticket_de_corte(self.idUnidad)
+            hora = strftime('%H:%M:%S')
+            
+            if hecho:
+                #hora = strftime('%H:%M:%S')
+                total_de_folio_aforo_efectivo = int(self.settings.value('info_estudiantes').split(',')[0]) + int(self.settings.value('info_normales').split(',')[0]) + int(self.settings.value('info_chicos').split(',')[0]) + int(self.settings.value('info_ad_mayores').split(',')[0])
+                if self.settings.value('csn_chofer_dos') == "":
+                    guardar_estado_del_viaje(str(0),f"{self.settings.value('servicio')},{self.settings.value('pension')}",hora,total_de_folio_aforo_efectivo,0,str(self.settings.value('folio_de_viaje')))
+                else:
+                    guardar_estado_del_viaje(str(self.settings.value('csn_chofer_dos')),f"{self.settings.value('servicio')},{self.settings.value('pension')}",hora,total_de_folio_aforo_efectivo,0,str(self.settings.value('folio_de_viaje')))
+                self.close_signal.emit()
+                self.close_signal_pasaje.emit()
+                variables_globales.ventana_actual = VentanaActual.CERRAR_TURNO
+                variables_globales.folio_asignacion = 0
+                self.enviar_vualta = EnviarVuelta(self.close_signal_vuelta)
+                self.enviar_vualta.show()
+                self.settings.setValue('origen_actual', "")
+                self.settings.setValue('folio_de_viaje', "")
+                self.settings.setValue('pension', "")
+                self.settings.setValue('turno', "")
+                self.settings.setValue('vuelta', 1)
+                self.settings.setValue('info_estudiantes', "0,0.0")
+                self.settings.setValue('info_normales', "0,0.0")
+                self.settings.setValue('info_chicos', "0,0.0")
+                self.settings.setValue('info_ad_mayores', "0,0.0")
+                self.settings.setValue('reiniciar_folios', 1)
+                self.settings.setValue('total_a_liquidar', "0.0")
+                self.settings.setValue('total_de_folios', 0)
+                self.settings.setValue('csn_chofer_dos', "")
+            else:
+                self.settings.setValue('csn_chofer_dos', "")
+                self.settings.setValue('ventana_actual', "servicios_transbordos")
+                for i in range(5):
+                    GPIO.output(12, True)
+                    time.sleep(0.055)
+                    GPIO.output(12, False)
+                    time.sleep(0.055)
+                time.sleep(.5)
+        except Exception as e:
+            print(f"Error en la ventana corte: {e}")
+            logging.info(f"Error en la ventana corte: {e}")
+            for i in range(5):
+                GPIO.output(12, True)
+                time.sleep(0.055)
+                GPIO.output(12, False)
+                time.sleep(0.055)
+            time.sleep(.5)
+
+    #Función para cancelar el corte.
+    def cancelar(self, event):
+        try:
+            self.settings.setValue('csn_chofer_dos', "")
+            self.settings.setValue('ventana_actual', "servicios_transbordos")
+            self.close()
+        except Exception as e:
+            logging.info(f"Error en la ventana corte: {e}")
+    
+    #Función para cerrar la ventana de corte.
+    def close_me(self):
+        try:
+            self.close()
+        except Exception as e:
+            logging.info(f"Error en la ventana corte: {e}")

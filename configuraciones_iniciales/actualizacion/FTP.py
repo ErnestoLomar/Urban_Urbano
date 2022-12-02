@@ -29,9 +29,9 @@ except:
     
 #configuracion FTP
 Account = "\"account\""
-UserFTP = "\"recursosespirituales\""
-PassFTP = "\"1280x800\""
-HostFTP = "\"files.000webhost.com\""
+UserFTP = "\"Abraham\""
+PassFTP = "\"May0admin2022*\""
+HostFTP = "\"20.106.77.209\""
 ConfConexionFTP = "AT+QFTPCFG="+Account+","+UserFTP+","+PassFTP
 ConexionFTP = "AT+QFTPOPEN="+HostFTP+",21"
 contador = 1

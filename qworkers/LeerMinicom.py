@@ -110,6 +110,8 @@ class LeerMinicomWorker(QObject):
                     if self.contador_servidor >= 4:
                         
                         if folio_asignacion_viaje != 0:
+                            print("Enviando trama 3 con viaje")
+                            logging.info("Enviando trama 3 con viaje")
                             trama_3_con_folio = "3"+","+str(self.folio)+','+str(folio_asignacion_viaje)+","+hora+","+str(res['latitud'])+","+str(res['longitud'])+","+str(variables_globales.geocerca.split(",")[0])+","+str(res['velocidad'])
                             result = modem.mandar_datos(trama_3_con_folio)
                             enviado = result['enviado']
@@ -127,6 +129,8 @@ class LeerMinicomWorker(QObject):
                             self.folio = self.folio + 1
                             self.realizar_accion(result)
                         else:
+                            print("Enviando trama 3 sin viaje")
+                            logging.info("Enviando trama 3 sin viaje")
                             folio_de_viaje_sin_viaje = f"{''.join(fecha_completa[:10].split('-'))[3:]}{self.idUnidad}{99}"
                             trama_3_sin_folio = "3"+","+str(self.folio)+','+str(folio_de_viaje_sin_viaje)+","+hora+","+str(res['latitud'])+","+str(res['longitud'])+","+str(variables_globales.geocerca.split(",")[0])+","+str(res['velocidad'])
                             result = modem.mandar_datos(trama_3_sin_folio)

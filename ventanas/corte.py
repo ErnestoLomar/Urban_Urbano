@@ -125,7 +125,7 @@ class corte(QWidget):
                     print("Se ha actualizado el total de boletos en el aforo a: "+str(total_de_folio_aforo_efectivo))
                     logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")
                 if self.settings.value('csn_chofer_dos') == "":
-                    guardar_estado_del_viaje(str(0),f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora,total_de_folio_aforo_efectivo,0,str(self.settings.value('folio_de_viaje')))
+                    guardar_estado_del_viaje(csn_init,f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora,total_de_folio_aforo_efectivo,0,str(self.settings.value('folio_de_viaje')))
                 else:
                     guardar_estado_del_viaje(str(self.settings.value('csn_chofer_dos')),f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora,total_de_folio_aforo_efectivo,0,str(self.settings.value('folio_de_viaje')))
                 self.close_signal.emit()

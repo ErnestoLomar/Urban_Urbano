@@ -292,7 +292,7 @@ class Ventana(QWidget):
     def reportProgressTarjeta(self, result):
         try:
         #Si el resultado es una lista y la lista no está vacía, abra la ventana
-            if len(result) > 0:
+            if len(result) == 14:
                 #Abrir ventana chofer
                 if self.settings.value('csn_chofer') == "":
                     variables_globales.csn_chofer = result

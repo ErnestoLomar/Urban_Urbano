@@ -96,11 +96,12 @@ class LeerTarjetaWorker(QObject):
             while True:
                 try:
                     csn = self.lib.ev2IsPresent().decode(encoding="utf8", errors='ignore')
+                    time.sleep(0.01)
                     if csn != "":
                         try:
                             tipo = str(self.lib.tipoTiscEV2().decode(encoding="utf8", errors='ignore')[0:2])
                             if tipo == "KI":
-                                vigenciaTarjeta = str(self.lib.obtenerVigencia().decode(encoding="utf8", errors='ignore'))
+                                vigenciaTarjeta = str(self.lib.obtenerVigencia().decode(encoding="utf8", errors='ignore'))[:12]
                                 print("Vigencia completa de la tarjeta: "+vigenciaTarjeta)
                                 if len(vigenciaTarjeta) == 12 and int(vigenciaTarjeta[:2]) >= 22:
                                     now = datetime.now()
@@ -109,14 +110,28 @@ class LeerTarjetaWorker(QObject):
                                     print("Vigencia actual: "+vigenciaActual)
                                     if vigenciaActual <= vigenciaTarjeta[:6]:
                                         print("Tarjeta vigente")
-                                        self.progress.emit(csn)
-                                        GPIO.output(12, True)
-                                        time.sleep(0.1)
-                                        GPIO.output(12, False)
-                                        time.sleep(0.1)
-                                        GPIO.output(12, True)
-                                        time.sleep(0.1)
-                                        GPIO.output(12, False)
+                                        vg.vigencia_de_tarjeta = vigenciaTarjeta
+                                        csn = self.lib.ev2IsPresent().decode(encoding="utf8", errors='ignore')
+                                        time.sleep(0.01)
+                                        if len(csn) == 14:
+                                            self.progress.emit(csn)
+                                            GPIO.output(12, True)
+                                            time.sleep(0.1)
+                                            GPIO.output(12, False)
+                                            time.sleep(0.1)
+                                            GPIO.output(12, True)
+                                            time.sleep(0.1)
+                                            GPIO.output(12, False)
+                                        else:
+                                            GUI = VentanaEmergente("TARJETAINVALIDA", "")
+                                            GUI.show()
+                                            for i in range(5):
+                                                GPIO.output(12, True)
+                                                time.sleep(0.055)
+                                                GPIO.output(12, False)
+                                                time.sleep(0.055)
+                                            time.sleep(2)
+                                            GUI.close()
                                     else:
                                         GUI = VentanaEmergente("FUERADEVIGENCIA", "")
                                         GUI.show()

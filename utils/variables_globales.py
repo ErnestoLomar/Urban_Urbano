@@ -6,7 +6,7 @@
 # Script para almacenar las variables globales que se esten utilizando en el programa
 ##########################################
 
-version_del_software = "EL.v1.14"
+version_del_software = "EL.v1.15"
 banderaServicio=False
 longitud = 0
 latitud = 0
@@ -28,6 +28,7 @@ todos_los_transbordos_activos = []
 vendiendo_boleto = False
 detectando_geocercas_hilo = True
 terminar_hilo_verificar_datos = False
+vigencia_de_tarjeta = ""
 
 from enum import Enum
 # La clase VentanaActual es una enumeración de los posibles valores de la variable ventana_actual

@@ -2,11 +2,18 @@ import time
 import subprocess
 import sys
 import os
+import datetime
 
 sys.path.insert(1, '/home/pi/Urban_Urbano/configuraciones_iniciales/actualizacion')
 sys.path.insert(1, '/home/pi/Urban_Urbano/utils')
+sys.path.insert(1, '/home/pi/Urban_Urbano/db')
 
 from variables_globales import version_del_software
+'''
+from asignaciones_queries import eliminar_auto_asignaciones_antiguas, eliminar_fin_de_viaje_antiguos
+from tickets_usados import eliminar_tickets_antiguos
+from ventas_queries import eliminar_ventas_antiguas
+'''
 
 try:
     print("#############################################")
@@ -31,12 +38,54 @@ def Encender_QUECTEL():
                 break
             print("################################################")
             time.sleep(3)
+        '''
+        print("################################################")
+        print("Verificando bases de datos...")
+        fecha_ahora = datetime.datetime.utcnow()
+        print("Hoy es "+str(fecha_ahora))
+        fecha_antigua = fecha_ahora - datetime.timedelta(days=15)
+        print("Hace 15 días fue "+str(fecha_antigua))
+        año_hace_15_dias = str(fecha_antigua)[:4]
+        mes_hace_15_dias = str(fecha_antigua)[5:7]
+        dia_hace_15_dias = str(fecha_antigua)[8:10]
+        fecha_hace_15_dias = dia_hace_15_dias+"-"+mes_hace_15_dias+"-"+año_hace_15_dias
+        print("La fecha hace 15 días es "+str(fecha_hace_15_dias))
+        eliminado_inicio_viaje_db = False
+        eliminado_fin_de_viaje_db = False
+        eliminado_tickets_db = False
+        eliminado_ventas_db = False
+        eliminado_inicio_viaje_db = eliminar_auto_asignaciones_antiguas(fecha_hace_15_dias)
+        if eliminado_inicio_viaje_db:
+            print("Auto asignaciones verificadas")
+        else:
+            print("Ocurrió un problema al verificar las auto asignaciones")
+        time.sleep(1)
+        eliminado_fin_de_viaje_db = eliminar_fin_de_viaje_antiguos(fecha_hace_15_dias)
+        if eliminado_fin_de_viaje_db:
+            print("Fin de viajes verificados")
+        else:
+            print("Ocurrió un problema al verificar los fin de viajes")
+        time.sleep(1)
+        eliminado_tickets_db = eliminar_tickets_antiguos(fecha_hace_15_dias)
+        if eliminado_tickets_db:
+            print("Tickets verificados")
+        else:
+            print("Ocurrió un problema al verificar los tickets")
+        time.sleep(1)
+        eliminado_ventas_db = eliminar_ventas_antiguas(fecha_hace_15_dias)
+        if eliminado_ventas_db:
+            print("Ventas verificadas")
+        else:
+            print("Ocurrió un problema al verificar las ventas")
+        time.sleep(1)
+        print("Se terminó de verificar las bases de datos")
+        print("################################################")'''
         if os.path.exists("/home/pi/Urban_Urbano/ventanas/inicio.py"):
             subprocess.run("sudo python3 /home/pi/Urban_Urbano/ventanas/inicio.py",shell=True)
         else:
             print("No se encontró el archivo inicio.py")
     except Exception as e:
-        print("ALGO OCURRIO AL INICIAR EL QUECTEL")
+        print("ALGO OCURRIO AL INICIAR EL SISTEMA: ", e)
         intentos = intentos + 1
         if intentos < 5:
             Encender_QUECTEL()

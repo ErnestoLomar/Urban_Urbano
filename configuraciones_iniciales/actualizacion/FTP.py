@@ -224,7 +224,7 @@ class Principal_Modem:
                 print("salio "+Aux.decode())
                 return True
             except Exception as e:
-                print("FTP.py, linea 171, Error al inicializar SIM: "+str(e))
+                print("FTP.py, linea 171, Error al ConfigurarFTP: "+str(e))
                 return False
             
 ##########################################################################################################################################
@@ -257,7 +257,7 @@ class Principal_Modem:
                     IniciarSesionFTP()
                 return True
             except Exception as e:
-                print("FTP.py, linea 171, Error al inicializar SIM: "+str(e))
+                print("FTP.py, linea 171, Error al IniciarSesionFTP: "+str(e))
                 return False
             
 ##########################################################################################################################################
@@ -309,7 +309,7 @@ class Principal_Modem:
                     leerArchivo()
                     return True
             except Exception as e:
-                print("FTP.py, linea 171, Error al inicializar SIM: "+str(e))
+                print("FTP.py, linea 171, Error al UbicarPathFTP: "+str(e))
                 return False
             
 ##########################################################################################################################################
@@ -354,7 +354,7 @@ class Principal_Modem:
                             break
                 return True
             except Exception as e:
-                print("FTP.py, linea 171, Error al inicializar SIM: "+str(e))
+                print("FTP.py, linea 171, Error al leer archivo: "+str(e))
                 return False
             
 

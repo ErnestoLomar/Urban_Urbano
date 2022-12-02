@@ -40,6 +40,7 @@ class CerrarTurno(QWidget):
             self.label_cancel.mousePressEvent = self.cancelar
             self.label_fin.mousePressEvent = self.cerrar_turno
             self.label_cambiar_ruta.mousePressEvent = self.cambiar_ruta
+            self.label_vigencia_tarjeta.hide()
             self.idUnidad = str(obtener_datos_aforo()[1])
             self.settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat)
         except Exception as e:
@@ -64,6 +65,7 @@ class CerrarTurno(QWidget):
             self.settings.setValue('servicio', "")
             self.settings.setValue('ventana_actual', "")
             self.settings.setValue('csn_chofer', "")
+            variables_globales.csn_chofer = ""
             GPIO.output(33, False)
         except Exception as e:
             print(e)
@@ -85,6 +87,7 @@ class CerrarTurno(QWidget):
 
     def cargar_datos(self):
         try:
+            print("La vigencia de la tarjeta es: "+str(variables_globales.vigencia_de_tarjeta))
             self.settings.setValue('ventana_actual', "cerrar_turno")
             self.label_head.setText(f"{self.idUnidad} {str(self.settings.value('servicio')[6:])}")
             self.label_vuelta.setText(f"Vuelta {str(self.settings.value('vuelta'))}")

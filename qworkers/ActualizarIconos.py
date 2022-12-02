@@ -12,8 +12,8 @@ from PyQt5.QtCore import QObject, pyqtSignal
 import time
 import logging
 
-from ventas_queries import obtener_estado_de_todas_las_ventas_no_enviadas
-from asignaciones_queries import obtener_todas_las_asignaciones_no_enviadas, obtener_estado_de_todos_los_viajes_no_enviados
+from ventas_queries import obtener_estado_de_todass_las_ventas_no_enviadas
+from asignaciones_queries import obtener_todass_las_asignaciones_no_enviadas, obtener_estado_de_todos_los_viajes_no_enviados
 
 #Librerias propias
 import variables_globales
@@ -41,8 +41,8 @@ class ActualizarIconosWorker(QObject):
                 res["gps"] = variables_globales.GPS
                 res['velocidad'] = variables_globales.velocidad
                 res['servidor'] = variables_globales.conexion_servidor
-                self.total_de_ventas_no_enviadas = obtener_estado_de_todas_las_ventas_no_enviadas()
-                self.total_de_asignaciones_no_enviadas = obtener_todas_las_asignaciones_no_enviadas()
+                self.total_de_ventas_no_enviadas = obtener_estado_de_todass_las_ventas_no_enviadas()
+                self.total_de_asignaciones_no_enviadas = obtener_todass_las_asignaciones_no_enviadas()
                 self.total_de_viajes_no_enviados = obtener_estado_de_todos_los_viajes_no_enviados()
                 self.cantidad_total_de_datos_no_enviados = len(self.total_de_ventas_no_enviadas) + len(self.total_de_asignaciones_no_enviadas) + len(self.total_de_viajes_no_enviados)
                 res['datos_pendientes'] = self.cantidad_total_de_datos_no_enviados

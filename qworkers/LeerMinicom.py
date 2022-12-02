@@ -51,6 +51,7 @@ class LeerMinicomWorker(QObject):
         try:
             self.intentos_envio = 0
             self.recibido_folio_webservice = 0
+            self.lista_de_datos_por_enviar = []
         except Exception as e:
             print("\x1b[1;31;47m"+"LeerMinicom.py, linea 47: "+str(e)+'\033[0;m')
             logging.info("LeerMinicom.py, linea 47: "+str(e))
@@ -94,7 +95,8 @@ class LeerMinicomWorker(QObject):
                 hora = strftime("%H:%M:%S")
                 dia = strftime("%d-%m-%Y")
                 enviado = ''
-                trama = ''
+                trama_3_con_folio = ''
+                trama_3_sin_folio = ''
                 
                 if ("error" not in res.keys()):
                     #GPS FUNCIONA
@@ -108,36 +110,36 @@ class LeerMinicomWorker(QObject):
                     if self.contador_servidor >= 4:
                         
                         if folio_asignacion_viaje != 0:
-                            trama = "3"+","+str(self.folio)+','+str(folio_asignacion_viaje)+","+hora+","+str(res['latitud'])+","+str(res['longitud'])+","+str(variables_globales.geocerca.split(",")[0])+","+str(res['velocidad'])
-                            result = modem.mandar_datos(trama)
+                            trama_3_con_folio = "3"+","+str(self.folio)+','+str(folio_asignacion_viaje)+","+hora+","+str(res['latitud'])+","+str(res['longitud'])+","+str(variables_globales.geocerca.split(",")[0])+","+str(res['velocidad'])
+                            result = modem.mandar_datos(trama_3_con_folio)
                             enviado = result['enviado']
                             if enviado == True:
                                 print("\x1b[1;32m"+"#############################################")
-                                print("\x1b[1;32m"+"Trama GNSS enviada: "+trama)
+                                print("\x1b[1;32m"+"Trama GNSS enviada: "+trama_3_con_folio)
                                 print("\x1b[1;32m"+"#############################################")
-                                logging.info('Trama enviada: '+trama)
+                                logging.info('Trama enviada: '+trama_3_con_folio)
                             else:
-                                logging.info('Trama no enviada: '+trama)
+                                logging.info('Trama no enviada: '+trama_3_con_folio)
                                 print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
-                                print("\x1b[1;31;47m"+"Trama GNSS no enviada: "+trama+'\033[0;m')
+                                print("\x1b[1;31;47m"+"Trama GNSS no enviada: "+trama_3_con_folio+'\033[0;m')
                                 print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
                             self.reeconectar_socket(enviado)
                             self.folio = self.folio + 1
                             self.realizar_accion(result)
                         else:
                             folio_de_viaje_sin_viaje = f"{''.join(fecha_completa[:10].split('-'))[3:]}{self.idUnidad}{99}"
-                            trama = "3"+","+str(self.folio)+','+str(folio_de_viaje_sin_viaje)+","+hora+","+str(res['latitud'])+","+str(res['longitud'])+","+str(variables_globales.geocerca.split(",")[0])+","+str(res['velocidad'])
-                            result = modem.mandar_datos(trama)
+                            trama_3_sin_folio = "3"+","+str(self.folio)+','+str(folio_de_viaje_sin_viaje)+","+hora+","+str(res['latitud'])+","+str(res['longitud'])+","+str(variables_globales.geocerca.split(",")[0])+","+str(res['velocidad'])
+                            result = modem.mandar_datos(trama_3_sin_folio)
                             enviado = result['enviado']
                             if enviado == True:
                                 print("\x1b[1;32m"+"#############################################")
-                                print("\x1b[1;32m"+"Trama GNSS enviada: "+trama)
+                                print("\x1b[1;32m"+"Trama GNSS enviada: "+trama_3_sin_folio)
                                 print("\x1b[1;32m"+"#############################################")
-                                logging.info('Trama enviada: '+trama)
+                                logging.info('Trama enviada: '+trama_3_sin_folio)
                             else:
-                                logging.info('Trama no enviada: '+trama)
+                                logging.info('Trama no enviada: '+trama_3_sin_folio)
                                 print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
-                                print("\x1b[1;31;47m"+"Trama GNSS no enviada: "+trama+'\033[0;m')
+                                print("\x1b[1;31;47m"+"Trama GNSS no enviada: "+trama_3_sin_folio+'\033[0;m')
                                 print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
                             self.reeconectar_socket(enviado)
                             self.folio = self.folio + 1
@@ -149,23 +151,44 @@ class LeerMinicomWorker(QObject):
                 if self.contador_servidor >= 4:
                     try:
                         print("\x1b[1;32m"+"Verificando si hay datos en la BD por enviar...")
-                        total_de_asignaciones_no_enviadas = obtener_todas_las_asignaciones_no_enviadas()
-                        if len(total_de_asignaciones_no_enviadas) != 0:
-                            try:
-                                self.enviar_inicio_de_viaje()
-                            except Exception as e:
-                                print("\x1b[1;31;47m"+"LeerMinicom.py, linea 157: "+str(e)+'\033[0;m')
-                        else:
-                            try:
-                                self.enviar_venta()
-                            except Exception as e:
-                                print("\x1b[1;31;47m"+"LeerMinicom.py, linea 163: "+str(e)+'\033[0;m')
-                        total_de_ventas_no_enviadas = obtener_estado_de_todas_las_ventas_no_enviadas()
-                        if variables_globales.folio_asignacion == 0 and len(total_de_ventas_no_enviadas) == 0:
-                            try:
-                                self.enviar_fin_de_viaje()
-                            except Exception as e:
-                                print("\x1b[1;31;47m"+"LeerMinicom.py, linea 169: "+str(e)+'\033[0;m')
+                        for j in range(3):
+                            total_de_asignaciones_no_enviadas = obtener_todas_las_asignaciones_no_enviadas()
+                            fin_de_viajes_no_enviados = obtener_estado_de_viajes_no_enviados()
+                            total_de_ventas_no_enviadas = obtener_estado_de_todas_las_ventas_no_enviadas()
+                            
+                            if len(total_de_asignaciones_no_enviadas) != 0:
+                                self.lista_de_datos_por_enviar.append(f"{total_de_asignaciones_no_enviadas[0][4]}{total_de_asignaciones_no_enviadas[0][5]},asignacion")
+                            if len(total_de_ventas_no_enviadas) != 0:
+                                self.lista_de_datos_por_enviar.append(f"{total_de_ventas_no_enviadas[0][3]}{total_de_ventas_no_enviadas[0][4]},venta")
+                            if len(fin_de_viajes_no_enviados) != 0:
+                                self.lista_de_datos_por_enviar.append(f"{fin_de_viajes_no_enviados[0][3]}{fin_de_viajes_no_enviados[0][4]},finviaje")
+                            
+                            if len(self.lista_de_datos_por_enviar) != 0:
+                                print("Lista de datos: ", self.lista_de_datos_por_enviar)
+                                primer_dato = self.lista_de_datos_por_enviar[0].split(",")
+                                menor_operacion = int(str(primer_dato[0]).replace(":", "").replace("-", ""))
+                                menor = primer_dato[0]
+                                tipo_de_dato = primer_dato[1]
+                                for i in range(len(self.lista_de_datos_por_enviar)):
+                                    print("Item de lista: ", self.lista_de_datos_por_enviar[i])
+                                    dato = self.lista_de_datos_por_enviar[i].split(",")
+                                    if int(str(dato[0]).replace(":", "").replace("-", "")) < menor_operacion:
+                                        menor = dato[0]
+                                        menor_operacion = int(str(dato[0]).replace(":", "").replace("-", ""))
+                                        tipo_de_dato = dato[1]
+                                print("El menor es: "+str(menor))
+                                print("El menor operacion es: "+str(menor_operacion))
+                                print("El tipo de dato es: "+str(tipo_de_dato))
+                                if 'asignacion' in tipo_de_dato:
+                                    print("Enviando asignacion")
+                                    self.enviar_inicio_de_viaje()
+                                if 'venta' in tipo_de_dato:
+                                    print("Enviando venta")
+                                    self.enviar_venta()
+                                if 'finviaje' in tipo_de_dato:
+                                    print("Enviando fin de viaje")
+                                    self.enviar_fin_de_viaje()
+                                self.lista_de_datos_por_enviar = []
                         print("\x1b[1;32m"+"Terminando de verificar si hay datos en la BD por enviar...")
                     except Exception as e:
                         logging.info('Error al enviar datos al servidor: '+str(e))
@@ -289,20 +312,20 @@ class LeerMinicomWorker(QObject):
                                 print("El servidor requiere una trama 5")
                                 print(f"el servidor pide el folio {datos[2]} de los ventas")
                                 print(f"del folio_de_viaje {datos[3]}")
-                                folio = datos[2]
-                                if folio != "99":
-                                    folio_viaje = datos[3]
-                                    if folio_viaje == "0":
+                                folio_de_trama_5 = datos[2]
+                                if folio_de_trama_5 != "99":
+                                    folio_viaje_trama_5 = datos[3]
+                                    if folio_viaje_trama_5 == "0":
                                         print("Se pide el folio de viaje actual")
                                         folio_viaje_competo = variables_globales.folio_asignacion
-                                        venta_db = obtener_venta_por_folio_y_foliodeviaje(folio, folio_viaje_competo)
+                                        venta_db = obtener_venta_por_folio_y_foliodeviaje(folio_de_trama_5, folio_viaje_competo)
                                         print("La venta encontrada es: ",str(venta_db))
                                     else:
                                         print("Se pide un folio de viaje diferente al actual")
-                                        fecha_viaje_pedido = folio_viaje[:6]
-                                        folio_viaje_pedido = folio_viaje[6:]
+                                        fecha_viaje_pedido = folio_viaje_trama_5[:6]
+                                        folio_viaje_pedido = folio_viaje_trama_5[6:]
                                         folio_viaje_competo = f"{fecha_viaje_pedido}{self.idUnidad}{folio_viaje_pedido}"
-                                        venta_db = obtener_venta_por_folio_y_foliodeviaje(folio, folio_viaje_competo)
+                                        venta_db = obtener_venta_por_folio_y_foliodeviaje(folio_de_trama_5, folio_viaje_competo)
                                         print("La venta encontrada es: ",str(venta_db))
                                     try:
                                         if venta_db != None:
@@ -315,10 +338,10 @@ class LeerMinicomWorker(QObject):
                                             id_tipo_de_pasajero = venta_db[7]
                                             transbordo_o_no = venta_db[8]
 
-                                            trama = '5'+","+str(folio_aforo_venta)+","+str(folio_de_viaje)+","+str(hora_db)+","+str(id_del_servicio_o_transbordo)+","+str(id_geocerca)+","+str(id_tipo_de_pasajero)+","+str(transbordo_o_no)
-                                            print("\x1b[1;32m"+"Reenviando venta: "+trama)
-                                            logging.info("Reenviando venta: "+trama)
-                                            result = modem.mandar_datos(trama)
+                                            trama_5_reenviar = '5'+","+str(folio_aforo_venta)+","+str(folio_de_viaje)+","+str(hora_db)+","+str(id_del_servicio_o_transbordo)+","+str(id_geocerca)+","+str(id_tipo_de_pasajero)+","+str(transbordo_o_no)
+                                            print("\x1b[1;32m"+"Reenviando venta: "+trama_5_reenviar)
+                                            logging.info("Reenviando venta: "+trama_5_reenviar)
+                                            result = modem.mandar_datos(trama_5_reenviar)
                                             enviado = result['enviado']
 
                                             if enviado == True:
@@ -354,8 +377,8 @@ class LeerMinicomWorker(QObject):
                                     folio_viaje_competo = variables_globales.folio_asignacion
                                     inicio_de_viaje_db = obtener_asignacion_por_folio_de_viaje(folio_viaje_competo)
                                 else:
-                                    fecha_viaje_pedido = folio_viaje[:6]
-                                    folio_viaje_pedido = folio_viaje[6:]
+                                    fecha_viaje_pedido = folio_de_viaje_pedido[:6]
+                                    folio_viaje_pedido = folio_de_viaje_pedido[6:]
                                     if folio_viaje_pedido != "99":
                                         folio_viaje_competo = f"{fecha_viaje_pedido}{self.idUnidad}{folio_viaje_pedido}"
                                         inicio_de_viaje_db = obtener_asignacion_por_folio_de_viaje(folio_viaje_competo)
@@ -370,11 +393,58 @@ class LeerMinicomWorker(QObject):
                                         servicio_pension = str(inicio_de_viaje_db[3]).replace("-", ",").split(",")[0]
                                         hora_inicio = inicio_de_viaje_db[5]
                                         folio_de_viaje = inicio_de_viaje_db[6]
+                                        
+                                        if csn_chofer == "":
+                                            print("\x1b[1;33m"+"#############################################")
+                                            print("\x1b[1;33m"+"El csn esta vació en reenviar trama 2, haciendo primer candado de seguridad...")
+                                            logging.info("El csn esta vació en reenviar trama 2, haciendo primer candado de seguridad...")
+                                            intentos = 1
+                                            while True:
+                                                if folio_de_viaje_pedido == "0":
+                                                    folio_viaje_competo = variables_globales.folio_asignacion
+                                                    inicio_de_viaje_db = obtener_asignacion_por_folio_de_viaje(folio_viaje_competo)
+                                                else:
+                                                    fecha_viaje_pedido = folio_de_viaje_pedido[:6]
+                                                    folio_viaje_pedido = folio_de_viaje_pedido[6:]
+                                                    if folio_viaje_pedido != "99":
+                                                        folio_viaje_competo = f"{fecha_viaje_pedido}{self.idUnidad}{folio_viaje_pedido}"
+                                                        inicio_de_viaje_db = obtener_asignacion_por_folio_de_viaje(folio_viaje_competo)
+                                                    else:
+                                                        print("El servidor pide folio de inicio de viaje 99")
+                                                        return
+                                                print("inicio_de_viaje_db: "+str(inicio_de_viaje_db))
+                                                csn_chofer = inicio_de_viaje_db[2]
+                                                if intentos == 5 or csn_chofer != "":
+                                                    print("\x1b[1;33m"+"#############################################")
+                                                    break
+                                                intentos = intentos + 1
+                                        if csn_chofer == "":
+                                            print("\x1b[1;33m"+"#############################################")
+                                            print("\x1b[1;33m"+"El csn esta vació en reenviar trama 2, haciendo segundo candado de seguridad...")
+                                            logging.info("El csn esta vació en reenviar trama 2, haciendo segundo candado de seguridad...")
+                                            intentos2 = 1
+                                            while True:
+                                                csn_chofer = self.settings.value('csn_chofer')
+                                                if intentos2 == 5 or csn_chofer != "":
+                                                    print("\x1b[1;33m"+"#############################################")
+                                                    break
+                                                intentos2 = intentos2 + 1
+                                        if csn_chofer == "":
+                                            print("\x1b[1;33m"+"#############################################")
+                                            print("\x1b[1;33m"+"El csn esta vació en reenviar trama 2, haciendo tercer candado de seguridad...")
+                                            logging.info("El csn esta vació en reenviar trama 2, haciendo tercer candado de seguridad...")
+                                            intentos3 = 1
+                                            while True:
+                                                csn_chofer = variables_globales.csn_chofer
+                                                if intentos3 == 5 or csn_chofer != "":
+                                                    print("\x1b[1;33m"+"#############################################")
+                                                    break
+                                                intentos3 = intentos3 + 1
 
-                                        trama = '2'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+servicio_pension
-                                        print("\x1b[1;32m"+"Reenviando inicio de viaje: "+trama)
-                                        logging.info("Reenviando inicio de viaje: "+trama)
-                                        result = modem.mandar_datos(trama)
+                                        trama_2_reenviar = '2'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+servicio_pension
+                                        print("\x1b[1;32m"+"Reenviando inicio de viaje: "+trama_2_reenviar)
+                                        logging.info("Reenviando inicio de viaje: "+trama_2_reenviar)
+                                        result = modem.mandar_datos(trama_2_reenviar)
                                         enviado = result['enviado']
 
                                         if enviado == True:
@@ -408,8 +478,8 @@ class LeerMinicomWorker(QObject):
                                     folio_viaje_competo = variables_globales.folio_asignacion
                                     fin_de_viaje_db = obtener_fin_de_viaje_por_folio_de_viaje(folio_viaje_competo)
                                 else:
-                                    fecha_viaje_pedido = folio_viaje[:6]
-                                    folio_viaje_pedido = folio_viaje[6:]
+                                    fecha_viaje_pedido = folio_de_fin_de_viaje_pedido[:6]
+                                    folio_viaje_pedido = folio_de_fin_de_viaje_pedido[6:]
                                     if folio_viaje_pedido != "99":
                                         folio_viaje_competo = f"{fecha_viaje_pedido}{self.idUnidad}{folio_viaje_pedido}"
                                         fin_de_viaje_db = obtener_fin_de_viaje_por_folio_de_viaje(folio_viaje_competo)
@@ -421,15 +491,15 @@ class LeerMinicomWorker(QObject):
                                     if fin_de_viaje_db != None:
                                         id = fin_de_viaje_db[0]
                                         csn_chofer = fin_de_viaje_db[1]
-                                        hora_inicio = fin_de_viaje_db[3]
-                                        total_de_folio_aforo_efectivo = fin_de_viaje_db[4]
-                                        total_de_folio_aforo_tarjeta = fin_de_viaje_db[5]
-                                        folio_de_viaje = fin_de_viaje_db[6]
+                                        hora_inicio = fin_de_viaje_db[4]
+                                        total_de_folio_aforo_efectivo = fin_de_viaje_db[5]
+                                        total_de_folio_aforo_tarjeta = fin_de_viaje_db[6]
+                                        folio_de_viaje = fin_de_viaje_db[7]
 
-                                        trama = '4'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+str(total_de_folio_aforo_efectivo)+","+str(total_de_folio_aforo_tarjeta)
-                                        print("\x1b[1;32m"+"Reenviando cierre de viaje: "+trama)
-                                        logging.info("Reenviando cierre de viaje: "+trama)
-                                        result = modem.mandar_datos(trama)
+                                        trama_4_reenviar = '4'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+str(total_de_folio_aforo_efectivo)+","+str(total_de_folio_aforo_tarjeta)
+                                        print("\x1b[1;32m"+"Reenviando cierre de viaje: "+trama_4_reenviar)
+                                        logging.info("Reenviando cierre de viaje: "+trama_4_reenviar)
+                                        result = modem.mandar_datos(trama_4_reenviar)
                                         enviado = result['enviado']
 
                                         if enviado == True:
@@ -530,11 +600,46 @@ class LeerMinicomWorker(QObject):
                         servicio_pension = str(asignacion[3]).replace("-", ",").split(",")[0]
                         hora_inicio = asignacion[5]
                         folio_de_viaje = asignacion[6]
+                        
+                        if csn_chofer == "":
+                            print("\x1b[1;33m"+"#############################################")
+                            print("\x1b[1;33m"+"El csn esta vació en trama 2, haciendo primer candado de seguridad...")
+                            logging.info("El csn esta vació en trama 2, haciendo primer candado de seguridad...")
+                            intentos = 1
+                            while True:
+                                asignacioness = obtener_asignaciones_no_enviadas()[0]
+                                csn_chofer = asignacioness[2]
+                                if intentos == 5 or csn_chofer != "":
+                                    print("\x1b[1;33m"+"#############################################")
+                                    break
+                                intentos = intentos + 1
+                        if csn_chofer == "":
+                            print("\x1b[1;33m"+"#############################################")
+                            print("\x1b[1;33m"+"El csn esta vació en trama 2, haciendo segundo candado de seguridad...")
+                            logging.info("El csn esta vació en trama 2, haciendo segundo candado de seguridad...")
+                            intentos2 = 1
+                            while True:
+                                csn_chofer = self.settings.value('csn_chofer')
+                                if intentos2 == 5 or csn_chofer != "":
+                                    print("\x1b[1;33m"+"#############################################")
+                                    break
+                                intentos2 = intentos2 + 1
+                        if csn_chofer == "":
+                            print("\x1b[1;33m"+"#############################################")
+                            print("\x1b[1;33m"+"El csn esta vació en trama 2, haciendo tercer candado de seguridad...")
+                            logging.info("El csn esta vació en trama 2, haciendo tercer candado de seguridad...")
+                            intentos3 = 1
+                            while True:
+                                csn_chofer = variables_globales.csn_chofer
+                                if intentos3 == 5 or csn_chofer != "":
+                                    print("\x1b[1;33m"+"#############################################")
+                                    break
+                                intentos3 = intentos3 + 1
 
-                        trama = '2'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+servicio_pension
-                        print("\x1b[1;32m"+"Enviando inicio de viaje: "+trama)
-                        logging.info("Enviando inicio de viaje: "+trama)
-                        result = modem.mandar_datos(trama)
+                        trama_2 = '2'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+servicio_pension
+                        print("\x1b[1;32m"+"Enviando inicio de viaje: "+trama_2)
+                        logging.info("Enviando inicio de viaje: "+trama_2)
+                        result = modem.mandar_datos(trama_2)
                         enviado = result['enviado']
 
                         if enviado == True:
@@ -567,15 +672,15 @@ class LeerMinicomWorker(QObject):
                     try:
                         id = viaje[0]
                         csn_chofer = viaje[1]
-                        hora_inicio = viaje[3]
-                        total_de_folio_aforo_efectivo = viaje[4]
-                        total_de_folio_aforo_tarjeta = viaje[5]
-                        folio_de_viaje = viaje[6]
+                        hora_inicio = viaje[4]
+                        total_de_folio_aforo_efectivo = viaje[5]
+                        total_de_folio_aforo_tarjeta = viaje[6]
+                        folio_de_viaje = viaje[7]
 
-                        trama = '4'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+str(total_de_folio_aforo_efectivo)+","+str(total_de_folio_aforo_tarjeta)
-                        print("\x1b[1;32m"+"Enviando cierre de viaje: "+trama)
-                        logging.info("Enviando cierre de viaje: "+trama)
-                        result = modem.mandar_datos(trama)
+                        trama_4 = '4'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+str(total_de_folio_aforo_efectivo)+","+str(total_de_folio_aforo_tarjeta)
+                        print("\x1b[1;32m"+"Enviando cierre de viaje: "+trama_4)
+                        logging.info("Enviando cierre de viaje: "+trama_4)
+                        result = modem.mandar_datos(trama_4)
                         enviado = result['enviado']
 
                         if enviado == True:
@@ -615,10 +720,10 @@ class LeerMinicomWorker(QObject):
                         id_tipo_de_pasajero = venta[7]
                         transbordo_o_no = venta[8]
 
-                        trama = '5'+","+str(folio_aforo_venta)+","+str(folio_de_viaje)+","+str(hora_db)+","+str(id_del_servicio_o_transbordo)+","+str(id_geocerca)+","+str(id_tipo_de_pasajero)+","+str(transbordo_o_no)
-                        print("\x1b[1;32m"+"Enviando venta: "+trama)
-                        logging.info("Enviando venta: "+trama)
-                        result = modem.mandar_datos(trama)
+                        trama_5 = '5'+","+str(folio_aforo_venta)+","+str(folio_de_viaje)+","+str(hora_db)+","+str(id_del_servicio_o_transbordo)+","+str(id_geocerca)+","+str(id_tipo_de_pasajero)+","+str(transbordo_o_no)
+                        print("\x1b[1;32m"+"Enviando venta: "+trama_5)
+                        logging.info("Enviando venta: "+trama_5)
+                        result = modem.mandar_datos(trama_5)
                         enviado = result['enviado']
 
                         if enviado == True:

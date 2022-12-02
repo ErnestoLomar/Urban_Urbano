@@ -64,3 +64,27 @@ def verificar_ticket_completo(qr):
     resultado = cur.fetchone()
     con.close()
     return resultado
+
+def obtener_primer_ticket():
+    try:
+        con = sqlite3.connect(URI,check_same_thread=False)
+        cur = con.cursor()
+        cur.execute(
+            "SELECT * FROM tickets_usados ORDER BY id_ticket ASC LIMIT 1")
+        return cur.fetchone()
+    except Exception as e:
+        print(e)
+
+def eliminar_tickets_antiguos(fecha):
+    try:
+        primer_ticket = obtener_primer_ticket()
+        con = sqlite3.connect(URI,check_same_thread=False)
+        cur = con.cursor()
+        cur.execute(
+            "DELETE FROM tickets_usados WHERE fecha_de_ticket_hecho BETWEEN ? AND ?", (primer_ticket[3], fecha,))
+        con.commit()
+        con.close()
+        return True
+    except Exception as e:
+        print(e)
+        return False

@@ -114,6 +114,16 @@ def obtener_ultimo_folio_de_item_venta():
     con.close()
     return resultado
 
+def obtener_primer_folio_de_item_venta():
+    #Creamos la conexión con la base de datos
+    con = sqlite3.connect(URI)
+    cur = con.cursor()
+    select = f''' SELECT * FROM item_venta ORDER BY item_venta.item_venta_id ASC LIMIT 1 '''
+    cur.execute(select)
+    resultado = cur.fetchone()
+    con.close()
+    return resultado
+
 def obtener_estado_de_ventas_no_enviadas():
     conexion = sqlite3.connect(URI)
     cursor = conexion.cursor()
@@ -122,7 +132,23 @@ def obtener_estado_de_ventas_no_enviadas():
     conexion.close()
     return resultado
 
+def obtener_total_de_ventas_por_folioviaje_y_fecha(folio_viaje,fecha):
+    conexion = sqlite3.connect(URI)
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM item_venta WHERE folio_viaje = ? AND fecha = ?", (folio_viaje,fecha,))
+    resultado = cursor.fetchall()
+    conexion.close()
+    return resultado
+
 def obtener_estado_de_todas_las_ventas_no_enviadas():
+    conexion = sqlite3.connect(URI)
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM item_venta WHERE check_servidor = 'NO' LIMIT 1")
+    resultado = cursor.fetchall()
+    conexion.close()
+    return resultado
+
+def obtener_estado_de_todass_las_ventas_no_enviadas():
     conexion = sqlite3.connect(URI)
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM item_venta WHERE check_servidor = 'NO'")
@@ -145,5 +171,18 @@ def obtener_venta_por_folio_y_foliodeviaje(folio_venta, folio_de_viaje):
     resultado = cursor.fetchone()
     conexion.close()
     return resultado
+
+def eliminar_ventas_antiguas(fecha):
+    try:
+        primer_venta = obtener_primer_folio_de_item_venta()
+        conexion = sqlite3.connect(URI)
+        cursor = conexion.cursor()
+        cursor.execute(f"DELETE FROM item_venta WHERE fecha BETWEEN ? AND ?", ('01-11-2022', fecha,))
+        conexion.commit()
+        conexion.close()
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 #crear_tablas()

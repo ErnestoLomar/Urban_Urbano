@@ -4,6 +4,19 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.15:
+  - Modificando estructura de la función *handle_ok* cuando se inicia un viaje.
+  - Añadiendo candado de seguridad del conteo de boletos registrados en la base de datos, los que se llevan en conteo y del folio de la ultima venta realizada.
+  - Quitando botón de apagar raspberry de la ventana de chofer.
+  - Quitando valor por defecto en la selección de pensión.
+  - Añadiendo candado de verificación de si hay un fin de viaje por enviar al servidor antes de enviar un comienzo de viaje.
+  - Agregando candados de seguridad al obtener el CSN.
+  - Agregando candados de seguridad del CSN al crear trama 2.
+  - Agregando candado de seguridad en la creación del folio de viaje.
+  - Mejorando el envío de datos cronológicamente.
+  - Cambiando nombres de variables para evitar la concatenación de datos.
+  - Actualizando funciones del letrero de la ventana principal de *datos pendientes por enviar*
+  - Añadiendo la eliminación de datos antiguos en las bases de datos.
 - v1.14:
   - Modificando la comparación de vigencias de tarjeta y actual a solo fechas.
 - v1.13:

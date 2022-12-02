@@ -21,7 +21,7 @@ import time
 #Librerías propias
 from servicio_pensiones import obtener_servicios_de_pension, obtener_pensiones
 import variables_globales as vg
-from asignaciones_queries import guardar_auto_asignacion, obtener_ultima_asignacion, aniadir_folio_de_viaje_a_auto_asignacion
+from asignaciones_queries import guardar_auto_asignacion, obtener_ultima_asignacion, aniadir_folio_de_viaje_a_auto_asignacion, eliminar_auto_asignacion_por_folio
 from queries import obtener_datos_aforo
 from matrices_tarifarias import obtener_servicio_por_numero_de_servicio_y_origen, obtener_transbordos_por_origen_y_numero_de_servicio
 from servicio_pensiones import obtener_origen_por_numero_de_servicio
@@ -60,6 +60,7 @@ class VentanaChofer(QWidget):
             self.vuelta = 1
             self.pension_selec = ""
             self.idUnidad = str(obtener_datos_aforo()[1])
+            self.intentos = 1
         except Exception as e:
             print(e)
             logging.info(e)
@@ -103,6 +104,7 @@ class VentanaChofer(QWidget):
             self.comboBox_pension.setMaxVisibleItems(15)
             self.comboBox_pension.addItems(self.lista_pensiones)
             self.comboBox_pension.activated[str].connect(self.pension_seleccionada)
+            self.comboBox_pension.setCurrentIndex(20)
 
             
             #ComboBox de servicios
@@ -131,7 +133,7 @@ class VentanaChofer(QWidget):
             # si no escogemos el que seleccionaron.
             self.close()
             fecha_completa = strftime('%Y-%m-%d %H:%M:%S')
-            fecha = strftime('%d-%m-%Y')
+            fecha = strftime('%d-%m-%Y').replace('/', '-')
             hora = strftime('%H:%M:%S')
 
             if self.pension_selec != "":
@@ -145,17 +147,38 @@ class VentanaChofer(QWidget):
                         guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora)
                         folio = self.crear_folio()
                         print("Folio creado: ", folio)
-                        folio_de_viaje = f"{''.join(fecha_completa[:10].split('-'))[3:]}{self.idUnidad}{folio}"
-                        #folio_de_viaje = "209262158899"#Folio de prueba
-                        vg.servicio = self.servicio
-                        vg.turno = self.comboBox_turno.currentText()
-                        self.rutas = Rutas(self.turno, self.servicio, self.close_signal, self.close_signal_pasaje)
-                        self.rutas.setGeometry(0, 0, 800, 440)
-                        self.rutas.setWindowFlags(Qt.FramelessWindowHint)
-                        vg.folio_asignacion = folio_de_viaje
-                        self.settings.setValue('folio_de_viaje', folio_de_viaje)
-                        aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje)
-                        self.rutas.show()
+                        while True:
+                            folio_de_viaje = f"{''.join(fecha_completa[:10].split('-'))[3:]}{self.idUnidad}{folio}"
+                            if len(folio_de_viaje) == 12:
+                                vg.servicio = self.servicio
+                                vg.turno = self.comboBox_turno.currentText()
+                                vg.folio_asignacion = folio_de_viaje
+                                self.settings.setValue('folio_de_viaje', folio_de_viaje)
+                                print("Folio de viaje: ", folio_de_viaje)
+                                logging.info(f"Folio de viaje: {folio_de_viaje}")
+                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje)
+                                self.rutas = Rutas(self.turno, self.servicio, self.close_signal, self.close_signal_pasaje)
+                                self.rutas.setGeometry(0, 0, 800, 440)
+                                self.rutas.setWindowFlags(Qt.FramelessWindowHint)
+                                self.rutas.show()
+                                break
+                            if self.intentos == 3:
+                                self.intentos = 0
+                                ultimo_folio_de_autoasignacion = str(obtener_ultima_asignacion()[1])
+                                eliminar_auto_asignacion_por_folio(ultimo_folio_de_autoasignacion)
+                                print("No se creo correctamente el folio")
+                                GPIO.output(33, False)
+                                self.servicio = ""
+                                vg.csn_chofer = ""
+                                self.settings.setValue('ventana_actual', "")
+                                self.settings.setValue('csn_chofer', "")
+                                for i in range(5):
+                                    GPIO.output(12, True)
+                                    time.sleep(0.055)
+                                    GPIO.output(12, False)
+                                    time.sleep(0.055)
+                                break
+                            self.intentos += 1
                     else:
                         print("No hay servicios disponibles1")
                         print("Total de servicios1: ", len(total_de_servicios))
@@ -181,15 +204,36 @@ class VentanaChofer(QWidget):
                         guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora)
                         folio = self.crear_folio()
                         print("Folio creado: ", folio)
-                        folio_de_viaje = f"{''.join(fecha_completa[:10].split('-'))[3:]}{self.idUnidad}{folio}"
-                        #folio_de_viaje = "209262158899" #Folio de prueba
-                        self.rutas = Rutas(self.turno, self.comboBox_servicio.currentText(), self.close_signal, self.close_signal_pasaje)
-                        self.rutas.setGeometry(0, 0, 800, 440)
-                        self.rutas.setWindowFlags(Qt.FramelessWindowHint)
-                        vg.folio_asignacion = folio_de_viaje
-                        self.settings.setValue('folio_de_viaje', folio_de_viaje)
-                        aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje)
-                        self.rutas.show()
+                        while True:
+                            folio_de_viaje = f"{''.join(fecha_completa[:10].split('-'))[3:]}{self.idUnidad}{folio}"
+                            if len(folio_de_viaje) == 12:
+                                vg.folio_asignacion = folio_de_viaje
+                                self.settings.setValue('folio_de_viaje', folio_de_viaje)
+                                print("Folio de viaje: ", folio_de_viaje)
+                                logging.info(f"Folio de viaje: {folio_de_viaje}")
+                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje)
+                                self.rutas = Rutas(self.turno, self.comboBox_servicio.currentText(), self.close_signal, self.close_signal_pasaje)
+                                self.rutas.setGeometry(0, 0, 800, 440)
+                                self.rutas.setWindowFlags(Qt.FramelessWindowHint)
+                                self.rutas.show()
+                                break
+                            if self.intentos == 3:
+                                self.intentos = 0
+                                ultimo_folio_de_autoasignacion = str(obtener_ultima_asignacion()[1])
+                                eliminar_auto_asignacion_por_folio(ultimo_folio_de_autoasignacion)
+                                print("No se creo correctamente el folio")
+                                GPIO.output(33, False)
+                                self.servicio = ""
+                                vg.csn_chofer = ""
+                                self.settings.setValue('ventana_actual', "")
+                                self.settings.setValue('csn_chofer', "")
+                                for i in range(5):
+                                    GPIO.output(12, True)
+                                    time.sleep(0.055)
+                                    GPIO.output(12, False)
+                                    time.sleep(0.055)
+                                break
+                            self.intentos += 1
                     else:
                         print("No hay servicios disponibles2")
                         print("Total de servicios2: ", len(total_de_servicios))
@@ -205,6 +249,10 @@ class VentanaChofer(QWidget):
                             time.sleep(0.055)
             else:
                 print("No hay pension seleccionada")
+                self.servicio = ""
+                vg.csn_chofer = ""
+                self.settings.setValue('ventana_actual', "")
+                self.settings.setValue('csn_chofer', "")
                 for i in range(5):
                     GPIO.output(12, True)
                     time.sleep(0.055)

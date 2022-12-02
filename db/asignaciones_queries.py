@@ -40,6 +40,7 @@ tabla_estado_del_viaje = '''CREATE TABLE IF NOT EXISTS estado_del_viaje (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         csn_chofer VARCHAR(100),
         servicio_pension VARCHAR(100),
+        fecha DATE,
         hora_inicio TIME,
         total_de_folio_aforo_efectivo INTEGER,
         total_de_folio_aforo_tarjeta INTEGER,
@@ -226,6 +227,70 @@ def obtener_ultima_asignacion():
     except Exception as e:
         print(e)
         logging.info(e)
+        
+def obtener_primer_asignacion():
+    try:
+        con = sqlite3.connect(URI,check_same_thread=False)
+        cur = con.cursor()
+        cur.execute(
+            "SELECT * FROM auto_asignacion ORDER BY id ASC LIMIT 1")
+        return cur.fetchone()
+    except Exception as e:
+        print(e)
+        logging.info(e)
+        
+def obtener_primer_fin_viaje():
+    try:
+        con = sqlite3.connect(URI,check_same_thread=False)
+        cur = con.cursor()
+        cur.execute(
+            "SELECT * FROM estado_del_viaje ORDER BY id ASC LIMIT 1")
+        return cur.fetchone()
+    except Exception as e:
+        print(e)
+        logging.info(e)
+        
+def eliminar_auto_asignacion_por_folio(folio):
+    try:
+        conexion = sqlite3.connect(URI,check_same_thread=False)
+        cursor = conexion.cursor()
+        cursor.execute(
+            "DELETE FROM auto_asignacion WHERE folio = ?", (folio,))
+        conexion.commit()
+        conexion.close()
+    except Exception as e:
+        print(e)
+        logging.info(e)
+        
+def eliminar_auto_asignaciones_antiguas(fecha):
+    try:
+        primer_asignacion = obtener_primer_asignacion()
+        conexion = sqlite3.connect(URI,check_same_thread=False)
+        cursor = conexion.cursor()
+        cursor.execute(
+            "DELETE FROM auto_asignacion WHERE fecha BETWEEN ? AND ?", (primer_asignacion[4], fecha,))
+        conexion.commit()
+        conexion.close()
+        return True
+    except Exception as e:
+        print(e)
+        logging.info(e)
+        return False
+        
+def eliminar_fin_de_viaje_antiguos(fecha):
+    try:
+        primer_fin_viaje = obtener_primer_fin_viaje()
+        conexion = sqlite3.connect(URI,check_same_thread=False)
+        cursor = conexion.cursor()
+        cursor.execute(
+            "DELETE FROM estado_del_viaje WHERE fecha BETWEEN ? AND ?", (primer_fin_viaje[3], fecha,))
+        conexion.commit()
+        conexion.close()
+        return True
+    except Exception as e:
+        print(e)
+        logging.info(e)
+        return False
 
 def obtener_ultimo_folio_asignaciones():
     try:
@@ -307,6 +372,19 @@ def obtener_todas_las_asignaciones_no_enviadas():
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
+            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' LIMIT 1")
+        resultado = cursor.fetchall()
+        conexion.close()
+        return resultado
+    except Exception as e:
+        print(e)
+        logging.info(e)
+        
+def obtener_todass_las_asignaciones_no_enviadas():
+    try:
+        conexion = sqlite3.connect(URI,check_same_thread=False)
+        cursor = conexion.cursor()
+        cursor.execute(
             "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO'")
         resultado = cursor.fetchall()
         conexion.close()
@@ -329,11 +407,11 @@ def actualizar_asignacion_check_servidor(id):
         print(e)
         logging.info(e)
 
-def guardar_estado_del_viaje(csn_chofer, servicio_pension, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, folio_de_viaje):
+def guardar_estado_del_viaje(csn_chofer, servicio_pension, fecha, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, folio_de_viaje):
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
-        cursor.execute("INSERT INTO estado_del_viaje (csn_chofer, servicio_pension, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, folio_de_viaje) VALUES (?, ?, ?, ?, ?, ?)", (csn_chofer, servicio_pension, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, folio_de_viaje))
+        cursor.execute("INSERT INTO estado_del_viaje (csn_chofer, servicio_pension, fecha, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, folio_de_viaje) VALUES (?, ?, ?, ?, ?, ?, ?)", (csn_chofer, servicio_pension, fecha, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, folio_de_viaje))
         conexion.commit()
         conexion.close()
         return True

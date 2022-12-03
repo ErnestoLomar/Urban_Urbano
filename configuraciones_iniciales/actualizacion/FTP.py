@@ -265,7 +265,7 @@ class Principal_Modem:
         global UbicarPathFTP
         def UbicarPathFTP():#se comienza hubicando la ruta
             try:
-                comando='AT+QFTPCWD="/Pruebas/"' + "\r\n"
+                comando='AT+QFTPCWD="/Actualizaciones/"' + "\r\n"
                 ser.write(comando.encode())
                 print(ser.readline())
                 Aux = ser.readline()

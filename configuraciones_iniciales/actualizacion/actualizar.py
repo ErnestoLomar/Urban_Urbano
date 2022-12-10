@@ -16,7 +16,7 @@ import time
 import logging
 
 #Se hacen las importaciones necesarias
-from FTP import ConfigurarFTP, IniciarSesionFTP, ActualizarArchivos
+from FTP import verificar_memoria_UFS, ConfigurarFTP, IniciarSesionFTP, ActualizarArchivos
 import subprocess
 
 class Actualizar(QWidget):
@@ -38,37 +38,25 @@ class Actualizar(QWidget):
             self.label_info_2.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(55, 147, 72);')
             self.label_info.setText("Recibiendo actualizaciones...")
             self.label_info_2.setText("por favor, no use la boletera")
-            hacer = ConfigurarFTP()
+            hacer = verificar_memoria_UFS()
             if hacer:
-                time.sleep(.5)
-                hacer = IniciarSesionFTP()
+                hacer = ConfigurarFTP("azure", tamanio_esperado)
                 if hacer:
-                    time.sleep(.5)
-                    hacer = ActualizarArchivos(tamanio_esperado)
-                    if hacer:
-                        self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(55, 147, 72);')
-                        self.label_info_2.setText("")
-                        self.label_info.setText("Actualización correcta, reiniciando...")
-                        time.sleep(8)
-                        subprocess.run("sudo reboot", shell=True)
-                    else:
-                        self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(255, 0, 0);')
-                        self.label_info_2.setText("")
-                        self.label_info.setText("Error al actualizar")
-                        time.sleep(60)
-                        self.close()
+                    self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(55, 147, 72);')
+                    self.label_info_2.setText("")
+                    self.label_info.setText("Actualización correcta, reiniciando...")
                 else:
                     self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(255, 0, 0);')
                     self.label_info_2.setText("")
-                    self.label_info.setText("Sesión FTP no iniciada")
+                    self.label_info.setText("No se completo la configuración de FTP")
                     time.sleep(60)
                     self.close()
             else:
-                self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(255, 0, 0);')
-                self.label_info_2.setText("")
-                self.label_info.setText("No se completo la configuración de FTP")
-                time.sleep(60)
-                self.close()
+                    self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(255, 0, 0);')
+                    self.label_info_2.setText("")
+                    self.label_info.setText("No se completo la verificación de la memoria UFS")
+                    time.sleep(60)
+                    self.close()
         except Exception as e:
             print(e)
             self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(255, 0, 0);')

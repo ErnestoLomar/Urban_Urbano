@@ -74,14 +74,24 @@ def obtener_primer_ticket():
         return cur.fetchone()
     except Exception as e:
         print(e)
+        
+def seleccionar_tickets_antiguos(fecha):
+    try:
+        conexion = sqlite3.connect(URI,check_same_thread=False)
+        cursor = conexion.cursor()
+        cursor.execute(f"SELECT * FROM tickets_usados WHERE fecha_de_ticket_hecho <= '{fecha}'")
+        resultado = cursor.fetchall()
+        conexion.close()
+        return resultado
+    except Exception as e:
+        print(e)
+        return False
 
 def eliminar_tickets_antiguos(fecha):
     try:
-        primer_ticket = obtener_primer_ticket()
         con = sqlite3.connect(URI,check_same_thread=False)
         cur = con.cursor()
-        cur.execute(
-            "DELETE FROM tickets_usados WHERE fecha_de_ticket_hecho BETWEEN ? AND ?", (primer_ticket[3], fecha,))
+        cur.execute(f"DELETE FROM tickets_usados WHERE fecha_de_ticket_hecho <= '{fecha}'")
         con.commit()
         con.close()
         return True

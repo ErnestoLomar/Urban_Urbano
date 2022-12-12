@@ -233,11 +233,11 @@ class Principal_Modem:
                 Aux = ser.readline()
                 print(Aux.decode())
             elif f'{id_Unidad}' in Aux.decode():
-                print(f"Ya existe el archivo {id_Unidad}")
+                print(f"Ya existe el archivo {id_Unidad}.txt")
                 print(ser.readline())
                 Aux = ser.readline()
                 print(Aux.decode())
-                eliminar_archivos = f"AT+QFDEL=\"{id_Unidad}\"\r\n"
+                eliminar_archivos = f"AT+QFDEL=\"{id_Unidad}.txt\"\r\n"
                 ser.write(eliminar_archivos.encode())
                 print(ser.readline())
                 Aux = ser.readline()
@@ -629,7 +629,7 @@ class Principal_Modem:
                             print(ser.readline())
                             Aux = ser.readline()
                             print(Aux.decode())
-                            eliminar_archivos = f"AT+QFDEL=\"actualizar{id_Unidad}\"\r\n"
+                            eliminar_archivos = f"AT+QFDEL=\"{id_Unidad}.txt\"\r\n"
                             ser.write(eliminar_archivos.encode())
                             print(ser.readline())
                             Aux = ser.readline()

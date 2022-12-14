@@ -156,6 +156,7 @@ class LeerMinicomWorker(QObject):
                     logging.info('Error al obtener datos del GPS')
                     if self.intentos_conexion_gps >= 5:
                         modem.reconectar_gps()
+                        self.intentos_conexion_gps = 0
                     self.intentos_conexion_gps+=1
                     
                 if self.contador_servidor >= 4:

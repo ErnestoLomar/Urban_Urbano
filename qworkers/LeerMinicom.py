@@ -52,6 +52,7 @@ class LeerMinicomWorker(QObject):
             self.intentos_envio = 0
             self.recibido_folio_webservice = 0
             self.lista_de_datos_por_enviar = []
+            self.intentos_conexion_gps = 0
         except Exception as e:
             print("\x1b[1;31;47m"+"LeerMinicom.py, linea 47: "+str(e)+'\033[0;m')
             logging.info("LeerMinicom.py, linea 47: "+str(e))
@@ -104,6 +105,7 @@ class LeerMinicomWorker(QObject):
                     variables_globales.latitud = res['latitud']
                     variables_globales.velocidad = res['velocidad']
                     variables_globales.GPS = "ok"
+                    self.intentos_conexion_gps = 0
 
                     actualizar_folio(id_folio, self.folio, fecha)
 
@@ -152,7 +154,9 @@ class LeerMinicomWorker(QObject):
                     variables_globales.GPS = "error"
                     print("\x1b[1;31;47m"+"Error al obtener coordenadas GPS"+'\033[0;m')
                     logging.info('Error al obtener datos del GPS')
-                    modem.reconectar_gps()
+                    if self.intentos_conexion_gps >= 5:
+                        modem.reconectar_gps()
+                    self.intentos_conexion_gps+=1
                     
                 if self.contador_servidor >= 4:
                     try:

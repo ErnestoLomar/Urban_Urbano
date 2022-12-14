@@ -150,7 +150,9 @@ class LeerMinicomWorker(QObject):
                             self.realizar_accion(result)
                 else:
                     variables_globales.GPS = "error"
+                    print("\x1b[1;31;47m"+"Error al obtener coordenadas GPS"+'\033[0;m')
                     logging.info('Error al obtener datos del GPS')
+                    modem.reconectar_gps()
                     
                 if self.contador_servidor >= 4:
                     try:

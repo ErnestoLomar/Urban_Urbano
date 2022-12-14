@@ -196,6 +196,41 @@ class Principal_Modem:
         except Exception as e:
             print("\x1b[1;31;47m"+"comand.py, linea 180: "+str(e)+'\033[0;m')
             logging.info(e)
+            
+    def reconectar_gps(self):
+        print("#####################################")
+        print(ser.readline())
+        print(ser.readline())
+        print("Procedemos a iniciar sesión del GPS")
+        ser.flushInput()
+        ser.flushOutput()
+        comando = "AT+QGPS=1\r\n"
+        ser.readline()
+        ser.write(comando.encode())
+        print(ser.readline())
+        time.sleep(3)
+        respuesta = ser.readline()
+        print("Respuesta: "+str(respuesta))
+        respuesta = ser.readline()
+        print("Respuesta: "+str(respuesta))
+        respuesta = ser.readline()
+        print("Respuesta: "+str(respuesta))
+        print("#####################################")
+        
+        ser.flushInput()
+        ser.flushOutput()
+        comando = "AT+QGPS=1\r\n"
+        ser.readline()
+        ser.write(comando.encode())
+        print(ser.readline())
+        time.sleep(3)
+        respuesta = ser.readline()
+        print("Respuesta: "+str(respuesta))
+        respuesta = ser.readline()
+        print("Respuesta: "+str(respuesta))
+        respuesta = ser.readline()
+        print("Respuesta: "+str(respuesta))
+        print("#####################################")
 
     def mandar_datos(self, Trama):
         try:

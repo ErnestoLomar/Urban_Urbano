@@ -107,12 +107,12 @@ class corte(QWidget):
                 logging.info(f"El total de boletos en la base de datos es: {len(total_de_boletos_db)}")
                 print("Ultima venta en la base de datos es: "+str(ultima_venta_bd))
                 logging.info(f"Ultima venta en la base de datos es: {ultima_venta_bd}")
-                print("Ultima folio de venta en la bd: "+str(ultima_venta_bd[1]))
-                logging.info(f"Ultima folio de venta en la bd: {ultima_venta_bd[1]}")
                 total_de_folio_aforo_efectivo = int(self.settings.value('info_estudiantes').split(',')[0]) + int(self.settings.value('info_normales').split(',')[0]) + int(self.settings.value('info_chicos').split(',')[0]) + int(self.settings.value('info_ad_mayores').split(',')[0])
                 print("El total de boletos en el aforo es: "+str(total_de_folio_aforo_efectivo))
                 logging.info(f"El total de boletos en el aforo es: {total_de_folio_aforo_efectivo}")
                 if ultima_venta_bd != None:
+                    print("Ultima folio de venta en la bd: "+str(ultima_venta_bd[1]))
+                    logging.info(f"Ultima folio de venta en la bd: {ultima_venta_bd[1]}")
                     if len(total_de_boletos_db) != total_de_folio_aforo_efectivo:
                         print("La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
                         logging.info(f"La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")

@@ -7,6 +7,7 @@ Linea cronológica:
 - v1.17:
   - Añadiendo la opción de poder hacer la actualización de software mediante 2 servidores con FTP.
   - Haciendo que cuando comience el software se enciende el GPS con *AT+QGPS=1*.
+  - Corrigiendo bug de cuando no se hace ninguna venta.
 - v1.16:
   - Agregando candado de seguridad en el CSN al crear la trama 2.
   - Quitando enters.

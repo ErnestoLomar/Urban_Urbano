@@ -5,7 +5,7 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 
 Linea cronológica:
 - v1.18:
-  - Agregando inicio de sesión de GPS cuando no se obtienen coordenadas.
+  - Agregando inicio de sesión del GPS cuando no se obtienen coordenadas.
 - v1.17:
   - Añadiendo la opción de poder hacer la actualización de software mediante 2 servidores con FTP.
   - Haciendo que cuando comience el software se enciende el GPS con *AT+QGPS=1*.

@@ -4,13 +4,15 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.17:
+  - Añadiendo la opción de poder hacer la actualización de software mediante 2 servidores con FTP.
+  - Haciendo que cuando comience el software se enciende el GPS con *AT+QGPS=1*.
 - v1.16:
   - Agregando candado de seguridad en el CSN al crear la trama 2.
   - Quitando enters.
   - Quitando caracteres de tarjetas leídas.
   - Agregando candado de seguridad al crear trama 4.
   - Nueva comunicación con servidor de Azure.
-  - Añadiendo la opción de poder hacer la actualización de software mediante 2 servidores.
 - v1.15:
   - Modificando estructura de la función *handle_ok* cuando se inicia un viaje.
   - Añadiendo candado de seguridad del conteo de boletos registrados en la base de datos, los que se llevan en conteo y del folio de la ultima venta realizada.

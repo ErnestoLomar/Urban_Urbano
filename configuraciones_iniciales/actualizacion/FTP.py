@@ -205,6 +205,37 @@ class Principal_Modem:
                     time.sleep(2)
                     #self.reiniciar_SIM()
                 print("#####################################")
+                
+                print("Procedemos a iniciar sesión del GPS")
+                ser.flushInput()
+                ser.flushOutput()
+                comando = "AT+QGPS=1\r\n"
+                ser.readline()
+                ser.write(comando.encode())
+                print(ser.readline())
+                time.sleep(3)
+                respuesta = ser.readline()
+                print("Respuesta: "+str(respuesta))
+                respuesta = ser.readline()
+                print("Respuesta: "+str(respuesta))
+                respuesta = ser.readline()
+                print("Respuesta: "+str(respuesta))
+                print("#####################################")
+                
+                ser.flushInput()
+                ser.flushOutput()
+                comando = "AT+QGPS=1\r\n"
+                ser.readline()
+                ser.write(comando.encode())
+                print(ser.readline())
+                time.sleep(3)
+                respuesta = ser.readline()
+                print("Respuesta: "+str(respuesta))
+                respuesta = ser.readline()
+                print("Respuesta: "+str(respuesta))
+                respuesta = ser.readline()
+                print("Respuesta: "+str(respuesta))
+                print("#####################################")
             except Exception as e:
                 print("FTP.py, linea 171, Error al inicializar SIM: "+str(e))
         

@@ -172,11 +172,11 @@ def obtener_venta_por_folio_y_foliodeviaje(folio_venta, folio_de_viaje):
     conexion.close()
     return resultado
 
-def seleccionar_ventas_antiguas(fecha):
+def seleccionar_ventas_antiguas():
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
-        cursor.execute(f"SELECT * FROM item_venta WHERE fecha <= '{fecha}'")
+        cursor.execute(f"SELECT item_venta_id, fecha FROM item_venta")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado
@@ -184,11 +184,11 @@ def seleccionar_ventas_antiguas(fecha):
         print(e)
         return False
 
-def eliminar_ventas_antiguas(fecha):
+def eliminar_ventas_antiguas(id):
     try:
         conexion = sqlite3.connect(URI)
         cursor = conexion.cursor()
-        cursor.execute(f"DELETE FROM item_venta WHERE fecha <= '{fecha}'")
+        cursor.execute(f"DELETE FROM item_venta WHERE item_venta_id == {id}")
         conexion.commit()
         conexion.close()
         return True

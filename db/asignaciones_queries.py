@@ -262,11 +262,11 @@ def eliminar_auto_asignacion_por_folio(folio):
         print(e)
         logging.info(e)
         
-def seleccionar_auto_asignaciones_antiguas(fecha):
+def seleccionar_auto_asignaciones_antiguas():
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
-        cursor.execute(f"SELECT * FROM auto_asignacion WHERE fecha <= '{fecha}'")
+        cursor.execute(f"SELECT id, fecha FROM auto_asignacion")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado
@@ -275,11 +275,11 @@ def seleccionar_auto_asignaciones_antiguas(fecha):
         logging.info(e)
         return False
         
-def eliminar_auto_asignaciones_antiguas(fecha):
+def eliminar_auto_asignaciones_antiguas(id):
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
-        cursor.execute(f"DELETE FROM auto_asignacion WHERE fecha <= '{fecha}'")
+        cursor.execute(f"DELETE FROM auto_asignacion WHERE id == {id}")
         conexion.commit()
         conexion.close()
         return True
@@ -288,11 +288,11 @@ def eliminar_auto_asignaciones_antiguas(fecha):
         logging.info(e)
         return False
     
-def seleccionar_fin_de_viaje_antiguos(fecha):
+def seleccionar_fin_de_viaje_antiguos():
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
-        cursor.execute(f"SELECT * FROM estado_del_viaje WHERE fecha <= '{fecha}'")
+        cursor.execute(f"SELECT id, fecha FROM estado_del_viaje")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado
@@ -301,11 +301,11 @@ def seleccionar_fin_de_viaje_antiguos(fecha):
         logging.info(e)
         return False
         
-def eliminar_fin_de_viaje_antiguos(fecha):
+def eliminar_fin_de_viaje_antiguos(id):
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
-        cursor.execute(f"DELETE FROM estado_del_viaje WHERE fecha <= '{fecha}'")
+        cursor.execute(f"DELETE FROM estado_del_viaje WHERE id == {id}")
         conexion.commit()
         conexion.close()
         return True

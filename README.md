@@ -4,6 +4,8 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.19:
+  - Agregando la eliminación de datos antiguos que sobrepasan los 15 días.
 - v1.18:
   - Agregando inicio de sesión del GPS cuando no se obtienen coordenadas.
 - v1.17:

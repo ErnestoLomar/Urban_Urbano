@@ -4,6 +4,8 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.20:
+  - Solucionando problema d la lectura de tickets de la base de datos.
 - v1.19:
   - Agregando la eliminación de datos antiguos que sobrepasan los 15 días.
 - v1.18:

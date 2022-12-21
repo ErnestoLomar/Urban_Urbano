@@ -79,7 +79,7 @@ def seleccionar_tickets_antiguos():
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
-        cursor.execute(f"SELECT id_ticket, fecha_de_ticket_hecho FROM tickets_usados")
+        cursor.execute(f"SELECT id_ticket, qr FROM tickets_usados")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado

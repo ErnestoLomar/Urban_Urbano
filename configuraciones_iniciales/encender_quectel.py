@@ -40,7 +40,7 @@ def Encender_QUECTEL():
             if actualizar_hora.actualizar_hora():
                 break
             print("################################################")
-            time.sleep(3)
+            time.sleep(2)
             
         print("################################################")
         print("Verificando bases de datos...")
@@ -75,7 +75,7 @@ def Encender_QUECTEL():
             else:
                 print("No se eliminaron registros de auto asignaciones")
                 
-        time.sleep(1)
+        time.sleep(0.10)
         print("\n")
         
         # Procedemos a hacer el chequeo de los registros de fin_de_viaje en la base de datos
@@ -95,7 +95,7 @@ def Encender_QUECTEL():
             else:
                 print("No se eliminaron registros de fin de viaje")
                 
-        time.sleep(1)
+        time.sleep(0.10)
         print("\n")
         
         # Procedemos a hacer el chequeo de los registros de tickets en la base de datos
@@ -104,8 +104,9 @@ def Encender_QUECTEL():
         if len(todas_los_tickets_antiguos) > 0:
             contador_de_tickets_eliminadas = 0
             for i in range(len(todas_los_tickets_antiguos)):
-                lista_fecha_ticket = str(todas_los_tickets_antiguos[i][1]).split("-")
-                cadena_fecha_ticket = lista_fecha_ticket[2]+lista_fecha_ticket[1]+lista_fecha_ticket[0]
+                qr_completo = str(todas_los_tickets_antiguos[i][1]).split("-")
+                print("QR completo: ", qr_completo)
+                cadena_fecha_ticket = str(str(qr_completo[2]).split(",")[0])+qr_completo[1]+qr_completo[0]
                 if int(cadena_fecha_ticket) <= int(fecha_hace_15_dias):
                     eliminado_tickets_db = eliminar_tickets_antiguos(todas_los_tickets_antiguos[i][0])
                     if eliminado_tickets_db:
@@ -115,7 +116,7 @@ def Encender_QUECTEL():
             else:
                 print("No se eliminaron registros de tickets")
                 
-        time.sleep(1)
+        time.sleep(0.10)
         print("\n")
         
         # Procedemos a hacer el chequeo de los registros de ventas en la base de datos
@@ -135,7 +136,7 @@ def Encender_QUECTEL():
             else:
                 print("No se eliminaron registros de ventas")
                 
-        time.sleep(1)
+        time.sleep(0.10)
         
         print("Se terminó de verificar las bases de datos")
         print("################################################")

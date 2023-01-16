@@ -405,7 +405,7 @@ class LeerMinicomWorker(QObject):
                                         hora_inicio = inicio_de_viaje_db[5]
                                         folio_de_viaje = inicio_de_viaje_db[6]
                                         
-                                        if csn_chofer == "":
+                                        if len(csn_chofer) == 0:
                                             print("\x1b[1;33m"+"#############################################")
                                             print("\x1b[1;33m"+"El csn esta vació en reenviar trama 2, haciendo primer candado de seguridad...")
                                             logging.info("El csn esta vació en reenviar trama 2, haciendo primer candado de seguridad...")
@@ -425,29 +425,29 @@ class LeerMinicomWorker(QObject):
                                                         return
                                                 print("inicio_de_viaje_db: "+str(inicio_de_viaje_db))
                                                 csn_chofer = inicio_de_viaje_db[2]
-                                                if intentos == 5 or csn_chofer != "":
+                                                if intentos == 5 or len(csn_chofer) != 0:
                                                     print("\x1b[1;33m"+"#############################################")
                                                     break
                                                 intentos = intentos + 1
-                                        if csn_chofer == "":
+                                        if len(csn_chofer) == 0:
                                             print("\x1b[1;33m"+"#############################################")
                                             print("\x1b[1;33m"+"El csn esta vació en reenviar trama 2, haciendo segundo candado de seguridad...")
                                             logging.info("El csn esta vació en reenviar trama 2, haciendo segundo candado de seguridad...")
                                             intentos2 = 1
                                             while True:
                                                 csn_chofer = self.settings.value('csn_chofer')
-                                                if intentos2 == 5 or csn_chofer != "":
+                                                if intentos2 == 5 or len(csn_chofer) != 0:
                                                     print("\x1b[1;33m"+"#############################################")
                                                     break
                                                 intentos2 = intentos2 + 1
-                                        if csn_chofer == "":
+                                        if len(csn_chofer) == 0:
                                             print("\x1b[1;33m"+"#############################################")
                                             print("\x1b[1;33m"+"El csn esta vació en reenviar trama 2, haciendo tercer candado de seguridad...")
                                             logging.info("El csn esta vació en reenviar trama 2, haciendo tercer candado de seguridad...")
                                             intentos3 = 1
                                             while True:
                                                 csn_chofer = variables_globales.csn_chofer
-                                                if intentos3 == 5 or csn_chofer != "":
+                                                if intentos3 == 5 or len(csn_chofer) != 0:
                                                     print("\x1b[1;33m"+"#############################################")
                                                     break
                                                 intentos3 = intentos3 + 1
@@ -612,7 +612,7 @@ class LeerMinicomWorker(QObject):
                         hora_inicio = asignacion[5]
                         folio_de_viaje = asignacion[6]
                         
-                        if csn_chofer == "":
+                        if len(csn_chofer) == 0:
                             print("\x1b[1;33m"+"#############################################")
                             print("\x1b[1;33m"+"El csn esta vació en trama 2, haciendo primer candado de seguridad...")
                             logging.info("El csn esta vació en trama 2, haciendo primer candado de seguridad...")
@@ -620,29 +620,30 @@ class LeerMinicomWorker(QObject):
                             while True:
                                 asignacioness = obtener_asignaciones_no_enviadas()[0]
                                 csn_chofer = asignacioness[2]
-                                if intentos == 5 or csn_chofer != "":
+                                if intentos == 5 or len(csn_chofer) != 0:
                                     print("\x1b[1;33m"+"#############################################")
                                     break
                                 intentos = intentos + 1
-                        if csn_chofer == "":
+                                
+                        if len(csn_chofer) == 0:
                             print("\x1b[1;33m"+"#############################################")
                             print("\x1b[1;33m"+"El csn esta vació en trama 2, haciendo segundo candado de seguridad...")
                             logging.info("El csn esta vació en trama 2, haciendo segundo candado de seguridad...")
                             intentos2 = 1
                             while True:
                                 csn_chofer = self.settings.value('csn_chofer')
-                                if intentos2 == 5 or csn_chofer != "":
+                                if intentos2 == 5 or len(csn_chofer) != 0:
                                     print("\x1b[1;33m"+"#############################################")
                                     break
                                 intentos2 = intentos2 + 1
-                        if csn_chofer == "":
+                        if len(csn_chofer) == 0:
                             print("\x1b[1;33m"+"#############################################")
                             print("\x1b[1;33m"+"El csn esta vació en trama 2, haciendo tercer candado de seguridad...")
                             logging.info("El csn esta vació en trama 2, haciendo tercer candado de seguridad...")
                             intentos3 = 1
                             while True:
                                 csn_chofer = variables_globales.csn_chofer
-                                if intentos3 == 5 or csn_chofer != "":
+                                if intentos3 == 5 or len(csn_chofer) != 0:
                                     print("\x1b[1;33m"+"#############################################")
                                     break
                                 intentos3 = intentos3 + 1

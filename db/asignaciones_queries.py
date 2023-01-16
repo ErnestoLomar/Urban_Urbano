@@ -350,9 +350,11 @@ def obtener_ultimo_folio_auto_asignacion():
         fecha_actual = strftime("%d/%m/%Y")
 
         if compare_two_dates(fecha_actual, fecha_db):
-            folio = folio + 1
+            folio_nuevo = folio + 1
+            if folio_nuevo != (folio + 1):
+                folio_nuevo = folio + 1
             return {
-                'folio': folio
+                'folio': folio_nuevo
             }
         else:
             return {

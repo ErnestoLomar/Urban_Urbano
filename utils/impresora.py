@@ -11,6 +11,7 @@ import sys
 sys.path.insert(1, '/home/pi/Urban_Urbano/db')
 
 from operadores import obtener_operador_por_UID
+from ventas_queries import obtener_ultimo_folio_de_item_venta, obtener_total_de_ventas_por_folioviaje_y_fecha
 
 try:
 
@@ -205,6 +206,42 @@ try:
         
     def imprimir_ticket_de_corte(idUnidad):
         try:
+            settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat)
+            fecha = str(strftime('%d-%m-%Y')).replace('/', '-')
+            total_a_liquidar_bd = 0.0
+            ultima_venta_bd = obtener_ultimo_folio_de_item_venta()
+            total_de_boletos_db = obtener_total_de_ventas_por_folioviaje_y_fecha(settings.value('folio_de_viaje'), fecha)
+            print("El tamaño de boletos en la base de datos es: "+str(len(total_de_boletos_db)))
+            logging.info(f"El total de boletos en la base de datos es: {len(total_de_boletos_db)}")
+            
+            # Procedemos a hacer la suma de la liquidación
+            if len(total_de_boletos_db) != 0:
+                for p in range(len(total_de_boletos_db)):
+                    total_a_liquidar_bd = total_a_liquidar_bd + float(total_de_boletos_db[p][11])
+                print("BD - El total a liquidar es: "+str(total_a_liquidar_bd))
+                logging.info(f"BD - El total a liquidar es: {total_a_liquidar_bd}")
+            
+            print("Ultima venta en la base de datos es: "+str(ultima_venta_bd))
+            logging.info(f"Ultima venta en la base de datos es: {ultima_venta_bd}")
+            total_de_folio_aforo_efectivo = int(settings.value('info_estudiantes').split(',')[0]) + int(settings.value('info_normales').split(',')[0]) + int(settings.value('info_chicos').split(',')[0]) + int(settings.value('info_ad_mayores').split(',')[0])
+            print("El total de boletos en el aforo es: "+str(total_de_folio_aforo_efectivo))
+            logging.info(f"El total de boletos en el aforo es: {total_de_folio_aforo_efectivo}")
+            if ultima_venta_bd != None:
+                print("Ultima folio de venta en la bd: "+str(ultima_venta_bd[1]))
+                logging.info(f"Ultima folio de venta en la bd: {ultima_venta_bd[1]}")
+                if len(total_de_boletos_db) != total_de_folio_aforo_efectivo:
+                    print("La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
+                    logging.info(f"La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
+                    if len(total_de_boletos_db) != ultima_venta_bd[1]:
+                        print("La cantidad de boletos en la base de datos no coincide con el folio de la ultima venta en la base de datos.")
+                        logging.info(f"La cantidad de boletos en la base de datos no coincide con el folio de la ultima venta en la base de datos.")
+                        total_de_folio_aforo_efectivo = ultima_venta_bd[1]
+                        print("Se ha actualizado el total de boletos en el aforo a: "+str(total_de_folio_aforo_efectivo))
+                        logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")
+                    total_de_folio_aforo_efectivo = len(total_de_boletos_db)
+                    print("Se ha actualizado el total de boletos en el aforo a: "+str(total_de_folio_aforo_efectivo))
+                    logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")
+                    
             nc='0x04c5'
             ns='0x126e'
 
@@ -212,13 +249,17 @@ try:
             n_serie_hex = int(ns, 16)
 
             instancia_impresora = Usb(n_creador_hex, n_serie_hex, 0)
-            fecha = str(strftime('%d-%m-%Y')).replace('/', '-')
             hora_actual = strftime('%H:%M:%S')
-            settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat)
             instancia_impresora.set(align='center')
             operador = obtener_operador_por_UID(settings.value('csn_chofer'))
             logging.info("Impresora encontrada")
-            for i in range(2):
+            for i in range(3):
+                if i == 0:
+                    instancia_impresora.text(f"<<< Copia jefe de pension >>>\n")
+                elif i == 1:
+                    instancia_impresora.text(f"<<< Copia liquidacion >>>\n")
+                elif i == 2:
+                    instancia_impresora.text(f"<<< Copia operador >>>\n")
                 instancia_impresora.text(f"{fecha} {hora_actual}\n")
                 instancia_impresora.text(f"Fv: {settings.value('folio_de_viaje')}  Sw: {version_del_software}\n")
                 if operador != None:
@@ -234,8 +275,8 @@ try:
                 instancia_impresora.text(f"Menor:        {str(settings.value('info_chicos')).split(',')[0]}  $       {str(settings.value('info_chicos')).split(',')[1]}\n")
                 instancia_impresora.text(f"Ad.May:       {str(settings.value('info_ad_mayores')).split(',')[0]}  $       {str(settings.value('info_ad_mayores')).split(',')[1]}\n")
                 instancia_impresora.text("\n")
-                instancia_impresora.text(f"Total a liquidar: $ {settings.value('total_a_liquidar')}\n")
-                instancia_impresora.text(f"Total de folios: {settings.value('total_de_folios')}\n")
+                instancia_impresora.text(f"Total a liquidar: $ {total_a_liquidar_bd}\n")
+                instancia_impresora.text(f"Total de folios: {total_de_folio_aforo_efectivo}\n")
                 instancia_impresora.cut()
                 logging.info(f"Tickets de corte impresos correctamente.")
             return True

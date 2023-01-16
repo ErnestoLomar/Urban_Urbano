@@ -4,8 +4,14 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.21:
+  - Añadiendo la impresión de un nuevo ticket al cerrar el corte del viaje, para que ahora sean 3 impresiones de copias y cada una tendrá su respectivo nombre de a quien va dirigido (Jefe pensión, liquidación y operador).
+  - Poniendo candado en el conteo de *total_de_folios* y *cantidad_a_liquidar* en la impresión de los tickets al cerrar el corte.
+  - Añadiendo try-catch estratégicos en el inicio del sistema.
+  - Hacemos la suma total del costo de las ventas realizadas en el viaje desde la base de datos.
+  - Cambiamos la condición de si el UID esta vació de '== ""' a 'len() == 0'.
 - v1.20:
-  - Solucionando problema d la lectura de tickets de la base de datos.
+  - Solucionando problema de la lectura de tickets de la base de datos.
 - v1.19:
   - Agregando la eliminación de datos antiguos que sobrepasan los 15 días.
 - v1.18:

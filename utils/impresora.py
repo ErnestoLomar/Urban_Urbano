@@ -253,13 +253,14 @@ try:
             instancia_impresora.set(align='center')
             operador = obtener_operador_por_UID(settings.value('csn_chofer'))
             logging.info("Impresora encontrada")
-            for i in range(3):
+            for i in range(2):
+                '''
                 if i == 0:
                     instancia_impresora.text(f"<<< Copia jefe de pension >>>\n")
                 elif i == 1:
                     instancia_impresora.text(f"<<< Copia liquidacion >>>\n")
                 elif i == 2:
-                    instancia_impresora.text(f"<<< Copia operador >>>\n")
+                    instancia_impresora.text(f"<<< Copia operador >>>\n")'''
                 instancia_impresora.text(f"{fecha} {hora_actual}\n")
                 instancia_impresora.text(f"Fv: {settings.value('folio_de_viaje')}  Sw: {version_del_software}\n")
                 if operador != None:

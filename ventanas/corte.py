@@ -133,6 +133,7 @@ class corte(QWidget):
                 self.close_signal_pasaje.emit()
                 variables_globales.ventana_actual = VentanaActual.CERRAR_TURNO
                 variables_globales.folio_asignacion = 0
+                variables_globales.numero_de_operador = ""
                 self.settings.setValue('origen_actual', "")
                 self.settings.setValue('folio_de_viaje', "")
                 self.settings.setValue('pension', "")

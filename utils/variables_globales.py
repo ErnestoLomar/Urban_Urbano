@@ -29,6 +29,7 @@ vendiendo_boleto = False
 detectando_geocercas_hilo = True
 terminar_hilo_verificar_datos = False
 vigencia_de_tarjeta = ""
+numero_de_operador = ""
 
 from enum import Enum
 # La clase VentanaActual es una enumeración de los posibles valores de la variable ventana_actual

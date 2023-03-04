@@ -4,6 +4,8 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.22:
+  - Añadiendo lectura de número de operador de la tarjeta.
 - v1.21:
   - Añadiendo la impresión de un nuevo ticket al cerrar el corte del viaje, para que ahora sean 3 impresiones de copias y cada una tendrá su respectivo nombre de a quien va dirigido (Jefe pensión, liquidación y operador).
   - Poniendo candado en el conteo de *total_de_folios* y *cantidad_a_liquidar* en la impresión de los tickets al cerrar el corte.

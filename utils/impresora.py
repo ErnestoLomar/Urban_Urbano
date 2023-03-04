@@ -5,7 +5,7 @@ import logging
 from time import strftime
 import time
 from PyQt5.QtCore import QSettings
-from variables_globales import version_del_software
+import variables_globales as vg
 import sys
 
 sys.path.insert(1, '/home/pi/Urban_Urbano/db')
@@ -251,7 +251,6 @@ try:
             instancia_impresora = Usb(n_creador_hex, n_serie_hex, 0)
             hora_actual = strftime('%H:%M:%S')
             instancia_impresora.set(align='center')
-            operador = obtener_operador_por_UID(settings.value('csn_chofer'))
             logging.info("Impresora encontrada")
             for i in range(2):
                 '''
@@ -262,12 +261,14 @@ try:
                 elif i == 2:
                     instancia_impresora.text(f"<<< Copia operador >>>\n")'''
                 instancia_impresora.text(f"{fecha} {hora_actual}\n")
-                instancia_impresora.text(f"Fv: {settings.value('folio_de_viaje')}  Sw: {version_del_software}\n")
-                if operador != None:
-                    instancia_impresora.text(f"Operador: {operador[2]}\n")
-                    instancia_impresora.text(f"Numero de empleado: {operador[1]}\n")
+                instancia_impresora.text(f"Fv: {settings.value('folio_de_viaje')}  Sw: {vg.version_del_software}\n")
+                if len(vg.numero_de_operador) > 0:
+                    instancia_impresora.text(f"Numero de empleado: {vg.numero_de_operador}\n")
                 else:
-                    instancia_impresora.text(f"Operador de Reciente Ingreso\n")
+                    if len(vg.csn_chofer) > 0:
+                        instancia_impresora.text(f"Numero de empleado: {vg.csn_chofer}\n")
+                    else:
+                        instancia_impresora.text(f"Numero de empleado: {settings.value('csn_chofer')}\n")
                 instancia_impresora.text(f"Folio de liquidacion: {settings.value('folio_de_viaje_webservice')}\n")
                 instancia_impresora.text(f"Unidad: {idUnidad}    Serv: {settings.value('servicio')}\n")
                 instancia_impresora.text(f"Vuelta: {settings.value('vuelta')}\n")

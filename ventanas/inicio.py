@@ -84,6 +84,7 @@ class Ventana(QWidget):
             self.label_datos_info.hide()
             self.label_datos_cantidad.hide()
             self.label_version_software.setText(variables_globales.version_del_software)
+            print("PREPAGO")
 
             #Declaramos variables
             self.registrar_usuario = any

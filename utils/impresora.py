@@ -12,6 +12,7 @@ sys.path.insert(1, '/home/pi/Urban_Urbano/db')
 
 from operadores import obtener_operador_por_UID
 from ventas_queries import obtener_ultimo_folio_de_item_venta, obtener_total_de_ventas_por_folioviaje_y_fecha
+from asignaciones_queries import obtener_asignacion_por_folio_de_viaje
 
 try:
 
@@ -251,16 +252,12 @@ try:
             instancia_impresora = Usb(n_creador_hex, n_serie_hex, 0)
             hora_actual = strftime('%H:%M:%S')
             instancia_impresora.set(align='center')
+            if len(settings.value('folio_de_viaje')) > 0:
+                trama_dos_del_viaje = obtener_asignacion_por_folio_de_viaje(settings.value('folio_de_viaje'))
+            else:
+                trama_dos_del_viaje = obtener_asignacion_por_folio_de_viaje(vg.folio_asignacion)
             logging.info("Impresora encontrada")
             for i in range(2):
-                '''
-                if i == 0:
-                    instancia_impresora.text(f"<<< Copia jefe de pension >>>\n")
-                elif i == 1:
-                    instancia_impresora.text(f"<<< Copia liquidacion >>>\n")
-                elif i == 2:
-                    instancia_impresora.text(f"<<< Copia operador >>>\n")'''
-                instancia_impresora.text(f"{fecha} {hora_actual}\n")
                 instancia_impresora.text(f"Fv: {settings.value('folio_de_viaje')}  Sw: {vg.version_del_software}\n")
                 if len(vg.numero_de_operador) > 0:
                     instancia_impresora.text(f"Numero de empleado: {vg.numero_de_operador}\n")
@@ -270,13 +267,13 @@ try:
                     else:
                         instancia_impresora.text(f"Numero de empleado: {settings.value('csn_chofer')}\n")
                 instancia_impresora.text(f"Folio de liquidacion: {settings.value('folio_de_viaje_webservice')}\n")
+                instancia_impresora.text(f"Inicio de viaje: {trama_dos_del_viaje[4]} {trama_dos_del_viaje[5]}\n")
+                instancia_impresora.text(f"Fin de viaje: {fecha} {hora_actual}\n")
                 instancia_impresora.text(f"Unidad: {idUnidad}    Serv: {settings.value('servicio')}\n")
-                instancia_impresora.text(f"Vuelta: {settings.value('vuelta')}\n")
                 instancia_impresora.text(f"Estud:        {str(settings.value('info_estudiantes')).split(',')[0]}  $       {str(settings.value('info_estudiantes')).split(',')[1]}\n")
                 instancia_impresora.text(f"Normal:       {str(settings.value('info_normales')).split(',')[0]}  $       {str(settings.value('info_normales')).split(',')[1]}\n")
                 instancia_impresora.text(f"Menor:        {str(settings.value('info_chicos')).split(',')[0]}  $       {str(settings.value('info_chicos')).split(',')[1]}\n")
                 instancia_impresora.text(f"Ad.May:       {str(settings.value('info_ad_mayores')).split(',')[0]}  $       {str(settings.value('info_ad_mayores')).split(',')[1]}\n")
-                instancia_impresora.text("\n")
                 instancia_impresora.text(f"Total a liquidar: $ {total_a_liquidar_bd}\n")
                 instancia_impresora.text(f"Total de folios: {total_de_folio_aforo_efectivo}\n")
                 instancia_impresora.cut()

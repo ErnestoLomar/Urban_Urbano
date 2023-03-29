@@ -109,7 +109,7 @@ class LeerMinicomWorker(QObject):
 
                     actualizar_folio(id_folio, self.folio, fecha)
 
-                    if self.contador_servidor >= 4:
+                    if self.contador_servidor >= 6:
                         
                         if folio_asignacion_viaje != 0:
                             print("Enviando trama 3 con viaje")
@@ -159,7 +159,7 @@ class LeerMinicomWorker(QObject):
                         self.intentos_conexion_gps = 0
                     self.intentos_conexion_gps+=1
                     
-                if self.contador_servidor >= 4:
+                if self.contador_servidor >= 6:
                     try:
                         print("\x1b[1;32m"+"Verificando si hay datos en la BD por enviar...")
                         for j in range(3):

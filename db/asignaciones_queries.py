@@ -370,7 +370,7 @@ def obtener_asignaciones_no_enviadas():
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' AND folio_de_viaje IS NOT 'por_aniadir' LIMIT 1")
+            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' OR check_servidor != 'yyy' folio_de_viaje IS NOT 'por_aniadir' LIMIT 1")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado
@@ -418,12 +418,12 @@ def obtener_todass_las_asignaciones_no_enviadas():
         logging.info(e)
 
 
-def actualizar_asignacion_check_servidor(id):
+def actualizar_asignacion_check_servidor(estado, id):
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "UPDATE auto_asignacion SET check_servidor = 'OK' WHERE id = ?", (id,))
+            "UPDATE auto_asignacion SET check_servidor = ? WHERE id = ?", (estado,id,))
         conexion.commit()
         conexion.close()
         return True

@@ -611,6 +611,8 @@ class LeerMinicomWorker(QObject):
                         servicio_pension = str(asignacion[3]).replace("-", ",").split(",")[0]
                         hora_inicio = asignacion[5]
                         folio_de_viaje = asignacion[6]
+                        estado_servidor = asignacion[7]
+                        print("El estado del servidor en envio de inicio de viaje es: ", estado_servidor)
                         
                         if len(csn_chofer) == 0:
                             print("\x1b[1;33m"+"#############################################")
@@ -656,9 +658,14 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
-                                actualizar_asignacion_check_servidor(id)
+                                if estado_servidor == "NO":
+                                    actualizar_asignacion_check_servidor("y",id)
+                                elif estado_servidor == "y":
+                                    actualizar_asignacion_check_servidor("yy",id)
+                                elif estado_servidor == "yy":
+                                    actualizar_asignacion_check_servidor("yyy",id)
                                 print("\x1b[1;32m"+"#############################################")
-                                print("\x1b[1;32m"+"Trama de inicio de viaje enviada")
+                                print("\x1b[1;32m"+"Trama de inicio de viaje enviada: ", estado_servidor)
                                 print("\x1b[1;32m"+"#############################################")
                                 logging.info("Trama de inicio de viaje enviada")
                             except Exception as e:

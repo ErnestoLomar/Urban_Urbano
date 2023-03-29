@@ -370,7 +370,7 @@ def obtener_asignaciones_no_enviadas():
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' OR check_servidor != 'yyy' folio_de_viaje IS NOT 'por_aniadir' LIMIT 1")
+            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' OR check_servidor != 'yyy' AND folio_de_viaje IS NOT 'por_aniadir' LIMIT 1")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado

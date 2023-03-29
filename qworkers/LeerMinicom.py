@@ -659,10 +659,13 @@ class LeerMinicomWorker(QObject):
                         if enviado == True:
                             try:
                                 if estado_servidor == "NO":
+                                    print("El estado del servidor es NO se procede a poner y")
                                     actualizar_asignacion_check_servidor("y",id)
                                 elif estado_servidor == "y":
+                                    print("El estado del servidor es y se procede a poner yy")
                                     actualizar_asignacion_check_servidor("yy",id)
                                 elif estado_servidor == "yy":
+                                    print("El estado del servidor es yy se procede a poner yyy")
                                     actualizar_asignacion_check_servidor("yyy",id)
                                 print("\x1b[1;32m"+"#############################################")
                                 print("\x1b[1;32m"+"Trama de inicio de viaje enviada: ", estado_servidor)

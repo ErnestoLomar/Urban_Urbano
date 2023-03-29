@@ -423,7 +423,7 @@ def actualizar_asignacion_check_servidor(estado, id):
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "UPDATE auto_asignacion SET check_servidor = ? WHERE id = ?", (estado,id,))
+            "UPDATE auto_asignacion SET check_servidor = ? WHERE id = ?", (estado,id))
         conexion.commit()
         conexion.close()
         return True

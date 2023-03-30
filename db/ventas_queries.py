@@ -143,7 +143,7 @@ def obtener_total_de_ventas_por_folioviaje_y_fecha(folio_viaje,fecha):
 def obtener_estado_de_todas_las_ventas_no_enviadas():
     conexion = sqlite3.connect(URI)
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM item_venta WHERE check_servidor = 'NO' LIMIT 1")
+    cursor.execute("SELECT * FROM item_venta WHERE check_servidor = 'NO' OR check_servidor != 'yyy' LIMIT 1")
     resultado = cursor.fetchall()
     conexion.close()
     return resultado
@@ -156,10 +156,10 @@ def obtener_estado_de_todass_las_ventas_no_enviadas():
     conexion.close()
     return resultado
 
-def actualizar_estado_venta_check_servidor(id):
+def actualizar_estado_venta_check_servidor(estado, id):
     conexion = sqlite3.connect(URI)
     cursor = conexion.cursor()
-    cursor.execute("UPDATE item_venta SET check_servidor = 'OK' WHERE item_venta_id = ?", (id,))
+    cursor.execute("UPDATE item_venta SET check_servidor = ? WHERE item_venta_id = ?", (estado,id))
     conexion.commit()
     conexion.close()
     return True

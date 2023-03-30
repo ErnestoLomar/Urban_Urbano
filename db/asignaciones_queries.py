@@ -443,12 +443,12 @@ def guardar_estado_del_viaje(csn_chofer, servicio_pension, fecha, hora_inicio, t
         print(e)
         logging.info(e)
 
-def actualizar_estado_del_viaje_check_servidor(id):
+def actualizar_estado_del_viaje_check_servidor(estado, id):
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "UPDATE estado_del_viaje SET check_servidor = 'OK' WHERE id = ?", (id,))
+            "UPDATE estado_del_viaje SET check_servidor = ? WHERE id = ?", (estado,id))
         conexion.commit()
         conexion.close()
         return True
@@ -461,7 +461,7 @@ def obtener_estado_de_viajes_no_enviados():
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "SELECT * FROM estado_del_viaje WHERE check_servidor = 'NO' LIMIT 1")
+            "SELECT * FROM estado_del_viaje WHERE check_servidor = 'NO' OR check_servidor != 'yyy' LIMIT 1")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado

@@ -127,7 +127,7 @@ def obtener_primer_folio_de_item_venta():
 def obtener_estado_de_ventas_no_enviadas():
     conexion = sqlite3.connect(URI)
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM item_venta WHERE check_servidor = 'NO' LIMIT 1")
+    cursor.execute("SELECT * FROM item_venta WHERE check_servidor = 'NO' OR check_servidor != 'yyy' LIMIT 1")
     resultado = cursor.fetchall()
     conexion.close()
     return resultado

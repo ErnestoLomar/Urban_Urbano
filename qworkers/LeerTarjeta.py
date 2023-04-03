@@ -104,6 +104,7 @@ class LeerTarjetaWorker(QObject):
                                 vigencia_y_numoperador = str(self.lib.obtenerVigencia().decode(encoding="utf8", errors='ignore'))
                                 vigenciaTarjeta = vigencia_y_numoperador[:12]
                                 print("Vigencia completa de la tarjeta: "+vigenciaTarjeta)
+                                print("Vigencia completa de la tarjeta 2: ",vigencia_y_numoperador)
                                 if len(vigenciaTarjeta) == 12 and int(vigenciaTarjeta[:2]) >= 22:
                                     now = datetime.now()
                                     vigenciaActual = f'{str(now.date())[2:].replace("-","")}'

@@ -267,7 +267,8 @@ try:
                     else:
                         instancia_impresora.text(f"Numero de empleado: {settings.value('csn_chofer')}\n")
                 instancia_impresora.text(f"Folio de liquidacion: {settings.value('folio_de_viaje_webservice')}\n")
-                instancia_impresora.text(f"Inicio de viaje: {trama_dos_del_viaje[4]} {trama_dos_del_viaje[5]}\n")
+                inicio_de_viaje_a_mostrar = str(trama_dos_del_viaje[0]).split(',')[5].replace("'","") + " " + str(str(trama_dos_del_viaje[0]).split(',')[6]).replace("'","")
+                instancia_impresora.text(f"Inicio de viaje: {inicio_de_viaje_a_mostrar}\n")
                 instancia_impresora.text(f"Fin de viaje: {fecha} {hora_actual}\n")
                 instancia_impresora.text(f"Unidad: {idUnidad}    Serv: {settings.value('servicio')}\n")
                 instancia_impresora.text(f"Estud:        {str(settings.value('info_estudiantes')).split(',')[0]}  $       {str(settings.value('info_estudiantes')).split(',')[1]}\n")

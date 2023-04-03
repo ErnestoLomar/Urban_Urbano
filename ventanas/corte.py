@@ -14,7 +14,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from time import strftime
 import logging
-import subprocess
 import time
 import RPi.GPIO as GPIO
 

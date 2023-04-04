@@ -161,7 +161,7 @@ class LeerMinicomWorker(QObject):
                     self.intentos_conexion_gps+=1
                     self.contador_servidor = 0
                     
-                if self.contador_servidor >= 4:
+                if self.contador_servidor == 4 or self.contador_servidor == 8 or self.contador_servidor >= 12:
                     try:
                         print("\x1b[1;32m"+"Verificando si hay datos en la BD por enviar...")
                         for j in range(3):
@@ -202,6 +202,7 @@ class LeerMinicomWorker(QObject):
                                     print("Enviando fin de viaje")
                                     self.enviar_fin_de_viaje()
                                 self.lista_de_datos_por_enviar = []
+                        self.contador_servidor = 0
                         print("\x1b[1;32m"+"Terminando de verificar si hay datos en la BD por enviar...")
                     except Exception as e:
                         logging.info('Error al enviar datos al servidor: '+str(e))

@@ -150,6 +150,7 @@ class LeerMinicomWorker(QObject):
                             self.reeconectar_socket(enviado)
                             self.folio = self.folio + 1
                             self.realizar_accion(result)
+                        self.contador_servidor = 0
                 else:
                     variables_globales.GPS = "error"
                     print("\x1b[1;31;47m"+"Error al obtener coordenadas GPS"+'\033[0;m')
@@ -158,6 +159,7 @@ class LeerMinicomWorker(QObject):
                         modem.reconectar_gps()
                         self.intentos_conexion_gps = 0
                     self.intentos_conexion_gps+=1
+                    self.contador_servidor = 0
                     
                 if self.contador_servidor >= 4:
                     try:
@@ -204,8 +206,6 @@ class LeerMinicomWorker(QObject):
                     except Exception as e:
                         logging.info('Error al enviar datos al servidor: '+str(e))
                         print("\x1b[1;31;47m"+"Error al enviar datos al servidor: "+str(e)+'\033[0;m')
-                    self.contador_servidor = 0
-                
                 self.progress.emit(res)
                 time.sleep(5)
                 self.contador_servidor = self.contador_servidor + 1

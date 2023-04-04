@@ -259,13 +259,18 @@ try:
             logging.info("Impresora encontrada")
             for i in range(2):
                 instancia_impresora.text(f"Fv: {settings.value('folio_de_viaje')}  Sw: {vg.version_del_software}\n")
-                if len(vg.numero_de_operador) > 0:
-                    instancia_impresora.text(f"Numero de empleado: {vg.numero_de_operador}\n")
+                if len(vg.nombre_de_operador) > 0:
+                    instancia_impresora.text(f"Nombre de empleado: {vg.nombre_de_operador}\n")
                 else:
-                    if len(vg.csn_chofer) > 0:
-                        instancia_impresora.text(f"Numero de empleado: {vg.csn_chofer}\n")
+                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                    if operador != None:
+                        instancia_impresora.text(f"Nombre de empleado: {operador[2]}\n")
                     else:
-                        instancia_impresora.text(f"Numero de empleado: {settings.value('csn_chofer')}\n")
+                        if len(vg.numero_de_operador) > 0:
+                            instancia_impresora.text(f"Numero de empleado: {vg.numero_de_operador}\n")
+                        else:
+                            instancia_impresora.text(f"Operador de Reciente Ingreso\n")
+                            instancia_impresora.text(f"UID: {settings.value('csn_chofer')}\n")
                 instancia_impresora.text(f"Folio de liquidacion: {settings.value('folio_de_viaje_webservice')}\n")
                 inicio_de_viaje_a_mostrar = str(trama_dos_del_viaje[0]).split(',')[5].replace("'","") + " " + str(str(trama_dos_del_viaje[0]).split(',')[6]).replace("'","")
                 instancia_impresora.text(f"Inicio de viaje: {inicio_de_viaje_a_mostrar}\n")

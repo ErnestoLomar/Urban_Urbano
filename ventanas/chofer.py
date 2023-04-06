@@ -21,7 +21,7 @@ import time
 #Librerías propias
 from servicio_pensiones import obtener_servicios_de_pension, obtener_pensiones
 import variables_globales as vg
-from asignaciones_queries import guardar_auto_asignacion, obtener_ultima_asignacion, aniadir_folio_de_viaje_a_auto_asignacion, eliminar_auto_asignacion_por_folio
+from asignaciones_queries import guardar_auto_asignacion, obtener_ultima_asignacion, aniadir_folio_de_viaje_a_auto_asignacion, eliminar_auto_asignacion_por_folio, obtener_ultimo_folio_auto_asignacion, modificar_folio_auto_asignacion
 from queries import obtener_datos_aforo
 from matrices_tarifarias import obtener_servicio_por_numero_de_servicio_y_origen, obtener_transbordos_por_origen_y_numero_de_servicio
 from servicio_pensiones import obtener_origen_por_numero_de_servicio
@@ -141,12 +141,24 @@ class VentanaChofer(QWidget):
                     origen = obtener_origen_por_numero_de_servicio(int(self.servicio.split(" - ")[0]))
                     total_de_servicios = obtener_servicio_por_numero_de_servicio_y_origen(int(self.servicio.split(" - ")[0]), str(origen[3]).replace("(", "").replace(")", "").replace(",", "").replace("'", ""))
                     if len(total_de_servicios) != 0:
+                        # Obtenemos el ultimo folio de auto_asignacion en la base de datos
+                        ultima_asignacion = obtener_ultima_asignacion()
+                        print("La ultima asignacion es: ", ultima_asignacion)
+                        
                         self.settings.setValue('servicio', self.servicio)
                         self.settings.setValue('pension', self.pension_selec)
                         self.settings.setValue('turno', self.comboBox_turno.currentText())
                         guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora)
                         folio = self.crear_folio()
+                        
+                        # Revisamos que el folio se haya incrementado.
+                        if ultima_asignacion[1] == folio:
+                            print("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                            logging.info("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                            folio = obtener_ultimo_folio_auto_asignacion()['folio'] + 1
+                            modificar_folio_auto_asignacion(folio, ultima_asignacion[0])
                         print("Folio creado: ", folio)
+                        
                         while True:
                             folio_de_viaje = f"{''.join(fecha_completa[:10].split('-'))[3:]}{self.idUnidad}{folio}"
                             if len(folio_de_viaje) == 12:

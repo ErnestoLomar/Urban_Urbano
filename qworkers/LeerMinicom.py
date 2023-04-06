@@ -648,6 +648,14 @@ class LeerMinicomWorker(QObject):
                                     print("\x1b[1;33m"+"#############################################")
                                     break
                                 intentos3 = intentos3 + 1
+                                
+                        if len(csn_chofer) == 0:
+                            print("\x1b[1;33m"+"#############################################")
+                            print("\x1b[1;33m"+"El csn esta vació en trama 2, haciendo cuarto candado de seguridad...")
+                            logging.info("El csn esta vació en trama 2, haciendo cuarto candado de seguridad...")
+                            if len(variables_globales.csn_chofer_respaldo) != 0:
+                                csn_chofer = variables_globales.csn_chofer_respaldo
+                                print("\x1b[1;33m"+"#############################################")
 
                         trama_2 = '2'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+servicio_pension
                         print("\x1b[1;32m"+"Enviando inicio de viaje: "+trama_2)
@@ -670,6 +678,7 @@ class LeerMinicomWorker(QObject):
                                 print("\x1b[1;32m"+"Trama de inicio de viaje enviada: ", estado_servidor_inicio)
                                 print("\x1b[1;32m"+"#############################################")
                                 logging.info("Trama de inicio de viaje enviada")
+                                variables_globales.csn_chofer_respaldo = ""
                             except Exception as e:
                                 print("LeerMinicom.py, linea 376: "+str(e))
                         else:

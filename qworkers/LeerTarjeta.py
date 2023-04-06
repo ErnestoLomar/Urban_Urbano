@@ -117,6 +117,7 @@ class LeerTarjetaWorker(QObject):
                                         vg.vigencia_de_tarjeta = vigenciaTarjeta
                                         vg.numero_de_operador = datos_completos_tarjeta[12:17]
                                         vg.nombre_de_operador = datos_completos_tarjeta[17:41].replace("*"," ").replace("."," ").replace("-"," ").replace("_"," ")
+                                        vg.csn_chofer_respaldo = csn
                                         print("Numero de operador: "+vg.numero_de_operador)
                                         print("El nombre del operador es: ",vg.nombre_de_operador)
                                         csn = self.lib.ev2IsPresent().decode(encoding="utf8", errors='ignore')

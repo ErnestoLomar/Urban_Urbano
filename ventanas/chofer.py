@@ -152,11 +152,12 @@ class VentanaChofer(QWidget):
                         folio = self.crear_folio()
                         
                         # Revisamos que el folio se haya incrementado.
-                        if ultima_asignacion[1] == folio:
-                            print("Se procederá a aumentar el folio ya que es el mismo que el anterior")
-                            logging.info("Se procederá a aumentar el folio ya que es el mismo que el anterior")
-                            folio = obtener_ultimo_folio_auto_asignacion()['folio'] + 1
-                            modificar_folio_auto_asignacion(folio, ultima_asignacion[0])
+                        if ultima_asignacion != None:
+                            if ultima_asignacion[1] == folio:
+                                print("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                                logging.info("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                                folio = obtener_ultimo_folio_auto_asignacion()['folio'] + 1
+                                modificar_folio_auto_asignacion(folio, ultima_asignacion[0])
                         print("Folio creado: ", folio)
                         
                         while True:
@@ -222,11 +223,12 @@ class VentanaChofer(QWidget):
                         folio = self.crear_folio()
                         
                         # Revisamos que el folio se haya incrementado.
-                        if ultima_asignacion[1] == folio:
-                            print("Se procederá a aumentar el folio ya que es el mismo que el anterior")
-                            logging.info("Se procederá a aumentar el folio ya que es el mismo que el anterior")
-                            folio = obtener_ultimo_folio_auto_asignacion()['folio'] + 1
-                            modificar_folio_auto_asignacion(folio, ultima_asignacion[0])
+                        if ultima_asignacion != None:
+                            if ultima_asignacion[1] == folio:
+                                print("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                                logging.info("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                                folio = obtener_ultimo_folio_auto_asignacion()['folio'] + 1
+                                modificar_folio_auto_asignacion(folio, ultima_asignacion[0])
                         
                         print("Folio creado: ", folio)
                         while True:

@@ -178,8 +178,8 @@ class Rutas(QWidget):
     def cargar_servicios(self, lista):
         try:
             if len(lista) > 0:
-                print("Lista de servicios:")
-                print(lista)
+                #print("Lista de servicios:")
+                #print(lista)
                 self.crear_lista_geocercas(lista, self.nombres_geocercas_servicios)
                 #Limpiamos las listas
                 self.list_serv_2.clear()
@@ -249,8 +249,8 @@ class Rutas(QWidget):
     def cargar_transbordos(self, lista):
         try:
             if len(lista) > 0:
-                print("Lista de transbordos:")
-                print(lista)
+                #print("Lista de transbordos:")
+                #print(lista)
                 #self.crear_lista_geocercas(lista, self.nombres_geocercas_transbordos)
                 variables_globales.todos_los_transbordos_activos = lista
                 self.lista_transbordos = lista

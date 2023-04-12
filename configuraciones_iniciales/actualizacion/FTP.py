@@ -180,7 +180,11 @@ class Principal_Modem:
                 if '+CCID' in respuesta.decode():
                     print(respuesta)
                     print(str(respuesta.decode()).replace("+CCID","").replace(" ",""))
-                    variables_globales.sim_id = str(respuesta.decode()).replace("+CCID","").replace(" ","")
+                    variables_globales.sim_id = str(respuesta.decode()).replace("+CCID","").replace(" ","").replace(":","")
+                    respuesta = ser.readline()
+                    print(respuesta)
+                    respuesta = ser.readline()
+                    print(respuesta)
                     ser.flushInput()
                     ser.flushOutput()
                 else:

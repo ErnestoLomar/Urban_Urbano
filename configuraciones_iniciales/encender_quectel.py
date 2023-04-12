@@ -11,7 +11,9 @@ sys.path.insert(1, '/home/pi/Urban_Urbano/db')
 from asignaciones_queries import seleccionar_auto_asignaciones_antiguas, eliminar_auto_asignaciones_antiguas, seleccionar_fin_de_viaje_antiguos, eliminar_fin_de_viaje_antiguos
 from tickets_usados import seleccionar_tickets_antiguos, eliminar_tickets_antiguos
 from ventas_queries import seleccionar_ventas_antiguas, eliminar_ventas_antiguas
+from queries import insertar_estadistica_boletera, insertar_estadistica_memoria
 from variables_globales import version_del_software
+from eeprom_num_serie import cargar_num_serie
 '''
 from asignaciones_queries import eliminar_auto_asignaciones_antiguas, eliminar_fin_de_viaje_antiguos
 from tickets_usados import eliminar_tickets_antiguos
@@ -46,6 +48,12 @@ def Encender_QUECTEL():
                 break
             print("################################################")
             time.sleep(2)
+        
+        '''
+        # Procedemos a hacer la trama 8
+        datos_en_memoria_eeprom = cargar_num_serie
+        mac = subprocess.run("cat /sys/class/net/eth0/address", stdout=subprocess.PIPE, shell=True)
+        insertar_estadistica_boletera(version_del_software, datos_en_memoria_eeprom['state_num_version'], mac.stdout[:].decode(), )'''
             
         print("################################################")
         try:

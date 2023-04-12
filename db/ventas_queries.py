@@ -151,7 +151,7 @@ def obtener_estado_de_todas_las_ventas_no_enviadas():
 def obtener_estado_de_todass_las_ventas_no_enviadas():
     conexion = sqlite3.connect(URI)
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM item_venta WHERE check_servidor = 'NO'")
+    cursor.execute("SELECT * FROM item_venta WHERE check_servidor = 'NO' OR check_servidor != 'yyy' LIMIT 1")
     resultado = cursor.fetchall()
     conexion.close()
     return resultado

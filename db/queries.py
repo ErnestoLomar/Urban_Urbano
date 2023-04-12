@@ -44,6 +44,23 @@ tabla_temp = ''' CREATE TABLE IF NOT EXISTS temp (
     tempGPU Real
 ) '''
 
+tabla_estadistica_rpi = ''' CREATE TABLE IF NOT EXISTS boletera (
+    idMuestreo INTEGER PRIMARY KEY AUTOINCREMENT,
+    version_sw VARCHAR(30),
+    version_hw VARCHAR(30),
+    mac VARCHAR(60),
+    sim VARCHAR(30),
+    ns_tablilla(30),
+    fecha DATE,
+    hora TIME
+) '''
+
+tabla_estadistica_memoria = ''' CREATE TABLE IF NOT EXISTS memoria (
+    idMuestreo INTEGER PRIMARY KEY AUTOINCREMENT,
+    uso_memoria_ram VARCHAR(20),
+    uso_memoria_rom VARCHAR(20)
+) '''
+
 def crear_tabla_gps():
     try:
         con = sqlite3.connect(URI,check_same_thread=False)
@@ -67,6 +84,22 @@ def crear_tabla_temp():
         con = sqlite3.connect(URI,check_same_thread=False)
         cur = con.cursor()
         cur.execute(tabla_temp)
+    except Exception as e:
+        print(e)
+        
+def crear_tabla_boletera():
+    try:
+        con = sqlite3.connect(URI,check_same_thread=False)
+        cur = con.cursor()
+        cur.execute(tabla_estadistica_rpi)
+    except Exception as e:
+        print(e)
+        
+def crear_tabla_memoria():
+    try:
+        con = sqlite3.connect(URI,check_same_thread=False)
+        cur = con.cursor()
+        cur.execute(tabla_estadistica_memoria)
     except Exception as e:
         print(e)
 
@@ -101,7 +134,22 @@ def insertar_temp(idMuestreo, fechaElegida, horaElegida, origenFechaHora, errorT
         f"INSERT INTO temp VALUES (' {idMuestreo}','{fechaElegida}', '{horaElegida}', '{origenFechaHora}' , '{errorTempCPU}','{errorTempGPU}','{tempCPU}','{tempGPU}' )")
     con.commit()
     con.close()
+    
+def insertar_estadistica_boletera(vs_sw, vs_hw, mac, sim, ns_tablilla, fecha, hora):
+    # BD temp
+    con = sqlite3.connect(URI,check_same_thread=False)
+    cur = con.cursor()
+    cur.execute(f"INSERT INTO boletera(version_sw, version_hw, mac, sim, ns_tablilla, fecha, hora) VALUES ('{vs_sw}','{vs_hw}', '{mac}', '{sim}' , '{ns_tablilla}','{fecha}','{hora}')")
+    con.commit()
+    con.close()
 
+def insertar_estadistica_memoria(ram, rom):
+    # BD temp
+    con = sqlite3.connect(URI,check_same_thread=False)
+    cur = con.cursor()
+    cur.execute(f"INSERT INTO memoria(uso_memoria_ram, uso_memoria_rom) VALUES ('{ram}','{rom}')")
+    con.commit()
+    con.close()
 
 def obtener_datos_no_enviados():
     con = sqlite3.connect(URI,check_same_thread=False)
@@ -133,5 +181,7 @@ def crear_tablas():
     crear_tabla_aforo()
     crear_tabla_temp()
     crear_tabla_gps()
+    crear_tabla_boletera()
+    crear_tabla_memoria()
     
 #insertar_aforo(1,21000,8150,0.0,0,0.0,51)

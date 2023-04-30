@@ -4,6 +4,19 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.23:
+  - Quitando el reinicio de los folios.
+  - Añadiendo la opción de que el viaje se cierre de manera automática a las 2AM.
+  - Cambiando el tiempo de envió de las tramas. De 30 segundos a 20 segundos para tramas 2,5 y 4. Y de 1 minuto a 30 segundos para la trama 3.
+  - Se modifico la impresión de la fecha de inicio de viaje en el ticket y fin de viaje.
+  - Actualizando librería .so para la opción de leer el nombre de operador de la tarjeta.
+  - Agregando un candado de seguridad al momento de crear la trama 2 (inicio de viaje) para asegurar que el campo del CSN no se envié vació.
+  - Se agrego un candado de seguridad en el folio auto incrementable del folio de viaje para asegurarse que se incremente.
+  - Se agrego una nueva tabla llamada *boletera* que almacena las estadísticas de la boletera en la base de datos aforo.
+  - Se quito "Vuelta" en la impresión del ticket.
+  - Se quitaron renglones en el ticket.
+  - Se agrego un candado de seguridad para cuando no se encuentre el numero de operador en la tarjeta se busque en la base de datos interna de operadores y ese dato sea el que se muestre en el ticket.
+  - Se agrego un nuevo dato en el ticket llamado *"Ultimo folio"*
 - v1.22:
   - Añadiendo lectura de número de operador de la tarjeta.
 - v1.21:

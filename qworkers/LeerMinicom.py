@@ -665,6 +665,8 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
+                                '''
+                                print("El estado del servidor es: ", estado_servidor_inicio)
                                 if estado_servidor_inicio == "NO":
                                     print("El estado del servidor es NO se procede a poner y")
                                     actualizar_asignacion_check_servidor("y",id)
@@ -673,7 +675,8 @@ class LeerMinicomWorker(QObject):
                                     actualizar_asignacion_check_servidor("yy",id)
                                 elif estado_servidor_inicio == "yy":
                                     print("El estado del servidor es yy se procede a poner yyy")
-                                    actualizar_asignacion_check_servidor("yyy",id)
+                                    actualizar_asignacion_check_servidor("yyy",id)'''
+                                actualizar_asignacion_check_servidor("OK",id)
                                 print("\x1b[1;32m"+"#############################################")
                                 print("\x1b[1;32m"+"Trama de inicio de viaje enviada: ", estado_servidor_inicio)
                                 print("\x1b[1;32m"+"#############################################")
@@ -716,6 +719,8 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
+                                '''
+                                print("El estado del servidor es: ", estado_servidor_fin)
                                 if estado_servidor_fin == "NO":
                                     print("El estado del servidor es NO se procede a poner y")
                                     actualizar_estado_del_viaje_check_servidor("y",id)
@@ -724,7 +729,8 @@ class LeerMinicomWorker(QObject):
                                     actualizar_estado_del_viaje_check_servidor("yy",id)
                                 elif estado_servidor_fin == "yy":
                                     print("El estado del servidor es yy se procede a poner yyy")
-                                    actualizar_estado_del_viaje_check_servidor("yyy",id)
+                                    actualizar_estado_del_viaje_check_servidor("yyy",id)'''
+                                actualizar_estado_del_viaje_check_servidor("OK",id)
                                 print("\x1b[1;32m"+"#############################################")
                                 print("\x1b[1;32m"+"Trama de fin de viaje enviada")
                                 print("\x1b[1;32m"+"#############################################")
@@ -768,6 +774,8 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
+                                '''
+                                print("El estado del servidor es: ", estado_servidor_venta)
                                 if estado_servidor_venta == "NO":
                                     print("El estado del servidor es NO se procede a poner y")
                                     actualizar_estado_venta_check_servidor("y",id)
@@ -776,7 +784,8 @@ class LeerMinicomWorker(QObject):
                                     actualizar_estado_venta_check_servidor("yy",id)
                                 elif estado_servidor_venta == "yy":
                                     print("El estado del servidor es yy se procede a poner yyy")
-                                    actualizar_estado_venta_check_servidor("yyy",id)
+                                    actualizar_estado_venta_check_servidor("yyy",id)'''
+                                actualizar_estado_venta_check_servidor("OK",id)
                                 print("\x1b[1;32m"+"#############################################")
                                 print("\x1b[1;32m"+"Trama de venta enviada")
                                 print("\x1b[1;32m"+"#############################################")

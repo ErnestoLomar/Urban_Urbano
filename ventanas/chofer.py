@@ -44,7 +44,7 @@ class VentanaChofer(QWidget):
             self.settings.setValue('ventana_actual', "chofer")
             self.settings.setValue('csn_chofer', vg.csn_chofer)
             self.setWindowFlags(Qt.FramelessWindowHint)
-            self.setGeometry(0,0,800, 440)
+            self.setGeometry(0,0,800, 480)
             self.inicializar_comboBox()
             self.inicializar_labels()
             #self.cargar_datos()

@@ -12,7 +12,7 @@ sys.path.insert(1, '/home/pi/Urban_Urbano/db')
 from asignaciones_queries import seleccionar_auto_asignaciones_antiguas, eliminar_auto_asignaciones_antiguas, seleccionar_fin_de_viaje_antiguos, eliminar_fin_de_viaje_antiguos
 from tickets_usados import seleccionar_tickets_antiguos, eliminar_tickets_antiguos
 from ventas_queries import seleccionar_ventas_antiguas, eliminar_ventas_antiguas
-from queries import insertar_estadistica_boletera, insertar_estadistica_memoria
+from queries import insertar_estadistica_boletera, insertar_estadistica_memoria, crear_tablas
 import variables_globales as vg
 from eeprom_num_serie import cargar_num_serie
 '''
@@ -50,12 +50,25 @@ def Encender_QUECTEL():
             print("################################################")
             time.sleep(2)
         
-        # Procedemos a hacer la trama 8
-        datos_en_memoria_eeprom = cargar_num_serie
-        mac = subprocess.run("cat /sys/class/net/eth0/address", stdout=subprocess.PIPE, shell=True)
-        fecha = strftime('%d-%m-%Y').replace('/', '-')
-        hora = strftime('%H:%M:%S')
-        insertar_estadistica_boletera(vg.version_del_software, datos_en_memoria_eeprom['state_num_version'], mac.stdout[:].decode(), vg.sim_id, datos_en_memoria_eeprom['state_num_serie'], fecha, hora)
+        try:
+            crear_tablas() #Creamos las tablas de la base de datos
+            # Procedemos a hacer la trama 8
+            datos_en_memoria_eeprom = cargar_num_serie()
+            mac = subprocess.run("cat /sys/class/net/eth0/address", stdout=subprocess.PIPE, shell=True)
+            fecha = strftime('%d-%m-%Y').replace('/', '-')
+            print("Version del software: ", vg.version_del_software)
+            print("Numero de version de la tablilla: ", datos_en_memoria_eeprom['state_num_version'])
+            print("MAC: ", mac.stdout[:].decode())
+            print("SIM: ", vg.sim_id)
+            print("Numero de serie de la tablilla: ", datos_en_memoria_eeprom['state_num_serie'])
+            print("Fecha: ", fecha)
+            fecha_actual = str(subprocess.run("date", stdout=subprocess.PIPE, shell=True))
+            indice = fecha_actual.find(":")
+            hora = fecha_actual[(int(indice) - 2):(int(indice) + 6)]
+            print("Hora: ", hora)
+            insertar_estadistica_boletera(vg.version_del_software, datos_en_memoria_eeprom['state_num_version'], mac.stdout[:].decode(), vg.sim_id, datos_en_memoria_eeprom['state_num_serie'], fecha, hora)
+        except Exception as e:
+            print(e)
             
         print("################################################")
         try:

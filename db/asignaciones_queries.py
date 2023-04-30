@@ -385,7 +385,7 @@ def obtener_asignaciones_no_enviadas():
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' OR check_servidor != 'yyy' AND folio_de_viaje IS NOT 'por_aniadir' LIMIT 1")
+            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' AND folio_de_viaje IS NOT 'por_aniadir' LIMIT 1")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado
@@ -411,7 +411,7 @@ def obtener_todas_las_asignaciones_no_enviadas():
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' OR check_servidor != 'yyy' LIMIT 1")
+            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' LIMIT 1")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado
@@ -424,7 +424,7 @@ def obtener_todass_las_asignaciones_no_enviadas():
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO' OR check_servidor != 'yyy' LIMIT 1")
+            "SELECT * FROM auto_asignacion WHERE check_servidor = 'NO'")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado
@@ -476,7 +476,7 @@ def obtener_estado_de_viajes_no_enviados():
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "SELECT * FROM estado_del_viaje WHERE check_servidor = 'NO' OR check_servidor != 'yyy' LIMIT 1")
+            "SELECT * FROM estado_del_viaje WHERE check_servidor = 'NO' LIMIT 1")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado
@@ -502,7 +502,7 @@ def obtener_estado_de_todos_los_viajes_no_enviados():
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "SELECT * FROM estado_del_viaje WHERE check_servidor = 'NO' OR check_servidor != 'yyy' LIMIT 1")
+            "SELECT * FROM estado_del_viaje WHERE check_servidor = 'NO'")
         resultado = cursor.fetchall()
         conexion.close()
         return resultado

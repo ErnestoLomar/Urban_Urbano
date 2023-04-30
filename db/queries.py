@@ -50,7 +50,7 @@ tabla_estadistica_rpi = ''' CREATE TABLE IF NOT EXISTS boletera (
     version_hw VARCHAR(30),
     mac VARCHAR(60),
     sim VARCHAR(30),
-    ns_tablilla(30),
+    ns_tablilla VARCHAR(30),
     fecha DATE,
     hora TIME
 ) '''
@@ -67,7 +67,7 @@ def crear_tabla_gps():
         cur = con.cursor()
         cur.execute(tabla_gps)
     except Exception as e:
-        print(e)
+        print("Problema al crear tabla del gps: ", e)
 
 
 def crear_tabla_aforo():
@@ -76,7 +76,7 @@ def crear_tabla_aforo():
         cur = con.cursor()
         cur.execute(tabla_aforo)
     except Exception as e:
-        print(e)
+        print("Problema al crear tabla aforo: ", e)
 
 
 def crear_tabla_temp():
@@ -85,7 +85,7 @@ def crear_tabla_temp():
         cur = con.cursor()
         cur.execute(tabla_temp)
     except Exception as e:
-        print(e)
+        print("Problema al crear tabla de la temperatura: ", e)
         
 def crear_tabla_boletera():
     try:
@@ -93,7 +93,7 @@ def crear_tabla_boletera():
         cur = con.cursor()
         cur.execute(tabla_estadistica_rpi)
     except Exception as e:
-        print(e)
+        print("Problema al crear tabla de la boletera: ", e)
         
 def crear_tabla_memoria():
     try:
@@ -101,7 +101,7 @@ def crear_tabla_memoria():
         cur = con.cursor()
         cur.execute(tabla_estadistica_memoria)
     except Exception as e:
-        print(e)
+        print("Problema al crear tabla de la memoria: ", e)
 
 
 def insertar_gps(fechaGPS, horaGPS, errorGPS, longitud, latitud, velocidadGPS, geocerca, folio, check_servidor, folio_viaje):

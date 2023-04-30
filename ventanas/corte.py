@@ -115,12 +115,15 @@ class corte(QWidget):
                     if len(total_de_boletos_db) != total_de_folio_aforo_efectivo:
                         print("La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
                         logging.info(f"La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
+                        
+                        '''
                         if len(total_de_boletos_db) != ultima_venta_bd[1]:
                             print("La cantidad de boletos en la base de datos no coincide con el folio de la ultima venta en la base de datos.")
                             logging.info(f"La cantidad de boletos en la base de datos no coincide con el folio de la ultima venta en la base de datos.")
                             total_de_folio_aforo_efectivo = ultima_venta_bd[1]
                             print("Se ha actualizado el total de boletos en el aforo a: "+str(total_de_folio_aforo_efectivo))
-                            logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")
+                            logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")'''
+                            
                         total_de_folio_aforo_efectivo = len(total_de_boletos_db)
                         print("Se ha actualizado el total de boletos en el aforo a: "+str(total_de_folio_aforo_efectivo))
                         logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")

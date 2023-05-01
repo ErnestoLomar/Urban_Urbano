@@ -50,6 +50,7 @@ def Encender_QUECTEL():
             print("################################################")
             time.sleep(2)
         
+        '''
         try:
             crear_tablas() #Creamos las tablas de la base de datos
             # Procedemos a hacer la trama 8
@@ -68,7 +69,7 @@ def Encender_QUECTEL():
             print("Hora: ", hora)
             insertar_estadistica_boletera(vg.version_del_software, datos_en_memoria_eeprom['state_num_version'], mac.stdout[:].decode(), vg.sim_id, datos_en_memoria_eeprom['state_num_serie'], fecha, hora)
         except Exception as e:
-            print(e)
+            print(e)'''
             
         print("################################################")
         try:

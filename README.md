@@ -12,7 +12,7 @@ Linea cronológica:
   - Actualizando librería .so para la opción de leer el nombre de operador de la tarjeta.
   - Agregando un candado de seguridad al momento de crear la trama 2 (inicio de viaje) para asegurar que el campo del CSN no se envié vació.
   - Se agrego un candado de seguridad en el folio auto incrementable del folio de viaje para asegurarse que se incremente.
-  - Se agrego una nueva tabla llamada *boletera* que almacena las estadísticas de la boletera en la base de datos aforo.
+  - Se agrego una nueva tabla llamada *boletera* y *memoria* donde próximamente se guardaran datos utilizados para futuras tramas.
   - Se quito "Vuelta" en la impresión del ticket.
   - Se quitaron renglones en el ticket.
   - Se agrego un candado de seguridad para cuando no se encuentre el numero de operador en la tarjeta se busque en la base de datos interna de operadores y ese dato sea el que se muestre en el ticket.

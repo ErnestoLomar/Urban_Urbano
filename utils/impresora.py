@@ -276,7 +276,7 @@ try:
                 instancia_impresora.text(f"Ultimo folio: {ultima_venta_bd[1]}\n")
                 inicio_de_viaje_a_mostrar = str(trama_dos_del_viaje[0]).split(',')[5].replace("'","")[1:] + str(str(trama_dos_del_viaje[0]).split(',')[6]).replace("'","")
                 instancia_impresora.text(f"Inicio de viaje: {inicio_de_viaje_a_mostrar}\n")
-                instancia_impresora.text(f"Fin de viaje: {fecha} {hora_actual}\n")
+                instancia_impresora.text(f"Fin de viaje (Impresion): {fecha} {hora_actual}\n")
                 instancia_impresora.text(f"Unidad: {idUnidad}    Serv: {settings.value('servicio')}\n")
                 instancia_impresora.text(f"Estud:        {str(settings.value('info_estudiantes')).split(',')[0]}  $       {str(settings.value('info_estudiantes')).split(',')[1]}\n")
                 instancia_impresora.text(f"Normal:       {str(settings.value('info_normales')).split(',')[0]}  $       {str(settings.value('info_normales')).split(',')[1]}\n")

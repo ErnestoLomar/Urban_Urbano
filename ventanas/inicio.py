@@ -20,6 +20,7 @@ import subprocess
 from time import strftime
 import faulthandler
 import logging
+from rpi_backlight import Backlight
 
 # Importar subdirectorios
 sys.path.insert(1, '/home/pi/Urban_Urbano/db')
@@ -96,6 +97,7 @@ class Ventana(QWidget):
             self.label_num_ver.setText(respuesta['state_num_version'])
 
             self.inicializar()
+            self.Brillo.valueChanged.connect(self.scrollbar_value_changed)
             #Creamos instancias de ventanas
             
             #Creamos los hilos
@@ -443,6 +445,12 @@ class Ventana(QWidget):
         except Exception as e:
             logging.info("Error al obtener la mac: " + str(e))
             print("Error al obtener la mac: " + str(e))
+            
+    def scrollbar_value_changed(self, value):
+        print("El valor del scrollbar ha cambiado:", value)
+        backlight = Backlight()
+        if value >= 5:
+            backlight.brightness =value
             
     def apagar_sistema(self, event):
         try:

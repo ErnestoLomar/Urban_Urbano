@@ -4,6 +4,8 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.24:
+  - Añadiendo control de brillo en la pantalla desde el menu principal.
 - v1.23:
   - Quitando el reinicio de los folios.
   - Añadiendo la opción de que el viaje se cierre de manera automática a las 2AM.

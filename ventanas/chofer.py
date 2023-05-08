@@ -8,6 +8,8 @@
 ##########################################
 
 #Librerías externas
+import datetime
+import subprocess
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtCore import Qt, QSettings
@@ -133,8 +135,17 @@ class VentanaChofer(QWidget):
             # si no escogemos el que seleccionaron.
             self.close()
             fecha_completa = strftime('%Y-%m-%d %H:%M:%S')
-            fecha = strftime('%d-%m-%Y').replace('/', '-')
             hora = strftime('%H:%M:%S')
+            
+            # Obtenemos la fecha actual de la raspberry
+            
+            # Ejecutar el comando date y obtener la salida
+            result = subprocess.run(['date', '+%d/%m/%Y'], stdout=subprocess.PIPE)
+
+            # Decodificar la salida en formato de cadena de caracteres
+            fecha = datetime.datetime.strptime(str(result.stdout.decode('utf-8').strip()), "%d/%m/%Y").strftime("%d/%m/%Y")
+            
+            print("La fecha actual de la raspberry es: ", fecha)
 
             if self.pension_selec != "":
                 if self.servicio != "":

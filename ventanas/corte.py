@@ -57,7 +57,7 @@ class corte(QWidget):
     #Función para inicializar la ventana corte.
     def inicializar(self):
         try:
-            self.label_fin.mousePressEvent = self.terminar_vuelta
+            self.label_fin.mousePressEvent = lambda event: self.terminar_vuelta(event, True)
             self.label_cancel.mousePressEvent = self.cancelar
         except Exception as e:
             logging.info(f"Error en la ventana corte: {e}")
@@ -85,15 +85,16 @@ class corte(QWidget):
             logging.info(f"Error en la ventana corte: {e}")
 
     #Función para cerrar la ventana de corte.
-    def terminar_vuelta(self, event):
+    def terminar_vuelta(self, event, imprimir):
         try:
+            print("El imprimir mandado es: ", imprimir)
             self.close()
             try:
                 from impresora import imprimir_ticket_de_corte
             except Exception as e:
                 print("No se importaron las librerias de impresora")
             
-            hecho = imprimir_ticket_de_corte(self.idUnidad)
+            hecho = imprimir_ticket_de_corte(self.idUnidad, imprimir)
             hora = strftime('%H:%M:%S')
             fecha = str(strftime('%d-%m-%Y')).replace('/', '-')
             csn_init = str(self.settings.value('csn_chofer'))
@@ -135,6 +136,10 @@ class corte(QWidget):
                 self.close_signal_pasaje.emit()
                 variables_globales.ventana_actual = VentanaActual.CERRAR_TURNO
                 variables_globales.folio_asignacion = 0
+                if variables_globales.folio_asignacion != 0:
+                    print*("El folio de asignacion no se reinicia")
+                    logging.info("El folio de asignacion no se reinicia")
+                    variables_globales.folio_asignacion = 0
                 variables_globales.numero_de_operador = ""
                 self.settings.setValue('origen_actual', "")
                 self.settings.setValue('folio_de_viaje', "")

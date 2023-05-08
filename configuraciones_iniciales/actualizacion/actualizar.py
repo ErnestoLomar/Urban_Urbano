@@ -32,7 +32,7 @@ class Actualizar(QWidget):
         except Exception as e:
             logging.info(e)
 
-    def actualizar_raspberrypi(self, tamanio_esperado):
+    def actualizar_raspberrypi(self, tamanio_esperado, version_matriz):
         try:
             self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(55, 147, 72);')
             self.label_info_2.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(55, 147, 72);')
@@ -40,7 +40,7 @@ class Actualizar(QWidget):
             self.label_info_2.setText("por favor, no use la boletera")
             hacer = verificar_memoria_UFS()
             if hacer:
-                hacer = ConfigurarFTP("azure", tamanio_esperado)
+                hacer = ConfigurarFTP("azure", tamanio_esperado, version_matriz)
                 if hacer:
                     self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(55, 147, 72);')
                     self.label_info_2.setText("")

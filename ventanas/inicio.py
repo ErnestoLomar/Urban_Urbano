@@ -97,6 +97,7 @@ class Ventana(QWidget):
             self.label_num_ver.setText(respuesta['state_num_version'])
 
             self.inicializar()
+            self.Brillo.setValue(100)
             self.Brillo.valueChanged.connect(self.scrollbar_value_changed)
             #Creamos instancias de ventanas
             
@@ -342,8 +343,31 @@ class Ventana(QWidget):
     #Con este método obtenemos la hora
     def obtener_hora(self):
         try:
-            fecha = strftime("%Y/%m/%d   %H:%M:%S")
-            self.label_fecha.setText(fecha)
+
+            # Obtener la fecha y hora en formato Y/m/d H:M:S
+            fecha_hora = subprocess.check_output(['date', '+%Y/%m/%d %H:%M:%S']).decode().strip()
+
+            # Obtener la fecha en formato Y/m/d
+            fecha = subprocess.check_output(['date', '+%Y/%m/%d']).decode().strip()
+
+            # Obtener la hora en formato H:M:S
+            hora = subprocess.check_output(['date', '+%H:%M:%S']).decode().strip()
+
+            #print("Fecha y hora:", fecha_hora)
+            #print("Fecha:", fecha)
+            #print("Hora:", hora)
+            
+            self.label_fecha.setText(fecha_hora)
+            
+            # Guardamos los datos en variables globales
+            variables_globales.fecha_completa_actual = fecha_hora
+            variables_globales.fecha_actual = fecha
+            variables_globales.hora_actual = hora
+            
+            #print(variables_globales.fecha_completa_actual)
+            #print(variables_globales.fecha_actual)
+            #print(variables_globales.hora_actual)
+            
             #if self.hora_actualizada == False:
             #    self.hora_actualizada = actualizar_hora()
         except Exception as e:
@@ -447,9 +471,8 @@ class Ventana(QWidget):
             print("Error al obtener la mac: " + str(e))
             
     def scrollbar_value_changed(self, value):
-        print("El valor del scrollbar ha cambiado:", value)
         backlight = Backlight()
-        if value >= 5:
+        if value >= 10:
             backlight.brightness =value
             
     def apagar_sistema(self, event):

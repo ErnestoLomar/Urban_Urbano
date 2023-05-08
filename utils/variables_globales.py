@@ -33,6 +33,10 @@ numero_de_operador = ""
 nombre_de_operador = ""
 csn_chofer_respaldo = ""
 sim_id = ""
+version_de_MT = "202305050001"
+fecha_actual = ""
+hora_actual = ""
+fecha_completa_actual = ""
 
 from enum import Enum
 # La clase VentanaActual es una enumeración de los posibles valores de la variable ventana_actual

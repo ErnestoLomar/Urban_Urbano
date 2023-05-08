@@ -205,7 +205,7 @@ try:
             logging.info(e)
             return False
         
-    def imprimir_ticket_de_corte(idUnidad):
+    def imprimir_ticket_de_corte(idUnidad, imprimir):
         try:
             settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat)
             fecha = str(strftime('%d-%m-%Y')).replace('/', '-')
@@ -290,6 +290,9 @@ try:
         except Exception as e:
             print(e)
             logging.info(e)
-            return False
+            if imprimir:
+                return False
+            else:
+                return True
 except Exception as e:
     print("No hubo comunicacion con impresora")

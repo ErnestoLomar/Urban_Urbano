@@ -23,7 +23,7 @@ sys.path.insert(1, '/home/pi/Urban_Urbano/configuraciones_iniciales/actualizacio
 #Librerias propias
 from comand import Comunicacion_Minicom, Principal_Modem
 import variables_globales
-from queries import obtener_datos_aforo
+from queries import obtener_datos_aforo, obtener_estadisticas_no_enviadas, actualizar_estado_estadistica_check_servidor
 from asignaciones_queries import guardar_actualizacion, obtener_asignaciones_no_enviadas, actualizar_asignacion_check_servidor, obtener_todas_las_asignaciones_no_enviadas
 import variables_globales
 from comand import Comunicacion_Minicom, Principal_Modem
@@ -168,6 +168,7 @@ class LeerMinicomWorker(QObject):
                             total_de_asignaciones_no_enviadas = obtener_todas_las_asignaciones_no_enviadas()
                             fin_de_viajes_no_enviados = obtener_estado_de_viajes_no_enviados()
                             total_de_ventas_no_enviadas = obtener_estado_de_todas_las_ventas_no_enviadas()
+                            total_de_estadisticas_no_enviadas = obtener_estadisticas_no_enviadas()
                             
                             if len(total_de_asignaciones_no_enviadas) != 0:
                                 self.lista_de_datos_por_enviar.append(f"{total_de_asignaciones_no_enviadas[0][4]}{total_de_asignaciones_no_enviadas[0][5]},asignacion")
@@ -175,6 +176,8 @@ class LeerMinicomWorker(QObject):
                                 self.lista_de_datos_por_enviar.append(f"{total_de_ventas_no_enviadas[0][3]}{total_de_ventas_no_enviadas[0][4]},venta")
                             if len(fin_de_viajes_no_enviados) != 0:
                                 self.lista_de_datos_por_enviar.append(f"{fin_de_viajes_no_enviados[0][3]}{fin_de_viajes_no_enviados[0][4]},finviaje")
+                            if len(total_de_estadisticas_no_enviadas) != 0:
+                                self.lista_de_datos_por_enviar.append(f"{total_de_estadisticas_no_enviadas[0][2]}{total_de_estadisticas_no_enviadas[0][3]},estadistica")
                             
                             if len(self.lista_de_datos_por_enviar) != 0:
                                 print("Lista de datos: ", self.lista_de_datos_por_enviar)
@@ -201,6 +204,9 @@ class LeerMinicomWorker(QObject):
                                 if 'finviaje' in tipo_de_dato:
                                     print("Enviando fin de viaje")
                                     self.enviar_fin_de_viaje()
+                                if 'estadistica' in tipo_de_dato:
+                                    print("Enviando estadistica")
+                                    self.enviar_trama_informativa()
                                 self.lista_de_datos_por_enviar = []
                         print("\x1b[1;32m"+"Terminando de verificar si hay datos en la BD por enviar...")
                     except Exception as e:
@@ -291,7 +297,7 @@ class LeerMinicomWorker(QObject):
                                     logging.info("Actualizando raspberry por petición del servidor")
                                     ventana_actualzar = Actualizar()
                                     ventana_actualzar.show()
-                                    ventana_actualzar.actualizar_raspberrypi(int(datos[1]))
+                                    ventana_actualzar.actualizar_raspberrypi(int(datos[1]), False)
                                 else:
                                     while True:
                                         if len(total_de_ventas_no_enviadas) == 0 and len(total_de_inicio_de_viajes_no_enviados) == 0 and len(total_de_fin_de_viajes_no_enviados) == 0:
@@ -537,6 +543,30 @@ class LeerMinicomWorker(QObject):
                                 print("LeerMinicom.py, linea 370: "+str(e))
                     except Exception as e:
                         print("LeerMinicom.py, linea 253: "+str(e))
+                elif "T" in accion:
+                    try:
+                        print("Entro a T, actualizar matriz tarifaría")
+                        logging.info('Entro a T, actualizar matriz tarifaría')
+                        datos = accion.split(',')
+                        if len(datos) == 3:
+                            if len(str(datos[1])) == 12:
+                                if variables_globales.version_de_MT < str(datos[1]):
+                                    print(f"Se procedera a actualizar la MT de {variables_globales.version_de_MT} a {str(datos[1])}")
+                                    logging.info(f"Se procedera a actualizar la MT de {variables_globales.version_de_MT} a {str(datos[1])}")
+                                    try:
+                                        ventana_actualzar = Actualizar()
+                                        ventana_actualzar.show()
+                                        ventana_actualzar.actualizar_raspberrypi(int(datos[2]), str(datos[1]))
+                                    except Exception as e:
+                                        print(f"No se logro hacer la actualizacion de la matriz tarifaría: {e}")
+                                        logging.info(f"No se logro hacer la actualizacion de la matriz tarifaría: {e}")
+                                else:
+                                    print(f"No se puede actualizar la MT porque {variables_globales.version_de_MT} es igual a {str(datos[1])}")
+                                    logging.info(f"No se puede actualizar la MT porque {variables_globales.version_de_MT} es igual a {str(datos[1])}")
+                    except Exception as e:
+                        print("Error al hacer accion T: " + str(e))
+                        logging.info('Error al hacer accion T: '+str(e))
+                        print("LeerMinicom.py, linea 138: "+str(e))
         except Exception as e:
             print("LeerMinicom.py, linea 255: "+str(e))
 
@@ -797,6 +827,58 @@ class LeerMinicomWorker(QObject):
                             print("\x1b[1;31;47m"+"Trama de venta no enviada"+'\033[0;m')
                             print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
                             logging.info("No se pudo enviar la trama de venta")
+                            self.reeconectar_socket(enviado)
+                            self.realizar_accion(result)
+                    except Exception as e:
+                        print("LeerMinicom.py, linea 378: "+str(e))
+        except Exception as e:
+            print("LeerMinicom.py, linea 380: "+str(e))
+            
+    def enviar_trama_informativa(self):
+        try:
+            estadisticas = obtener_estadisticas_no_enviadas()
+
+            if len(estadisticas) > 0:
+                for estadistica in estadisticas:
+                    try:
+                        idMuestreo_estadistica = estadistica[0]
+                        idUnidad_estadistica = estadistica[1]
+                        fecha_estadistica = estadistica[2]
+                        hora_estadistica = estadistica[3]
+                        columna_estadistica = estadistica[4]
+                        valor_estadistica = estadistica[5]
+
+                        trama_9 = '9'+","+str(idUnidad_estadistica)+","+str(fecha_estadistica)+","+str(hora_estadistica)+","+str(columna_estadistica)+","+str(valor_estadistica)
+                        print("\x1b[1;32m"+"Enviando trama 9: "+trama_9)
+                        logging.info("Enviando estadistica: "+trama_9)
+                        result = modem.mandar_datos(trama_9)
+                        enviado = result['enviado']
+
+                        if enviado == True:
+                            try:
+                                '''
+                                print("El estado del servidor es: ", estado_servidor_venta)
+                                if estado_servidor_venta == "NO":
+                                    print("El estado del servidor es NO se procede a poner y")
+                                    actualizar_estado_venta_check_servidor("y",id)
+                                elif estado_servidor_venta == "y":
+                                    print("El estado del servidor es y se procede a poner yy")
+                                    actualizar_estado_venta_check_servidor("yy",id)
+                                elif estado_servidor_venta == "yy":
+                                    print("El estado del servidor es yy se procede a poner yyy")
+                                    actualizar_estado_venta_check_servidor("yyy",id)'''
+                                actualizar_estado_estadistica_check_servidor("OK",idMuestreo_estadistica)
+                                print("\x1b[1;32m"+"#############################################")
+                                print("\x1b[1;32m"+"Trama de estadistica enviada")
+                                print("\x1b[1;32m"+"#############################################")
+                                logging.info("Trama de estadistica enviada")
+                            except Exception as e:
+                                print("LeerMinicom.py, linea 376: "+str(e))
+                        else:
+                            print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
+                            print("\x1b[1;31;47m"+"Trama de estadistica no enviada"+'\033[0;m')
+                            print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
+                            logging.info("No se pudo enviar la trama de estadistica")
                             self.reeconectar_socket(enviado)
                             self.realizar_accion(result)
                     except Exception as e:

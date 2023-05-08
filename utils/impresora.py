@@ -12,7 +12,6 @@ sys.path.insert(1, '/home/pi/Urban_Urbano/db')
 
 from operadores import obtener_operador_por_UID
 from ventas_queries import obtener_ultimo_folio_de_item_venta, obtener_total_de_ventas_por_folioviaje_y_fecha
-from asignaciones_queries import obtener_asignacion_por_folio_de_viaje
 
 try:
 
@@ -233,14 +232,12 @@ try:
                 if len(total_de_boletos_db) != total_de_folio_aforo_efectivo:
                     print("La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
                     logging.info(f"La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
-                    '''
                     if len(total_de_boletos_db) != ultima_venta_bd[1]:
                         print("La cantidad de boletos en la base de datos no coincide con el folio de la ultima venta en la base de datos.")
                         logging.info(f"La cantidad de boletos en la base de datos no coincide con el folio de la ultima venta en la base de datos.")
                         total_de_folio_aforo_efectivo = ultima_venta_bd[1]
                         print("Se ha actualizado el total de boletos en el aforo a: "+str(total_de_folio_aforo_efectivo))
-                        logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")'''
-                        
+                        logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")
                     total_de_folio_aforo_efectivo = len(total_de_boletos_db)
                     print("Se ha actualizado el total de boletos en el aforo a: "+str(total_de_folio_aforo_efectivo))
                     logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")
@@ -254,34 +251,32 @@ try:
             instancia_impresora = Usb(n_creador_hex, n_serie_hex, 0)
             hora_actual = strftime('%H:%M:%S')
             instancia_impresora.set(align='center')
-            if len(settings.value('folio_de_viaje')) > 0:
-                trama_dos_del_viaje = obtener_asignacion_por_folio_de_viaje(settings.value('folio_de_viaje'))
-            else:
-                trama_dos_del_viaje = obtener_asignacion_por_folio_de_viaje(vg.folio_asignacion)
             logging.info("Impresora encontrada")
             for i in range(2):
+                '''
+                if i == 0:
+                    instancia_impresora.text(f"<<< Copia jefe de pension >>>\n")
+                elif i == 1:
+                    instancia_impresora.text(f"<<< Copia liquidacion >>>\n")
+                elif i == 2:
+                    instancia_impresora.text(f"<<< Copia operador >>>\n")'''
+                instancia_impresora.text(f"{fecha} {hora_actual}\n")
                 instancia_impresora.text(f"Fv: {settings.value('folio_de_viaje')}  Sw: {vg.version_del_software}\n")
-                if len(vg.nombre_de_operador) > 0:
-                    instancia_impresora.text(f"Nombre de empleado: {vg.nombre_de_operador}\n")
+                if len(vg.numero_de_operador) > 0:
+                    instancia_impresora.text(f"Numero de empleado: {vg.numero_de_operador}\n")
                 else:
-                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
-                    if operador != None:
-                        instancia_impresora.text(f"Nombre de empleado: {operador[2]}\n")
+                    if len(vg.csn_chofer) > 0:
+                        instancia_impresora.text(f"Numero de empleado: {vg.csn_chofer}\n")
                     else:
-                        if len(vg.numero_de_operador) > 0:
-                            instancia_impresora.text(f"Numero de empleado: {vg.numero_de_operador}\n")
-                        else:
-                            instancia_impresora.text(f"Operador de Reciente Ingreso\n")
-                            instancia_impresora.text(f"UID: {settings.value('csn_chofer')}\n")
-                instancia_impresora.text(f"Ultimo folio: {ultima_venta_bd[1]}\n")
-                inicio_de_viaje_a_mostrar = str(trama_dos_del_viaje[0]).split(',')[5].replace("'","")[1:] + str(str(trama_dos_del_viaje[0]).split(',')[6]).replace("'","")
-                instancia_impresora.text(f"Inicio de viaje: {inicio_de_viaje_a_mostrar}\n")
-                instancia_impresora.text(f"Fin de viaje (Impresion): {fecha} {hora_actual}\n")
+                        instancia_impresora.text(f"Numero de empleado: {settings.value('csn_chofer')}\n")
+                instancia_impresora.text(f"Folio de liquidacion: {settings.value('folio_de_viaje_webservice')}\n")
                 instancia_impresora.text(f"Unidad: {idUnidad}    Serv: {settings.value('servicio')}\n")
+                instancia_impresora.text(f"Vuelta: {settings.value('vuelta')}\n")
                 instancia_impresora.text(f"Estud:        {str(settings.value('info_estudiantes')).split(',')[0]}  $       {str(settings.value('info_estudiantes')).split(',')[1]}\n")
                 instancia_impresora.text(f"Normal:       {str(settings.value('info_normales')).split(',')[0]}  $       {str(settings.value('info_normales')).split(',')[1]}\n")
                 instancia_impresora.text(f"Menor:        {str(settings.value('info_chicos')).split(',')[0]}  $       {str(settings.value('info_chicos')).split(',')[1]}\n")
                 instancia_impresora.text(f"Ad.May:       {str(settings.value('info_ad_mayores')).split(',')[0]}  $       {str(settings.value('info_ad_mayores')).split(',')[1]}\n")
+                instancia_impresora.text("\n")
                 instancia_impresora.text(f"Total a liquidar: $ {total_a_liquidar_bd}\n")
                 instancia_impresora.text(f"Total de folios: {total_de_folio_aforo_efectivo}\n")
                 instancia_impresora.cut()

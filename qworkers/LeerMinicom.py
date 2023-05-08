@@ -109,7 +109,7 @@ class LeerMinicomWorker(QObject):
 
                     actualizar_folio(id_folio, self.folio, fecha)
 
-                    if self.contador_servidor >= 12:
+                    if self.contador_servidor >= 4:
                         
                         if folio_asignacion_viaje != 0:
                             print("Enviando trama 3 con viaje")
@@ -150,7 +150,6 @@ class LeerMinicomWorker(QObject):
                             self.reeconectar_socket(enviado)
                             self.folio = self.folio + 1
                             self.realizar_accion(result)
-                        self.contador_servidor = 0
                 else:
                     variables_globales.GPS = "error"
                     print("\x1b[1;31;47m"+"Error al obtener coordenadas GPS"+'\033[0;m')
@@ -159,9 +158,8 @@ class LeerMinicomWorker(QObject):
                         modem.reconectar_gps()
                         self.intentos_conexion_gps = 0
                     self.intentos_conexion_gps+=1
-                    self.contador_servidor = 0
                     
-                if self.contador_servidor == 4 or self.contador_servidor == 8 or self.contador_servidor >= 12:
+                if self.contador_servidor >= 4:
                     try:
                         print("\x1b[1;32m"+"Verificando si hay datos en la BD por enviar...")
                         for j in range(3):
@@ -206,6 +204,8 @@ class LeerMinicomWorker(QObject):
                     except Exception as e:
                         logging.info('Error al enviar datos al servidor: '+str(e))
                         print("\x1b[1;31;47m"+"Error al enviar datos al servidor: "+str(e)+'\033[0;m')
+                    self.contador_servidor = 0
+                
                 self.progress.emit(res)
                 time.sleep(5)
                 self.contador_servidor = self.contador_servidor + 1
@@ -611,7 +611,6 @@ class LeerMinicomWorker(QObject):
                         servicio_pension = str(asignacion[3]).replace("-", ",").split(",")[0]
                         hora_inicio = asignacion[5]
                         folio_de_viaje = asignacion[6]
-                        estado_servidor_inicio = asignacion[7]
                         
                         if len(csn_chofer) == 0:
                             print("\x1b[1;33m"+"#############################################")
@@ -648,14 +647,6 @@ class LeerMinicomWorker(QObject):
                                     print("\x1b[1;33m"+"#############################################")
                                     break
                                 intentos3 = intentos3 + 1
-                                
-                        if len(csn_chofer) == 0:
-                            print("\x1b[1;33m"+"#############################################")
-                            print("\x1b[1;33m"+"El csn esta vació en trama 2, haciendo cuarto candado de seguridad...")
-                            logging.info("El csn esta vació en trama 2, haciendo cuarto candado de seguridad...")
-                            if len(variables_globales.csn_chofer_respaldo) != 0:
-                                csn_chofer = variables_globales.csn_chofer_respaldo
-                                print("\x1b[1;33m"+"#############################################")
 
                         trama_2 = '2'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+servicio_pension
                         print("\x1b[1;32m"+"Enviando inicio de viaje: "+trama_2)
@@ -665,23 +656,11 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
-                                '''
-                                print("El estado del servidor es: ", estado_servidor_inicio)
-                                if estado_servidor_inicio == "NO":
-                                    print("El estado del servidor es NO se procede a poner y")
-                                    actualizar_asignacion_check_servidor("y",id)
-                                elif estado_servidor_inicio == "y":
-                                    print("El estado del servidor es y se procede a poner yy")
-                                    actualizar_asignacion_check_servidor("yy",id)
-                                elif estado_servidor_inicio == "yy":
-                                    print("El estado del servidor es yy se procede a poner yyy")
-                                    actualizar_asignacion_check_servidor("yyy",id)'''
-                                actualizar_asignacion_check_servidor("OK",id)
+                                actualizar_asignacion_check_servidor(id)
                                 print("\x1b[1;32m"+"#############################################")
-                                print("\x1b[1;32m"+"Trama de inicio de viaje enviada: ", estado_servidor_inicio)
+                                print("\x1b[1;32m"+"Trama de inicio de viaje enviada")
                                 print("\x1b[1;32m"+"#############################################")
                                 logging.info("Trama de inicio de viaje enviada")
-                                variables_globales.csn_chofer_respaldo = ""
                             except Exception as e:
                                 print("LeerMinicom.py, linea 376: "+str(e))
                         else:
@@ -709,7 +688,6 @@ class LeerMinicomWorker(QObject):
                         total_de_folio_aforo_efectivo = viaje[5]
                         total_de_folio_aforo_tarjeta = viaje[6]
                         folio_de_viaje = viaje[7]
-                        estado_servidor_fin = viaje[8]
 
                         trama_4 = '4'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+str(total_de_folio_aforo_efectivo)+","+str(total_de_folio_aforo_tarjeta)
                         print("\x1b[1;32m"+"Enviando cierre de viaje: "+trama_4)
@@ -719,18 +697,7 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
-                                '''
-                                print("El estado del servidor es: ", estado_servidor_fin)
-                                if estado_servidor_fin == "NO":
-                                    print("El estado del servidor es NO se procede a poner y")
-                                    actualizar_estado_del_viaje_check_servidor("y",id)
-                                elif estado_servidor_fin == "y":
-                                    print("El estado del servidor es y se procede a poner yy")
-                                    actualizar_estado_del_viaje_check_servidor("yy",id)
-                                elif estado_servidor_fin == "yy":
-                                    print("El estado del servidor es yy se procede a poner yyy")
-                                    actualizar_estado_del_viaje_check_servidor("yyy",id)'''
-                                actualizar_estado_del_viaje_check_servidor("OK",id)
+                                actualizar_estado_del_viaje_check_servidor(id)
                                 print("\x1b[1;32m"+"#############################################")
                                 print("\x1b[1;32m"+"Trama de fin de viaje enviada")
                                 print("\x1b[1;32m"+"#############################################")
@@ -764,7 +731,6 @@ class LeerMinicomWorker(QObject):
                         id_geocerca = venta[6]
                         id_tipo_de_pasajero = venta[7]
                         transbordo_o_no = venta[8]
-                        estado_servidor_venta = venta[12]
 
                         trama_5 = '5'+","+str(folio_aforo_venta)+","+str(folio_de_viaje)+","+str(hora_db)+","+str(id_del_servicio_o_transbordo)+","+str(id_geocerca)+","+str(id_tipo_de_pasajero)+","+str(transbordo_o_no)
                         print("\x1b[1;32m"+"Enviando venta: "+trama_5)
@@ -774,18 +740,7 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
-                                '''
-                                print("El estado del servidor es: ", estado_servidor_venta)
-                                if estado_servidor_venta == "NO":
-                                    print("El estado del servidor es NO se procede a poner y")
-                                    actualizar_estado_venta_check_servidor("y",id)
-                                elif estado_servidor_venta == "y":
-                                    print("El estado del servidor es y se procede a poner yy")
-                                    actualizar_estado_venta_check_servidor("yy",id)
-                                elif estado_servidor_venta == "yy":
-                                    print("El estado del servidor es yy se procede a poner yyy")
-                                    actualizar_estado_venta_check_servidor("yyy",id)'''
-                                actualizar_estado_venta_check_servidor("OK",id)
+                                actualizar_estado_venta_check_servidor(id)
                                 print("\x1b[1;32m"+"#############################################")
                                 print("\x1b[1;32m"+"Trama de venta enviada")
                                 print("\x1b[1;32m"+"#############################################")

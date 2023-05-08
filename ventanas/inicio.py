@@ -71,7 +71,7 @@ class Ventana(QWidget):
             self.setWindowFlags(Qt.FramelessWindowHint)
             uic.loadUi("/home/pi/Urban_Urbano/ui/inicio.ui", self)
             self.settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat) #Cargamos el archivo de configuración
-            crear_tablas() #Creamos las tablas de la base de datos
+            crear_tablas() #Creamos las tablas de la base de datos #Creamos las ventanas
             try:
                 self.label_unidad.setText(str(obtener_datos_aforo()[1]))
                 self.label_socket.setText(str(obtener_datos_aforo()[2]))

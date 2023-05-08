@@ -9,10 +9,8 @@ import base64
 import sys
 
 sys.path.insert(1, '/home/pi/Urban_Urbano/db')
-sys.path.insert(1, '/home/pi/Urban_Urbano/utils')
 
 from queries import obtener_datos_aforo
-import variables_globales
 
 ##########################################################################################################################################
 #INICIAMOS COMUNICACIoN POR LOS PUERTOS Y ACTIVAMOS LOS GPIO NECESARIOS
@@ -164,31 +162,6 @@ class Principal_Modem:
                     ser.flushOutput()
                 else:
                     print("No se pudo inicializar AT+CGREG?")
-                    print(respuesta)
-                    time.sleep(2)
-                    #self.reiniciar_SIM()
-                print("#####################################\n")
-                
-                ser.flushInput()
-                ser.flushOutput()
-                comando = "AT+CCID\r\n"
-                ser.readline()
-                ser.write(comando.encode())
-                print(ser.readline())
-                time.sleep(5)
-                respuesta = ser.readline()
-                if '+CCID' in respuesta.decode():
-                    print(respuesta)
-                    print(str(respuesta.decode()).replace("+CCID","").replace(" ",""))
-                    variables_globales.sim_id = str(respuesta.decode()).replace("+CCID","").replace(" ","").replace(":","")
-                    respuesta = ser.readline()
-                    print(respuesta)
-                    respuesta = ser.readline()
-                    print(respuesta)
-                    ser.flushInput()
-                    ser.flushOutput()
-                else:
-                    print("No se pudo inicializar AT+CCID")
                     print(respuesta)
                     time.sleep(2)
                     #self.reiniciar_SIM()

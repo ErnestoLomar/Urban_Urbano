@@ -101,25 +101,19 @@ class LeerTarjetaWorker(QObject):
                         try:
                             tipo = str(self.lib.tipoTiscEV2().decode(encoding="utf8", errors='ignore')[0:2])
                             if tipo == "KI":
-                                datos_completos_tarjeta = str(self.lib.obtenerVigencia().decode(encoding="utf8", errors='ignore'))
-                                print("Datos completos de la tarjeta: ",datos_completos_tarjeta)
-                                vigenciaTarjeta = datos_completos_tarjeta[:12]
+                                vigencia_y_numoperador = str(self.lib.obtenerVigencia().decode(encoding="utf8", errors='ignore'))
+                                vigenciaTarjeta = vigencia_y_numoperador[:12]
                                 print("Vigencia completa de la tarjeta: "+vigenciaTarjeta)
-                                
-                                # Verificamos que el dato de la vigencia de la tarjeta sea correcto.
                                 if len(vigenciaTarjeta) == 12 and int(vigenciaTarjeta[:2]) >= 22:
                                     now = datetime.now()
                                     vigenciaActual = f'{str(now.date())[2:].replace("-","")}'
-                                    print("Fecha actual: "+vigenciaActual)
                                     print("Fecha vigencia tarjeta: "+vigenciaTarjeta[:6])
+                                    print("Vigencia actual: "+vigenciaActual)
                                     if vigenciaActual <= vigenciaTarjeta[:6]:
                                         print("Tarjeta vigente")
                                         vg.vigencia_de_tarjeta = vigenciaTarjeta
-                                        vg.numero_de_operador = datos_completos_tarjeta[12:17]
-                                        vg.nombre_de_operador = datos_completos_tarjeta[17:41].replace("*"," ").replace("."," ").replace("-"," ").replace("_"," ")
-                                        vg.csn_chofer_respaldo = csn
+                                        vg.numero_de_operador = vigencia_y_numoperador[12:17]
                                         print("Numero de operador: "+vg.numero_de_operador)
-                                        print("El nombre del operador es: ",vg.nombre_de_operador)
                                         csn = self.lib.ev2IsPresent().decode(encoding="utf8", errors='ignore')
                                         time.sleep(0.01)
                                         if len(csn) == 14:

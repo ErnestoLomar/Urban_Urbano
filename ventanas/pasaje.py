@@ -191,16 +191,8 @@ class VentanaPasaje(QWidget):
                     if estudiantes.total_pasajeros > 0:
                         folio = 0
                         for i in range(estudiantes.total_pasajeros):
-                            
-                            # Obtenemos el ultimo folio de venta de la base de datos.
                             ultimo_folio_de_venta = obtener_ultimo_folio_de_item_venta()
-                            
                             if ultimo_folio_de_venta != None:
-                                folio = ultimo_folio_de_venta[1] + 1
-                                if ultimo_folio_de_venta == folio:
-                                    logging.info("Folio repetido por reiniciar_folios 0")
-                                    folio = ultimo_folio_de_venta[1] + 1
-                                '''
                                 print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
                                 print(int(self.settings.value('reiniciar_folios')) == 0)
                                 if int(self.settings.value('reiniciar_folios')) == 0:
@@ -213,7 +205,7 @@ class VentanaPasaje(QWidget):
                                     self.settings.setValue('reiniciar_folios', 0)
                                     if int(self.settings.value('total_de_folios')) == folio:
                                         logging.info("Folio repetido por reiniciar_folios 1")
-                                        folio = ultimo_folio_de_venta[1] + 1'''
+                                        folio = ultimo_folio_de_venta[1] + 1
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -241,11 +233,6 @@ class VentanaPasaje(QWidget):
                         for i in range(normales.total_pasajeros):
                             ultimo_folio_de_venta = obtener_ultimo_folio_de_item_venta()
                             if ultimo_folio_de_venta != None:
-                                folio = ultimo_folio_de_venta[1] + 1
-                                if ultimo_folio_de_venta == folio:
-                                    logging.info("Folio repetido por reiniciar_folios 0")
-                                    folio = ultimo_folio_de_venta[1] + 1
-                                '''
                                 print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
                                 print(int(self.settings.value('reiniciar_folios')) == 0)
                                 if int(self.settings.value('reiniciar_folios')) == 0:
@@ -258,7 +245,7 @@ class VentanaPasaje(QWidget):
                                     self.settings.setValue('reiniciar_folios', 0)
                                     if int(self.settings.value('total_de_folios')) == folio:
                                         logging.info("Folio repetido por reiniciar_folios 1")
-                                        folio = ultimo_folio_de_venta[1] + 1'''
+                                        folio = ultimo_folio_de_venta[1] + 1
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -286,11 +273,6 @@ class VentanaPasaje(QWidget):
                         for i in range(chicos.total_pasajeros):
                             ultimo_folio_de_venta = obtener_ultimo_folio_de_item_venta()
                             if ultimo_folio_de_venta != None:
-                                folio = ultimo_folio_de_venta[1] + 1
-                                if ultimo_folio_de_venta == folio:
-                                    logging.info("Folio repetido por reiniciar_folios 0")
-                                    folio = ultimo_folio_de_venta[1] + 1
-                                '''
                                 print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
                                 print(int(self.settings.value('reiniciar_folios')) == 0)
                                 if int(self.settings.value('reiniciar_folios')) == 0:
@@ -303,7 +285,7 @@ class VentanaPasaje(QWidget):
                                     self.settings.setValue('reiniciar_folios', 0)
                                     if int(self.settings.value('total_de_folios')) == folio:
                                         logging.info("Folio repetido por reiniciar_folios 1")
-                                        folio = ultimo_folio_de_venta[1] + 1'''
+                                        folio = ultimo_folio_de_venta[1] + 1
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -331,11 +313,6 @@ class VentanaPasaje(QWidget):
                         for i in range(mayores.total_pasajeros):
                             ultimo_folio_de_venta = obtener_ultimo_folio_de_item_venta()
                             if ultimo_folio_de_venta != None:
-                                folio = ultimo_folio_de_venta[1] + 1
-                                if ultimo_folio_de_venta == folio:
-                                    logging.info("Folio repetido por reiniciar_folios 0")
-                                    folio = ultimo_folio_de_venta[1] + 1
-                                '''
                                 print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
                                 print(int(self.settings.value('reiniciar_folios')) == 0)
                                 if int(self.settings.value('reiniciar_folios')) == 0:
@@ -348,7 +325,7 @@ class VentanaPasaje(QWidget):
                                     self.settings.setValue('reiniciar_folios', 0)
                                     if int(self.settings.value('total_de_folios')) == folio:
                                         logging.info("Folio repetido por reiniciar_folios 1")
-                                        folio = ultimo_folio_de_venta[1] + 1'''
+                                        folio = ultimo_folio_de_venta[1] + 1
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -378,11 +355,6 @@ class VentanaPasaje(QWidget):
                         for i in range(estudiantes.total_pasajeros):
                             ultimo_folio_de_venta = obtener_ultimo_folio_de_item_venta()
                             if ultimo_folio_de_venta != None:
-                                folio = ultimo_folio_de_venta[1] + 1
-                                if ultimo_folio_de_venta == folio:
-                                    logging.info("Folio repetido por reiniciar_folios 0")
-                                    folio = ultimo_folio_de_venta[1] + 1
-                                '''
                                 print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
                                 print(int(self.settings.value('reiniciar_folios')) == 0)
                                 if int(self.settings.value('reiniciar_folios')) == 0:
@@ -395,7 +367,7 @@ class VentanaPasaje(QWidget):
                                     self.settings.setValue('reiniciar_folios', 0)
                                     if int(self.settings.value('total_de_folios')) == folio:
                                         logging.info("Folio repetido por reiniciar_folios 1")
-                                        folio = ultimo_folio_de_venta[1] + 1'''
+                                        folio = ultimo_folio_de_venta[1] + 1
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -424,11 +396,6 @@ class VentanaPasaje(QWidget):
                         for i in range(normales.total_pasajeros):
                             ultimo_folio_de_venta = obtener_ultimo_folio_de_item_venta()
                             if ultimo_folio_de_venta != None:
-                                folio = ultimo_folio_de_venta[1] + 1
-                                if ultimo_folio_de_venta == folio:
-                                    logging.info("Folio repetido por reiniciar_folios 0")
-                                    folio = ultimo_folio_de_venta[1] + 1
-                                '''
                                 print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
                                 print(int(self.settings.value('reiniciar_folios')) == 0)
                                 if int(self.settings.value('reiniciar_folios')) == 0:
@@ -441,7 +408,7 @@ class VentanaPasaje(QWidget):
                                     self.settings.setValue('reiniciar_folios', 0)
                                     if int(self.settings.value('total_de_folios')) == folio:
                                         logging.info("Folio repetido por reiniciar_folios 1")
-                                        folio = ultimo_folio_de_venta[1] + 1'''
+                                        folio = ultimo_folio_de_venta[1] + 1
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -469,11 +436,6 @@ class VentanaPasaje(QWidget):
                         for i in range(chicos.total_pasajeros):
                             ultimo_folio_de_venta = obtener_ultimo_folio_de_item_venta()
                             if ultimo_folio_de_venta != None:
-                                folio = ultimo_folio_de_venta[1] + 1
-                                if ultimo_folio_de_venta == folio:
-                                    logging.info("Folio repetido por reiniciar_folios 0")
-                                    folio = ultimo_folio_de_venta[1] + 1
-                                '''
                                 print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
                                 print(int(self.settings.value('reiniciar_folios')) == 0)
                                 if int(self.settings.value('reiniciar_folios')) == 0:
@@ -486,7 +448,7 @@ class VentanaPasaje(QWidget):
                                     self.settings.setValue('reiniciar_folios', 0)
                                     if int(self.settings.value('total_de_folios')) == folio:
                                         logging.info("Folio repetido por reiniciar_folios 1")
-                                        folio = ultimo_folio_de_venta[1] + 1'''
+                                        folio = ultimo_folio_de_venta[1] + 1
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -514,11 +476,6 @@ class VentanaPasaje(QWidget):
                         for i in range(mayores.total_pasajeros):
                             ultimo_folio_de_venta = obtener_ultimo_folio_de_item_venta()
                             if ultimo_folio_de_venta != None:
-                                folio = ultimo_folio_de_venta[1] + 1
-                                if ultimo_folio_de_venta == folio:
-                                    logging.info("Folio repetido por reiniciar_folios 0")
-                                    folio = ultimo_folio_de_venta[1] + 1
-                                '''
                                 print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
                                 print(int(self.settings.value('reiniciar_folios')) == 0)
                                 if int(self.settings.value('reiniciar_folios')) == 0:
@@ -531,7 +488,7 @@ class VentanaPasaje(QWidget):
                                     self.settings.setValue('reiniciar_folios', 0)
                                     if int(self.settings.value('total_de_folios')) == folio:
                                         logging.info("Folio repetido por reiniciar_folios 1")
-                                        folio = ultimo_folio_de_venta[1] + 1'''
+                                        folio = ultimo_folio_de_venta[1] + 1
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")

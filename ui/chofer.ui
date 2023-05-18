@@ -51,7 +51,7 @@
    <property name="geometry">
     <rect>
      <x>410</x>
-     <y>327</y>
+     <y>330</y>
      <width>111</width>
      <height>41</height>
     </rect>
@@ -123,7 +123,7 @@ background-color: #005500;</string>
    <property name="geometry">
     <rect>
      <x>410</x>
-     <y>287</y>
+     <y>290</y>
      <width>101</width>
      <height>51</height>
     </rect>
@@ -375,7 +375,7 @@ font: 87 48pt &quot;Arial Black&quot;;</string>
    <property name="geometry">
     <rect>
      <x>525</x>
-     <y>289</y>
+     <y>290</y>
      <width>141</width>
      <height>91</height>
     </rect>
@@ -393,7 +393,7 @@ text-align: center;</string>
    <property name="geometry">
     <rect>
      <x>350</x>
-     <y>140</y>
+     <y>150</y>
      <width>101</width>
      <height>51</height>
     </rect>

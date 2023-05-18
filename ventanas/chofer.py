@@ -8,6 +8,8 @@
 ##########################################
 
 #Librerías externas
+import datetime
+import subprocess
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtCore import Qt, QSettings
@@ -21,7 +23,7 @@ import time
 #Librerías propias
 from servicio_pensiones import obtener_servicios_de_pension, obtener_pensiones
 import variables_globales as vg
-from asignaciones_queries import guardar_auto_asignacion, obtener_ultima_asignacion, aniadir_folio_de_viaje_a_auto_asignacion, eliminar_auto_asignacion_por_folio
+from asignaciones_queries import guardar_auto_asignacion, obtener_ultima_asignacion, aniadir_folio_de_viaje_a_auto_asignacion, eliminar_auto_asignacion_por_folio, obtener_ultimo_folio_auto_asignacion, modificar_folio_auto_asignacion
 from queries import obtener_datos_aforo
 from matrices_tarifarias import obtener_servicio_por_numero_de_servicio_y_origen, obtener_transbordos_por_origen_y_numero_de_servicio
 from servicio_pensiones import obtener_origen_por_numero_de_servicio
@@ -44,7 +46,7 @@ class VentanaChofer(QWidget):
             self.settings.setValue('ventana_actual', "chofer")
             self.settings.setValue('csn_chofer', vg.csn_chofer)
             self.setWindowFlags(Qt.FramelessWindowHint)
-            self.setGeometry(0,0,800, 440)
+            self.setGeometry(0,0,800, 480)
             self.inicializar_comboBox()
             self.inicializar_labels()
             #self.cargar_datos()
@@ -133,20 +135,42 @@ class VentanaChofer(QWidget):
             # si no escogemos el que seleccionaron.
             self.close()
             fecha_completa = strftime('%Y-%m-%d %H:%M:%S')
-            fecha = strftime('%d-%m-%Y').replace('/', '-')
             hora = strftime('%H:%M:%S')
+            
+            # Obtenemos la fecha actual de la raspberry
+            
+            # Ejecutar el comando date y obtener la salida
+            result = subprocess.run(['date', '+%d/%m/%Y'], stdout=subprocess.PIPE)
+
+            # Decodificar la salida en formato de cadena de caracteres
+            fecha = datetime.datetime.strptime(str(result.stdout.decode('utf-8').strip()), "%d/%m/%Y").strftime("%d/%m/%Y")
+            
+            print("La fecha actual de la raspberry es: ", fecha)
 
             if self.pension_selec != "":
                 if self.servicio != "":
                     origen = obtener_origen_por_numero_de_servicio(int(self.servicio.split(" - ")[0]))
                     total_de_servicios = obtener_servicio_por_numero_de_servicio_y_origen(int(self.servicio.split(" - ")[0]), str(origen[3]).replace("(", "").replace(")", "").replace(",", "").replace("'", ""))
                     if len(total_de_servicios) != 0:
+                        # Obtenemos el ultimo folio de auto_asignacion en la base de datos
+                        ultima_asignacion = obtener_ultima_asignacion()
+                        print("La ultima asignacion es: ", ultima_asignacion)
+                        
                         self.settings.setValue('servicio', self.servicio)
                         self.settings.setValue('pension', self.pension_selec)
                         self.settings.setValue('turno', self.comboBox_turno.currentText())
-                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora)
+                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", str(fecha).replace("/","-"), hora)
                         folio = self.crear_folio()
+                        
+                        # Revisamos que el folio se haya incrementado.
+                        if ultima_asignacion != None:
+                            if ultima_asignacion[1] == folio:
+                                print("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                                logging.info("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                                folio = obtener_ultimo_folio_auto_asignacion()['folio'] + 1
+                                modificar_folio_auto_asignacion(folio, ultima_asignacion[0])
                         print("Folio creado: ", folio)
+                        
                         while True:
                             folio_de_viaje = f"{''.join(fecha_completa[:10].split('-'))[3:]}{self.idUnidad}{folio}"
                             if len(folio_de_viaje) == 12:
@@ -201,8 +225,22 @@ class VentanaChofer(QWidget):
                         self.settings.setValue('pension', self.pension_selec)
                         vg.turno = self.comboBox_turno.currentText()
                         self.settings.setValue('turno', self.comboBox_turno.currentText())
-                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora)
+                        
+                        # Obtenemos el ultimo folio de auto_asignacion en la base de datos
+                        ultima_asignacion = obtener_ultima_asignacion()
+                        print("La ultima asignacion es: ", ultima_asignacion)
+                        
+                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", str(fecha).replace("/","-"), hora)
                         folio = self.crear_folio()
+                        
+                        # Revisamos que el folio se haya incrementado.
+                        if ultima_asignacion != None:
+                            if ultima_asignacion[1] == folio:
+                                print("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                                logging.info("Se procederá a aumentar el folio ya que es el mismo que el anterior")
+                                folio = obtener_ultimo_folio_auto_asignacion()['folio'] + 1
+                                modificar_folio_auto_asignacion(folio, ultima_asignacion[0])
+                        
                         print("Folio creado: ", folio)
                         while True:
                             folio_de_viaje = f"{''.join(fecha_completa[:10].split('-'))[3:]}{self.idUnidad}{folio}"

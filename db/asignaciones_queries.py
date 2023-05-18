@@ -164,6 +164,18 @@ def guardar_auto_asignacion(id_chofer, servicio_pension, fecha, hora_inicio):
     except Exception as e:
         print(e)
         logging.info(e)
+        
+def modificar_folio_auto_asignacion(folio, id):
+    try:
+        conexion = sqlite3.connect(URI,check_same_thread=False)
+        cursor = conexion.cursor()
+        cursor.execute("UPDATE auto_asignacion SET folio = ? WHERE id = ?", (folio, id))
+        conexion.commit()
+        conexion.close()
+        return True
+    except Exception as e:
+        print(e)
+        logging.info(e)
 
 def aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje):
     try:
@@ -339,24 +351,27 @@ def obtener_ultimo_folio_asignaciones():
 
 def obtener_ultimo_folio_auto_asignacion():
     try:
-        asignacion = obtener_ultima_asignacion()
-        inicio_folio = obtener_datos_aforo()[6]
-        if asignacion is None:
+        asignacion = obtener_ultima_asignacion() # Obtenemos la ultima asignacion guardada en la base de datos.
+        inicio_folio = obtener_datos_aforo()[6] # Obtenemos el comienzo del folio asignado desde la base de datos.
+        
+        if asignacion is None: # Si no hay ninguna asignacion en la base de datos, utiliza el folio por defecto.
             return {
                 'folio': f"{inicio_folio}"
             }
+        
         folio = asignacion[1]
         fecha_db = asignacion[4].replace("-", "/")
         fecha_actual = strftime("%d/%m/%Y")
 
-        if compare_two_dates(fecha_actual, fecha_db):
+        # Verificamos si la fecha del ultimo registro de asignacion es diferente a la fecha actual.
+        if compare_two_dates(fecha_actual, fecha_db): # Si es el mismo dia
             folio_nuevo = folio + 1
             if folio_nuevo != (folio + 1):
                 folio_nuevo = folio + 1
             return {
                 'folio': folio_nuevo
             }
-        else:
+        else: # Si es un dia diferente.
             return {
                 'folio': f"{inicio_folio}"
             }
@@ -418,12 +433,12 @@ def obtener_todass_las_asignaciones_no_enviadas():
         logging.info(e)
 
 
-def actualizar_asignacion_check_servidor(id):
+def actualizar_asignacion_check_servidor(estado, id):
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "UPDATE auto_asignacion SET check_servidor = 'OK' WHERE id = ?", (id,))
+            "UPDATE auto_asignacion SET check_servidor = ? WHERE id = ?", (estado,id))
         conexion.commit()
         conexion.close()
         return True
@@ -443,12 +458,12 @@ def guardar_estado_del_viaje(csn_chofer, servicio_pension, fecha, hora_inicio, t
         print(e)
         logging.info(e)
 
-def actualizar_estado_del_viaje_check_servidor(id):
+def actualizar_estado_del_viaje_check_servidor(estado, id):
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
         cursor.execute(
-            "UPDATE estado_del_viaje SET check_servidor = 'OK' WHERE id = ?", (id,))
+            "UPDATE estado_del_viaje SET check_servidor = ? WHERE id = ?", (estado,id))
         conexion.commit()
         conexion.close()
         return True

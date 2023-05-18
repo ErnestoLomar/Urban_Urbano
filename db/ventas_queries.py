@@ -156,10 +156,10 @@ def obtener_estado_de_todass_las_ventas_no_enviadas():
     conexion.close()
     return resultado
 
-def actualizar_estado_venta_check_servidor(id):
+def actualizar_estado_venta_check_servidor(estado, id):
     conexion = sqlite3.connect(URI)
     cursor = conexion.cursor()
-    cursor.execute("UPDATE item_venta SET check_servidor = 'OK' WHERE item_venta_id = ?", (id,))
+    cursor.execute("UPDATE item_venta SET check_servidor = ? WHERE item_venta_id = ?", (estado,id))
     conexion.commit()
     conexion.close()
     return True

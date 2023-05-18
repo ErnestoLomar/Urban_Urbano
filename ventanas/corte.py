@@ -14,7 +14,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from time import strftime
 import logging
-import subprocess
 import time
 import RPi.GPIO as GPIO
 
@@ -58,7 +57,7 @@ class corte(QWidget):
     #Función para inicializar la ventana corte.
     def inicializar(self):
         try:
-            self.label_fin.mousePressEvent = self.terminar_vuelta
+            self.label_fin.mousePressEvent = lambda event: self.terminar_vuelta(event, True)
             self.label_cancel.mousePressEvent = self.cancelar
         except Exception as e:
             logging.info(f"Error en la ventana corte: {e}")
@@ -86,42 +85,55 @@ class corte(QWidget):
             logging.info(f"Error en la ventana corte: {e}")
 
     #Función para cerrar la ventana de corte.
-    def terminar_vuelta(self, event):
+    def terminar_vuelta(self, event, imprimir):
         try:
+            print("El imprimir mandado es: ", imprimir)
             self.close()
             try:
                 from impresora import imprimir_ticket_de_corte
             except Exception as e:
                 print("No se importaron las librerias de impresora")
             
-            hecho = imprimir_ticket_de_corte(self.idUnidad)
-            hora = strftime('%H:%M:%S')
-            fecha = str(strftime('%d-%m-%Y')).replace('/', '-')
+            hecho = imprimir_ticket_de_corte(self.idUnidad, imprimir)
+            hora = variables_globales.hora_actual
+            fecha = str(variables_globales.fecha_actual).replace('/', '-')
             csn_init = str(self.settings.value('csn_chofer'))
             self.settings.setValue('respaldo_csn_chofer', csn_init)
             
             if hecho:
+                
                 ultima_venta_bd = obtener_ultimo_folio_de_item_venta()
-                total_de_boletos_db = obtener_total_de_ventas_por_folioviaje_y_fecha(self.settings.value('folio_de_viaje'), fecha)
-                print("El total de boletos en la base de datos es: "+str(len(total_de_boletos_db)))
-                logging.info(f"El total de boletos en la base de datos es: {len(total_de_boletos_db)}")
                 print("Ultima venta en la base de datos es: "+str(ultima_venta_bd))
                 logging.info(f"Ultima venta en la base de datos es: {ultima_venta_bd}")
+                
+                if (len(self.settings.value('folio_de_viaje')) != 0):
+                    total_de_boletos_db = obtener_total_de_ventas_por_folioviaje_y_fecha(self.settings.value('folio_de_viaje'), fecha)
+                elif (len(variables_globales.folio_asignacion) != 0):
+                    total_de_boletos_db = obtener_total_de_ventas_por_folioviaje_y_fecha(variables_globales.folio_asignacion, fecha)
+                    
+                print("El total de boletos en la base de datos es: "+str(len(total_de_boletos_db)))
+                logging.info(f"El total de boletos en la base de datos es: {len(total_de_boletos_db)}")
+                
                 total_de_folio_aforo_efectivo = int(self.settings.value('info_estudiantes').split(',')[0]) + int(self.settings.value('info_normales').split(',')[0]) + int(self.settings.value('info_chicos').split(',')[0]) + int(self.settings.value('info_ad_mayores').split(',')[0])
                 print("El total de boletos en el aforo es: "+str(total_de_folio_aforo_efectivo))
                 logging.info(f"El total de boletos en el aforo es: {total_de_folio_aforo_efectivo}")
+                
                 if ultima_venta_bd != None:
                     print("Ultima folio de venta en la bd: "+str(ultima_venta_bd[1]))
                     logging.info(f"Ultima folio de venta en la bd: {ultima_venta_bd[1]}")
+                    
                     if len(total_de_boletos_db) != total_de_folio_aforo_efectivo:
                         print("La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
                         logging.info(f"La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
+                        
+                        '''
                         if len(total_de_boletos_db) != ultima_venta_bd[1]:
                             print("La cantidad de boletos en la base de datos no coincide con el folio de la ultima venta en la base de datos.")
                             logging.info(f"La cantidad de boletos en la base de datos no coincide con el folio de la ultima venta en la base de datos.")
                             total_de_folio_aforo_efectivo = ultima_venta_bd[1]
                             print("Se ha actualizado el total de boletos en el aforo a: "+str(total_de_folio_aforo_efectivo))
-                            logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")
+                            logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")'''
+                            
                         total_de_folio_aforo_efectivo = len(total_de_boletos_db)
                         print("Se ha actualizado el total de boletos en el aforo a: "+str(total_de_folio_aforo_efectivo))
                         logging.info(f"Se ha actualizado el total de boletos en el aforo a: {total_de_folio_aforo_efectivo}")
@@ -133,6 +145,10 @@ class corte(QWidget):
                 self.close_signal_pasaje.emit()
                 variables_globales.ventana_actual = VentanaActual.CERRAR_TURNO
                 variables_globales.folio_asignacion = 0
+                if variables_globales.folio_asignacion != 0:
+                    print*("El folio de asignacion no se reinicia")
+                    logging.info("El folio de asignacion no se reinicia")
+                    variables_globales.folio_asignacion = 0
                 variables_globales.numero_de_operador = ""
                 self.settings.setValue('origen_actual', "")
                 self.settings.setValue('folio_de_viaje', "")

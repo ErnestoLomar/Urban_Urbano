@@ -23,7 +23,7 @@ sys.path.insert(1, '/home/pi/Urban_Urbano/configuraciones_iniciales/actualizacio
 #Librerias propias
 from comand import Comunicacion_Minicom, Principal_Modem
 import variables_globales
-from queries import obtener_datos_aforo
+from queries import obtener_datos_aforo, obtener_estadisticas_no_enviadas, actualizar_estado_estadistica_check_servidor
 from asignaciones_queries import guardar_actualizacion, obtener_asignaciones_no_enviadas, actualizar_asignacion_check_servidor, obtener_todas_las_asignaciones_no_enviadas
 import variables_globales
 from comand import Comunicacion_Minicom, Principal_Modem
@@ -109,7 +109,7 @@ class LeerMinicomWorker(QObject):
 
                     actualizar_folio(id_folio, self.folio, fecha)
 
-                    if self.contador_servidor >= 4:
+                    if self.contador_servidor >= 12:
                         
                         if folio_asignacion_viaje != 0:
                             print("Enviando trama 3 con viaje")
@@ -150,6 +150,7 @@ class LeerMinicomWorker(QObject):
                             self.reeconectar_socket(enviado)
                             self.folio = self.folio + 1
                             self.realizar_accion(result)
+                        self.contador_servidor = 0
                 else:
                     variables_globales.GPS = "error"
                     print("\x1b[1;31;47m"+"Error al obtener coordenadas GPS"+'\033[0;m')
@@ -158,14 +159,16 @@ class LeerMinicomWorker(QObject):
                         modem.reconectar_gps()
                         self.intentos_conexion_gps = 0
                     self.intentos_conexion_gps+=1
+                    self.contador_servidor = 0
                     
-                if self.contador_servidor >= 4:
+                if self.contador_servidor == 0 or self.contador_servidor == 4 or self.contador_servidor == 8 or self.contador_servidor >= 12:
                     try:
                         print("\x1b[1;32m"+"Verificando si hay datos en la BD por enviar...")
-                        for j in range(3):
+                        for j in range(6):
                             total_de_asignaciones_no_enviadas = obtener_todas_las_asignaciones_no_enviadas()
                             fin_de_viajes_no_enviados = obtener_estado_de_viajes_no_enviados()
                             total_de_ventas_no_enviadas = obtener_estado_de_todas_las_ventas_no_enviadas()
+                            total_de_estadisticas_no_enviadas = obtener_estadisticas_no_enviadas()
                             
                             if len(total_de_asignaciones_no_enviadas) != 0:
                                 self.lista_de_datos_por_enviar.append(f"{total_de_asignaciones_no_enviadas[0][4]}{total_de_asignaciones_no_enviadas[0][5]},asignacion")
@@ -173,6 +176,8 @@ class LeerMinicomWorker(QObject):
                                 self.lista_de_datos_por_enviar.append(f"{total_de_ventas_no_enviadas[0][3]}{total_de_ventas_no_enviadas[0][4]},venta")
                             if len(fin_de_viajes_no_enviados) != 0:
                                 self.lista_de_datos_por_enviar.append(f"{fin_de_viajes_no_enviados[0][3]}{fin_de_viajes_no_enviados[0][4]},finviaje")
+                            if len(total_de_estadisticas_no_enviadas) != 0:
+                                self.lista_de_datos_por_enviar.append(f"{total_de_estadisticas_no_enviadas[0][2]}{total_de_estadisticas_no_enviadas[0][3]},estadistica")
                             
                             if len(self.lista_de_datos_por_enviar) != 0:
                                 print("Lista de datos: ", self.lista_de_datos_por_enviar)
@@ -199,13 +204,14 @@ class LeerMinicomWorker(QObject):
                                 if 'finviaje' in tipo_de_dato:
                                     print("Enviando fin de viaje")
                                     self.enviar_fin_de_viaje()
+                                if 'estadistica' in tipo_de_dato:
+                                    print("Enviando estadistica")
+                                    self.enviar_trama_informativa()
                                 self.lista_de_datos_por_enviar = []
                         print("\x1b[1;32m"+"Terminando de verificar si hay datos en la BD por enviar...")
                     except Exception as e:
                         logging.info('Error al enviar datos al servidor: '+str(e))
                         print("\x1b[1;31;47m"+"Error al enviar datos al servidor: "+str(e)+'\033[0;m')
-                    self.contador_servidor = 0
-                
                 self.progress.emit(res)
                 time.sleep(5)
                 self.contador_servidor = self.contador_servidor + 1
@@ -291,7 +297,7 @@ class LeerMinicomWorker(QObject):
                                     logging.info("Actualizando raspberry por petición del servidor")
                                     ventana_actualzar = Actualizar()
                                     ventana_actualzar.show()
-                                    ventana_actualzar.actualizar_raspberrypi(int(datos[1]))
+                                    ventana_actualzar.actualizar_raspberrypi(int(datos[1]), False)
                                 else:
                                     while True:
                                         if len(total_de_ventas_no_enviadas) == 0 and len(total_de_inicio_de_viajes_no_enviados) == 0 and len(total_de_fin_de_viajes_no_enviados) == 0:
@@ -537,6 +543,30 @@ class LeerMinicomWorker(QObject):
                                 print("LeerMinicom.py, linea 370: "+str(e))
                     except Exception as e:
                         print("LeerMinicom.py, linea 253: "+str(e))
+                elif "T" in accion:
+                    try:
+                        print("Entro a T, actualizar matriz tarifaría")
+                        logging.info('Entro a T, actualizar matriz tarifaría')
+                        datos = accion.split(',')
+                        if len(datos) == 3:
+                            if len(str(datos[1])) == 12:
+                                if variables_globales.version_de_MT < str(datos[1]):
+                                    print(f"Se procedera a actualizar la MT de {variables_globales.version_de_MT} a {str(datos[1])}")
+                                    logging.info(f"Se procedera a actualizar la MT de {variables_globales.version_de_MT} a {str(datos[1])}")
+                                    try:
+                                        ventana_actualzar = Actualizar()
+                                        ventana_actualzar.show()
+                                        ventana_actualzar.actualizar_raspberrypi(int(datos[2]), str(datos[1]))
+                                    except Exception as e:
+                                        print(f"No se logro hacer la actualizacion de la matriz tarifaría: {e}")
+                                        logging.info(f"No se logro hacer la actualizacion de la matriz tarifaría: {e}")
+                                else:
+                                    print(f"No se puede actualizar la MT porque {variables_globales.version_de_MT} es igual a {str(datos[1])}")
+                                    logging.info(f"No se puede actualizar la MT porque {variables_globales.version_de_MT} es igual a {str(datos[1])}")
+                    except Exception as e:
+                        print("Error al hacer accion T: " + str(e))
+                        logging.info('Error al hacer accion T: '+str(e))
+                        print("LeerMinicom.py, linea 138: "+str(e))
         except Exception as e:
             print("LeerMinicom.py, linea 255: "+str(e))
 
@@ -547,7 +577,7 @@ class LeerMinicomWorker(QObject):
             print("\x1b[1;32m"+'numero de intentos'+ str(int(self.intentos_envio) + 1))
             if enviado != True:
                 self.intentos_envio = self.intentos_envio + 1
-                if self.intentos_envio == 4:
+                if self.intentos_envio == 2:
                     try:
                         logging.info('Creando una nueva conexion con el socket')
                         print("\x1b[1;33m"+"Creando un nuevo socket......")
@@ -565,7 +595,7 @@ class LeerMinicomWorker(QObject):
                             modem.abrir_puerto()
                         except Exception as e:
                             print("\x1b[1;31;47m"+"LeerMinicom.py, linea 186: "+str(e)+'\033[0;m')"""
-                elif self.intentos_envio == 6:
+                elif self.intentos_envio == 4:
                     try:
                         logging.info('Reiniciando el quectel')
                         print("\x1b[1;33m"+"Reiniciando el quectel......")
@@ -592,7 +622,7 @@ class LeerMinicomWorker(QObject):
                             subprocess.run("sudo reboot", shell=True)
                         except Exception as e:
                             print("\x1b[1;31;47m"+"LeerMinicom.py, linea 196: "+str(e)+'\033[0;m')"""
-                elif self.intentos_envio == 10:
+                elif self.intentos_envio == 6:
                     self.intentos_envio = 0
             else:
                 self.intentos_envio = 0
@@ -611,6 +641,7 @@ class LeerMinicomWorker(QObject):
                         servicio_pension = str(asignacion[3]).replace("-", ",").split(",")[0]
                         hora_inicio = asignacion[5]
                         folio_de_viaje = asignacion[6]
+                        estado_servidor_inicio = asignacion[7]
                         
                         if len(csn_chofer) == 0:
                             print("\x1b[1;33m"+"#############################################")
@@ -647,6 +678,14 @@ class LeerMinicomWorker(QObject):
                                     print("\x1b[1;33m"+"#############################################")
                                     break
                                 intentos3 = intentos3 + 1
+                                
+                        if len(csn_chofer) == 0:
+                            print("\x1b[1;33m"+"#############################################")
+                            print("\x1b[1;33m"+"El csn esta vació en trama 2, haciendo cuarto candado de seguridad...")
+                            logging.info("El csn esta vació en trama 2, haciendo cuarto candado de seguridad...")
+                            if len(variables_globales.csn_chofer_respaldo) != 0:
+                                csn_chofer = variables_globales.csn_chofer_respaldo
+                                print("\x1b[1;33m"+"#############################################")
 
                         trama_2 = '2'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+servicio_pension
                         print("\x1b[1;32m"+"Enviando inicio de viaje: "+trama_2)
@@ -656,11 +695,23 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
-                                actualizar_asignacion_check_servidor(id)
+                                '''
+                                print("El estado del servidor es: ", estado_servidor_inicio)
+                                if estado_servidor_inicio == "NO":
+                                    print("El estado del servidor es NO se procede a poner y")
+                                    actualizar_asignacion_check_servidor("y",id)
+                                elif estado_servidor_inicio == "y":
+                                    print("El estado del servidor es y se procede a poner yy")
+                                    actualizar_asignacion_check_servidor("yy",id)
+                                elif estado_servidor_inicio == "yy":
+                                    print("El estado del servidor es yy se procede a poner yyy")
+                                    actualizar_asignacion_check_servidor("yyy",id)'''
+                                actualizar_asignacion_check_servidor("OK",id)
                                 print("\x1b[1;32m"+"#############################################")
-                                print("\x1b[1;32m"+"Trama de inicio de viaje enviada")
+                                print("\x1b[1;32m"+"Trama de inicio de viaje enviada: ", estado_servidor_inicio)
                                 print("\x1b[1;32m"+"#############################################")
                                 logging.info("Trama de inicio de viaje enviada")
+                                variables_globales.csn_chofer_respaldo = ""
                             except Exception as e:
                                 print("LeerMinicom.py, linea 376: "+str(e))
                         else:
@@ -688,6 +739,7 @@ class LeerMinicomWorker(QObject):
                         total_de_folio_aforo_efectivo = viaje[5]
                         total_de_folio_aforo_tarjeta = viaje[6]
                         folio_de_viaje = viaje[7]
+                        estado_servidor_fin = viaje[8]
 
                         trama_4 = '4'+","+str(folio_de_viaje)+","+str(hora_inicio)+","+str(csn_chofer)+","+str(total_de_folio_aforo_efectivo)+","+str(total_de_folio_aforo_tarjeta)
                         print("\x1b[1;32m"+"Enviando cierre de viaje: "+trama_4)
@@ -697,7 +749,18 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
-                                actualizar_estado_del_viaje_check_servidor(id)
+                                '''
+                                print("El estado del servidor es: ", estado_servidor_fin)
+                                if estado_servidor_fin == "NO":
+                                    print("El estado del servidor es NO se procede a poner y")
+                                    actualizar_estado_del_viaje_check_servidor("y",id)
+                                elif estado_servidor_fin == "y":
+                                    print("El estado del servidor es y se procede a poner yy")
+                                    actualizar_estado_del_viaje_check_servidor("yy",id)
+                                elif estado_servidor_fin == "yy":
+                                    print("El estado del servidor es yy se procede a poner yyy")
+                                    actualizar_estado_del_viaje_check_servidor("yyy",id)'''
+                                actualizar_estado_del_viaje_check_servidor("OK",id)
                                 print("\x1b[1;32m"+"#############################################")
                                 print("\x1b[1;32m"+"Trama de fin de viaje enviada")
                                 print("\x1b[1;32m"+"#############################################")
@@ -731,6 +794,7 @@ class LeerMinicomWorker(QObject):
                         id_geocerca = venta[6]
                         id_tipo_de_pasajero = venta[7]
                         transbordo_o_no = venta[8]
+                        estado_servidor_venta = venta[12]
 
                         trama_5 = '5'+","+str(folio_aforo_venta)+","+str(folio_de_viaje)+","+str(hora_db)+","+str(id_del_servicio_o_transbordo)+","+str(id_geocerca)+","+str(id_tipo_de_pasajero)+","+str(transbordo_o_no)
                         print("\x1b[1;32m"+"Enviando venta: "+trama_5)
@@ -740,7 +804,18 @@ class LeerMinicomWorker(QObject):
 
                         if enviado == True:
                             try:
-                                actualizar_estado_venta_check_servidor(id)
+                                '''
+                                print("El estado del servidor es: ", estado_servidor_venta)
+                                if estado_servidor_venta == "NO":
+                                    print("El estado del servidor es NO se procede a poner y")
+                                    actualizar_estado_venta_check_servidor("y",id)
+                                elif estado_servidor_venta == "y":
+                                    print("El estado del servidor es y se procede a poner yy")
+                                    actualizar_estado_venta_check_servidor("yy",id)
+                                elif estado_servidor_venta == "yy":
+                                    print("El estado del servidor es yy se procede a poner yyy")
+                                    actualizar_estado_venta_check_servidor("yyy",id)'''
+                                actualizar_estado_venta_check_servidor("OK",id)
                                 print("\x1b[1;32m"+"#############################################")
                                 print("\x1b[1;32m"+"Trama de venta enviada")
                                 print("\x1b[1;32m"+"#############################################")
@@ -752,6 +827,59 @@ class LeerMinicomWorker(QObject):
                             print("\x1b[1;31;47m"+"Trama de venta no enviada"+'\033[0;m')
                             print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
                             logging.info("No se pudo enviar la trama de venta")
+                            self.reeconectar_socket(enviado)
+                            self.realizar_accion(result)
+                    except Exception as e:
+                        print("LeerMinicom.py, linea 378: "+str(e))
+        except Exception as e:
+            print("LeerMinicom.py, linea 380: "+str(e))
+            
+    def enviar_trama_informativa(self):
+        try:
+            estadisticas = obtener_estadisticas_no_enviadas()
+
+            if len(estadisticas) > 0:
+                for estadistica in estadisticas:
+                    try:
+                        idMuestreo_estadistica = estadistica[0]
+                        idUnidad_estadistica = estadistica[1]
+                        fecha_estadistica = estadistica[2]
+                        hora_estadistica = estadistica[3]
+                        columna_estadistica = estadistica[4]
+                        valor_estadistica = estadistica[5]
+
+                        trama_9 = '9'+","+str(idUnidad_estadistica)+","+str(fecha_estadistica)+","+str(hora_estadistica)+","+str(columna_estadistica)+","+str(valor_estadistica)
+                        print("\x1b[1;32m"+"Enviando trama 9: "+trama_9)
+                        logging.info("Enviando estadistica: "+trama_9)
+                        result = modem.mandar_datos(trama_9)
+                        enviado = result['enviado']
+
+                        if enviado == True:
+                            try:
+                                '''
+                                print("El estado del servidor es: ", estado_servidor_venta)
+                                if estado_servidor_venta == "NO":
+                                    print("El estado del servidor es NO se procede a poner y")
+                                    actualizar_estado_venta_check_servidor("y",id)
+                                elif estado_servidor_venta == "y":
+                                    print("El estado del servidor es y se procede a poner yy")
+                                    actualizar_estado_venta_check_servidor("yy",id)
+                                elif estado_servidor_venta == "yy":
+                                    print("El estado del servidor es yy se procede a poner yyy")
+                                    actualizar_estado_venta_check_servidor("yyy",id)'''
+                                actualizar_estado_estadistica_check_servidor("OK",idMuestreo_estadistica)
+                                print("\x1b[1;32m"+"#############################################")
+                                print("\x1b[1;32m"+"Trama de estadistica enviada")
+                                print("\x1b[1;32m"+"#############################################")
+                                logging.info("Trama de estadistica enviada")
+                                self.realizar_accion(result)
+                            except Exception as e:
+                                print("LeerMinicom.py, linea 376: "+str(e))
+                        else:
+                            print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
+                            print("\x1b[1;31;47m"+"Trama de estadistica no enviada"+'\033[0;m')
+                            print("\x1b[1;31;47m"+"#############################################"+'\033[0;m')
+                            logging.info("No se pudo enviar la trama de estadistica")
                             self.reeconectar_socket(enviado)
                             self.realizar_accion(result)
                     except Exception as e:

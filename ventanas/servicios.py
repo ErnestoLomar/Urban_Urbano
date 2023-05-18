@@ -47,7 +47,7 @@ class Rutas(QWidget):
             self.ruta = self.servicio_info[0] + "-" + self.servicio_info[1] + "-" + self.servicio_info[2]
             self.de = str(self.origen_de_servicio[3])
             self.geocerca_numero_uno = obtener_geocerca_de_servicio(self.origen_de_servicio[3])
-            print("Geocerca numero uno: "+str(self.geocerca_numero_uno))
+            #print("Geocerca numero uno: "+str(self.geocerca_numero_uno))
             variables_globales.geocerca = f"{self.geocerca_numero_uno[0]},{self.geocerca_numero_uno[1]}"
             self.bandera = False
             self.turno = turno
@@ -178,8 +178,8 @@ class Rutas(QWidget):
     def cargar_servicios(self, lista):
         try:
             if len(lista) > 0:
-                print("Lista de servicios:")
-                print(lista)
+                #print("Lista de servicios:")
+                #print(lista)
                 self.crear_lista_geocercas(lista, self.nombres_geocercas_servicios)
                 #Limpiamos las listas
                 self.list_serv_2.clear()
@@ -249,8 +249,8 @@ class Rutas(QWidget):
     def cargar_transbordos(self, lista):
         try:
             if len(lista) > 0:
-                print("Lista de transbordos:")
-                print(lista)
+                #print("Lista de transbordos:")
+                #print(lista)
                 #self.crear_lista_geocercas(lista, self.nombres_geocercas_transbordos)
                 variables_globales.todos_los_transbordos_activos = lista
                 self.lista_transbordos = lista

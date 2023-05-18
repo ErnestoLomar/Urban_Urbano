@@ -5,6 +5,7 @@
         "./minicom",
         "./qworkers",
         "./ventanas",
-        "./configuraciones_iniciales/actualizacion"
+        "./configuraciones_iniciales/actualizacion",
+        "./configuraciones_iniciales"
     ]
 }

@@ -71,7 +71,7 @@ class Ventana(QWidget):
             self.setWindowFlags(Qt.FramelessWindowHint)
             uic.loadUi("/home/pi/Urban_Urbano/ui/inicio.ui", self)
             self.settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat) #Cargamos el archivo de configuración
-            crear_tablas() #Creamos las tablas de la base de datos #Creamos las ventanas
+            crear_tablas() #Creamos las tablas de la base de datos
             try:
                 self.label_unidad.setText(str(obtener_datos_aforo()[1]))
                 self.label_socket.setText(str(obtener_datos_aforo()[2]))
@@ -96,6 +96,15 @@ class Ventana(QWidget):
             self.label_num_ver.setText(respuesta['state_num_version'])
 
             self.inicializar()
+            try:
+                from rpi_backlight import Backlight
+                self.backlight = Backlight()
+                self.Brillo.setValue(100)
+                self.Brillo.valueChanged.connect(self.scrollbar_value_changed)
+            except Exception as e:
+                print("Ocurrió algo al ejecutar la herramienta de brillo: ", e)
+                self.backlight = None
+                self.Brillo.hide()
             #Creamos instancias de ventanas
             
             #Creamos los hilos
@@ -340,8 +349,31 @@ class Ventana(QWidget):
     #Con este método obtenemos la hora
     def obtener_hora(self):
         try:
-            fecha = strftime("%Y/%m/%d   %H:%M:%S")
-            self.label_fecha.setText(fecha)
+
+            # Obtener la fecha y hora en formato Y/m/d H:M:S
+            fecha_hora = subprocess.check_output(['date', '+%Y/%m/%d %H:%M:%S']).decode().strip()
+
+            # Obtener la fecha en formato Y/m/d
+            fecha = subprocess.check_output(['date', '+%d-%m-%Y']).decode().strip()
+
+            # Obtener la hora en formato H:M:S
+            hora = subprocess.check_output(['date', '+%H:%M:%S']).decode().strip()
+
+            #print("Fecha y hora:", fecha_hora)
+            #print("Fecha:", fecha)
+            #print("Hora:", hora)
+            
+            self.label_fecha.setText(fecha_hora)
+            
+            # Guardamos los datos en variables globales
+            variables_globales.fecha_completa_actual = fecha_hora
+            variables_globales.fecha_actual = fecha
+            variables_globales.hora_actual = hora
+            
+            #print(variables_globales.fecha_completa_actual)
+            #print(variables_globales.fecha_actual)
+            #print(variables_globales.hora_actual)
+            
             #if self.hora_actualizada == False:
             #    self.hora_actualizada = actualizar_hora()
         except Exception as e:
@@ -443,6 +475,14 @@ class Ventana(QWidget):
         except Exception as e:
             logging.info("Error al obtener la mac: " + str(e))
             print("Error al obtener la mac: " + str(e))
+            
+    def scrollbar_value_changed(self, value):
+        try:
+            if self.backlight != None:
+                if value >= 10:
+                    self.backlight.brightness =value
+        except Exception as e:
+            print("Ocurrió algo al ejecutar la función del brillo: ", e)
             
     def apagar_sistema(self, event):
         try:

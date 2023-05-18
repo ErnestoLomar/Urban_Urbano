@@ -1,6 +1,9 @@
 import os
 import subprocess
 import time
+import sys
+
+sys.path.insert(1, '/home/pi/Urban_Urbano/configuraciones_iniciales')
 
 time.sleep(2)
 

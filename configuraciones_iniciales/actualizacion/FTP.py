@@ -7,10 +7,15 @@ import subprocess
 import time
 import base64
 import sys
+import glob
+import shutil
+from time import strftime
 
 sys.path.insert(1, '/home/pi/Urban_Urbano/db')
+sys.path.insert(1, '/home/pi/Urban_Urbano/utils')
 
-from queries import obtener_datos_aforo
+from queries import obtener_datos_aforo, insertar_estadisticas_boletera
+import variables_globales
 
 ##########################################################################################################################################
 #INICIAMOS COMUNICACIoN POR LOS PUERTOS Y ACTIVAMOS LOS GPIO NECESARIOS
@@ -42,14 +47,20 @@ conexion_FTP_azure = "AT+QFTPOPEN="+host_FTP_azure+",21"
 
 #configuracion FTP webhost
 cuenta_webhost = "\"account\""
-usuario_FTP_webhost = "\"recursosespirituales\""
-contra_FTP_webhost = "\"1280x800\""
+usuario_FTP_webhost = "\"daslom\""
+contra_FTP_webhost = "\"geforceGTX\""
 host_FTP_webhost = "\"files.000webhost.com\""
 conf_conexion_FTP_webhost = "AT+QFTPCFG="+cuenta_webhost+","+usuario_FTP_webhost+","+contra_FTP_webhost
 conexion_FTP_webhost = "AT+QFTPOPEN="+host_FTP_webhost+",21"
 
 contador = 1
 id_Unidad = str(obtener_datos_aforo()[1])
+nombre = ""
+ubicacion = ""
+version_MT = ""
+tipo = ""
+datos_de_la_unidad = obtener_datos_aforo()
+
 intentos_ftp = 0
 
 ##########################################################################################################################################
@@ -116,7 +127,7 @@ class Principal_Modem:
                 comando = "AT+CPIN?\r\n"
                 ser.write(comando.encode())
                 print(ser.readline())
-                time.sleep(5)
+                time.sleep(1.5)
                 respuesta = ser.readline()
                 if 'READY' in respuesta.decode():
                     print(respuesta)
@@ -125,7 +136,7 @@ class Principal_Modem:
                 else:
                     print("No se pudo inicializar AT+CPIN")
                     print(respuesta)
-                    time.sleep(2)
+                    time.sleep(1)
                     #self.reiniciar_SIM()
                 print("#####################################\n")
 
@@ -135,7 +146,7 @@ class Principal_Modem:
                 ser.readline()
                 ser.write(comando.encode())
                 print(ser.readline())
-                time.sleep(5)
+                time.sleep(1.5)
                 respuesta = ser.readline()
                 if ',1' in respuesta.decode() or ',5' in respuesta.decode():
                     print(respuesta)
@@ -144,7 +155,7 @@ class Principal_Modem:
                 else:
                     print("No se pudo inicializar AT+CREG?")
                     print(respuesta)
-                    time.sleep(2)
+                    time.sleep(1)
                     #self.reiniciar_SIM()
                 print("#####################################\n")
 
@@ -154,7 +165,7 @@ class Principal_Modem:
                 ser.readline()
                 ser.write(comando.encode())
                 print(ser.readline())
-                time.sleep(5)
+                time.sleep(1.5)
                 respuesta = ser.readline()
                 if ',1' in respuesta.decode() or ',5' in respuesta.decode():
                     print(respuesta)
@@ -163,7 +174,32 @@ class Principal_Modem:
                 else:
                     print("No se pudo inicializar AT+CGREG?")
                     print(respuesta)
-                    time.sleep(2)
+                    time.sleep(1)
+                    #self.reiniciar_SIM()
+                print("#####################################\n")
+                
+                ser.flushInput()
+                ser.flushOutput()
+                comando = "AT+CCID\r\n"
+                ser.readline()
+                ser.write(comando.encode())
+                print(ser.readline())
+                time.sleep(1.5)
+                respuesta = ser.readline()
+                if '+CCID' in respuesta.decode():
+                    print(respuesta)
+                    print(str(respuesta.decode()).replace("+CCID","").replace(" ",""))
+                    variables_globales.sim_id = str(respuesta.decode()).replace("+CCID","").replace(" ","").replace(":","")
+                    respuesta = ser.readline()
+                    print(respuesta)
+                    respuesta = ser.readline()
+                    print(respuesta)
+                    ser.flushInput()
+                    ser.flushOutput()
+                else:
+                    print("No se pudo inicializar AT+CCID")
+                    print(respuesta)
+                    time.sleep(1)
                     #self.reiniciar_SIM()
                 print("#####################################\n")
 
@@ -173,7 +209,7 @@ class Principal_Modem:
                 ser.readline()
                 ser.write(comando.encode())
                 print(ser.readline())
-                time.sleep(5)
+                time.sleep(1.5)
                 respuesta = ser.readline()
                 if 'OK' in respuesta.decode():
                     print(respuesta)
@@ -182,7 +218,7 @@ class Principal_Modem:
                 else:
                     print("No se pudo inicializar AT+QICSGP")
                     print(respuesta)
-                    time.sleep(2)
+                    time.sleep(1)
                     #self.reiniciar_SIM()
                 print("#####################################\n")
 
@@ -192,7 +228,7 @@ class Principal_Modem:
                 ser.readline()
                 ser.write(comando.encode())
                 print(ser.readline())
-                time.sleep(8)
+                time.sleep(2)
                 ser.readline()
                 respuesta = ser.readline()
                 if 'OK' in respuesta.decode():
@@ -202,7 +238,7 @@ class Principal_Modem:
                 else:
                     print("No se pudo inicializar AT+QIACT=1")
                     print(respuesta)
-                    time.sleep(2)
+                    time.sleep(1)
                     #self.reiniciar_SIM()
                 print("#####################################")
                 
@@ -213,7 +249,7 @@ class Principal_Modem:
                 ser.readline()
                 ser.write(comando.encode())
                 print(ser.readline())
-                time.sleep(3)
+                time.sleep(1)
                 respuesta = ser.readline()
                 print("Respuesta: "+str(respuesta))
                 respuesta = ser.readline()
@@ -228,7 +264,7 @@ class Principal_Modem:
                 ser.readline()
                 ser.write(comando.encode())
                 print(ser.readline())
-                time.sleep(3)
+                time.sleep(1)
                 respuesta = ser.readline()
                 print("Respuesta: "+str(respuesta))
                 respuesta = ser.readline()
@@ -240,7 +276,7 @@ class Principal_Modem:
                 print("FTP.py, linea 171, Error al inicializar SIM: "+str(e))
         
         global verificar_memoria_UFS
-        def verificar_memoria_UFS():
+        def verificar_memoria_UFS(version_matriz):
             global id_Unidad
             ser.flushInput()
             ser.flushOutput()
@@ -255,7 +291,7 @@ class Principal_Modem:
             Aux = ser.readline()
             print(Aux.decode())
             if 'update.txt' in Aux.decode():
-                print("Ya existe el archivo update.txt")
+                print("Ya existe el archivo update.txt en quectel, procede a eliminarse...")
                 eliminar_archivos = "AT+QFDEL=\"update.txt\"\r\n"
                 ser.write(eliminar_archivos.encode())
                 print(ser.readline())
@@ -263,8 +299,8 @@ class Principal_Modem:
                 print(Aux.decode())
                 Aux = ser.readline()
                 print(Aux.decode())
-            elif f'{id_Unidad}' in Aux.decode():
-                print(f"Ya existe el archivo {id_Unidad}.txt")
+            if f'{id_Unidad}' in Aux.decode():
+                print(f"Ya existe el archivo {id_Unidad}.txt en quectel, procede a elminarse...")
                 print(ser.readline())
                 Aux = ser.readline()
                 print(Aux.decode())
@@ -275,19 +311,34 @@ class Principal_Modem:
                 print(Aux.decode())
                 Aux = ser.readline()
                 print(Aux.decode())
+            if f'{version_matriz}' in Aux.decode():
+                print(f"Ya existe el archivo {version_matriz}.txt en quectel, procede a eliminarse...")
+                eliminar_archivos = f"AT+QFDEL=\"{version_matriz}.txt\"\r\n"
+                ser.write(eliminar_archivos.encode())
+                print(ser.readline())
+                Aux = ser.readline()
+                print(Aux.decode())
+                Aux = ser.readline()
+                print(Aux.decode())
             if os.path.exists('/home/pi/update.txt'):
-                print("Ya existe el archivo update.txt")
+                print("Ya existe el archivo update.txt en raspebrry, procede a eliminarse...")
                 subprocess.run('rm -rf /home/pi/update.txt', shell=True)
-            elif os.path.exists(f'/home/pi/{id_Unidad}'):
-                print(f"Ya existe el archivo {id_Unidad}")
+            if os.path.exists(f'/home/pi/{id_Unidad}'):
+                print(f"Ya existe el archivo {id_Unidad}.txt en raspberry, procede a eliminarse...")
                 subprocess.run(f'rm -rf /home/pi/{id_Unidad}', shell=True)
+            if os.path.exists('/home/pi/update/'):
+                print("Ya existe directorio update en raspebrry, procede a eliminarse...")
+                subprocess.run('rm -rf /home/pi/update/', shell=True)
             ser.flushInput()
             ser.flushOutput()
             return True
         
         global ConfigurarFTP  
-        def ConfigurarFTP(servidor, tamanio):
+        def ConfigurarFTP(servidor, tamanio,version_matriz):
             try:
+                fecha = strftime('%Y/%m/%d').replace('/', '')[2:]
+                global version_MT
+                version_MT = version_matriz
                 if servidor == "web":
                     cone=conf_conexion_FTP_webhost+"\r\n"
                     print("esto es cone "+cone)
@@ -317,6 +368,9 @@ class Principal_Modem:
                     Aux = ser.readline()
                     print("salio "+Aux.decode())
                     IniciarSesionFTP("web", tamanio)
+                    #salida = IniciarSesionFTP("web", tamanio)
+                    #print(f"Regreso esto como salida ConfigurarFTP:{salida}")
+                    #return salida
                 elif servidor == "azure":
                     cone=conf_conexion_FTP_azure+"\r\n"
                     print("esto es cone "+cone)
@@ -346,8 +400,13 @@ class Principal_Modem:
                     Aux = ser.readline()
                     print("salio "+Aux.decode())
                     IniciarSesionFTP("azure", tamanio)
+                    #salida = IniciarSesionFTP("azure", tamanio)
+                    #print(f"Regreso esto como salida ConfigurarFTP:{salida}")
+                    #return salida
             except Exception as e:
-                print("FTP.py, linea 171, Error al ConfigurarFTP: "+str(e))
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                print("FTP.py,", exc_tb.tb_lineno, " Error al ConfigurarFTP: "+str(e))
+                insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "error", f"MT_{version_matriz}") # Matriz tarifaría
                 return False
             
 ##########################################################################################################################################
@@ -355,32 +414,34 @@ class Principal_Modem:
         global IniciarSesionFTP
         def IniciarSesionFTP(servidor, tamanio):
             try:
-                global intentos_ftp, contador
+                fecha = strftime('%Y/%m/%d').replace('/', '')[2:]
+                global intentos_ftp, contador, version_MT
                 if servidor == "web":
                     comando=conexion_FTP_webhost+"\r\n"
                     ser.write(comando.encode())
-                    print("INTENTANDO..")
+                    print("INTENTANDO CONECTAR A SERVIDOR WEBHOST..")
                     print(ser.readline())
                     Aux = ser.readline()
                     print(Aux.decode())
                     time.sleep(3)
                     
                     if Aux.decode() == "OK\r\n":
-                        print("Conexion exitosa")
+                        print("Conexion exitosa a servidor webhost")
                         time.sleep(5)
                         contador = 0
                         intentos_ftp = 0
                         UbicarPathFTP("web", tamanio)
                     else:
-                        print("Reintentando...")
+                        print("Reintentando conectar a servidor webhost...")
                         comando="AT+QFTPCLOSE\r\n"
                         ser.write(comando.encode())
                         time.sleep(5)
                         if contador >= 6:
-                            print("No se pudo establecer la conexion con el servidor FTP")
+                            print("No se pudo establecer la conexion con el servidor FTP [web]")
                             return False
                         contador += 1
                         intentos_ftp += 1
+                        print(f"contador:{contador}, intentis_ftp:{intentos_ftp}")
                         IniciarSesionFTP("web", tamanio)
                     contador = 0
                     intentos_ftp = 0
@@ -388,37 +449,40 @@ class Principal_Modem:
                 elif servidor == "azure":
                     comando=conexion_FTP_azure+"\r\n"
                     ser.write(comando.encode())
-                    print("INTENTANDO..")
+                    print("INTENTANDO CONECTAR A AZURE..")
                     print(ser.readline())
                     Aux = ser.readline()
                     print(Aux.decode())
                     time.sleep(3)
                     
                     if Aux.decode() == "OK\r\n":
-                        print("Conexion exitosa")
+                        print("Conexion exitosa a azure")
                         time.sleep(5)
                         contador = 0
                         intentos_ftp = 0
                         UbicarPathFTP("azure", tamanio)
                     else:
-                        print("Reintentando...")
+                        print("Reintentando conectar a azure...")
                         comando="AT+QFTPCLOSE\r\n"
                         ser.write(comando.encode())
                         time.sleep(5)
-                        if contador >= 6:
-                            print("No se pudo establecer la conexion con el servidor FTP")
-                            return False
                         if intentos_ftp >= 3:
-                            print("intentando con servidor webhost")
-                            ConfigurarFTP("web", tamanio)
-                        contador += 1
-                        intentos_ftp += 1
-                        IniciarSesionFTP("azure", tamanio)
+                            print("No se pudo establecer la conexion con el servidor FTP [Azure]")
+                            print("intentando conexion alternativa con servidor webhost")
+                            ConfigurarFTP("web", tamanio, version_MT)
+                        else:
+                            contador += 1
+                            intentos_ftp += 1
+                            print(f"contador:{contador}, intentis_ftp:{intentos_ftp}")
+                            IniciarSesionFTP("azure", tamanio)
                     contador = 0
                     intentos_ftp = 0
+                    insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "error", f"MT_{version_MT}") # Matriz tarifaría
                     return True
             except Exception as e:
-                print("FTP.py, linea 171, Error al IniciarSesionFTP: "+str(e))
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                print("FTP.py,", exc_tb.tb_lineno, " Error al IniciarSesionFTP: "+str(e))
+                insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "error", f"MT_{version_MT}") # Matriz tarifaría
                 return False
             
 ##########################################################################################################################################
@@ -426,24 +490,40 @@ class Principal_Modem:
         global UbicarPathFTP
         def UbicarPathFTP(servidor, tamanio):#se comienza ubicando la ruta
             try:
+                fecha = strftime('%Y/%m/%d').replace('/', '')[2:]
+                global id_Unidad,nombre,ubicacion,version_MT,tipo
+                if version_MT == False:
+                    nombre = id_Unidad
+                    ubicacion = "/Actualizaciones/"
+                    tipo = "Completo"
+                else:
+                    nombre = str(version_MT)
+                    ubicacion = "/Tarifas/"
+                    tipo = "Parcial"
+
+
                 if servidor == "azure":
-                    global id_Unidad, intentos_ftp
-                    comando = 'AT+QFTPCWD="/Actualizaciones/"' + "\r\n"
+                    global intentos_ftp
+                    print(f">>>>>>>>>>>>>>>Buscando archivo:{nombre}.txt en la ubicaion:{ubicacion}")
+                    #comando = 'AT+QFTPCWD="f/Tarifas/"' + "\r\n"
+                    comando = f'AT+QFTPCWD=\"{ubicacion}\"' + "\r\n"
+                    print(f"comando:{comando}")
+
                     ser.write(comando.encode())
                     print(ser.readline())
                     Aux = ser.readline()
                     print("salio 1 "+Aux.decode())
                     time.sleep(5)
                     
-                    archivo = f"\"{id_Unidad}.txt\""
-                    complemento= f"\"UFS:{id_Unidad}.txt\""
+                    archivo = f"\"{nombre}.txt\""
+                    complemento= f"\"UFS:{nombre}.txt\""
                     comando="AT+QFTPGET="+archivo+","+complemento+"\r\n"
                     ser.write(comando.encode())
                     time.sleep(5)
                     print(ser.readline())
                     Reintentar = "false"
                     while True:
-                        print("dentro del while")
+                        print("descargando archivo de azure...")
                         Aux = ser.readline()
                         print(Aux.decode())
                         if Aux == "+QFTPGET: 0,0":
@@ -462,7 +542,7 @@ class Principal_Modem:
                                     print("Verificando descarga")
                                     break
                             else:
-                                print("Ha ocurrido un error")
+                                print("Ha ocurrido un error, reintentando...")
                                 Reintentar = "True"
                                 break
                         
@@ -472,22 +552,25 @@ class Principal_Modem:
                         leerArchivo("azure", tamanio)
                         return True
                 elif servidor == "web":
-                    comando = 'AT+QFTPCWD="/Pruebas/"' + "\r\n"
+                    print(f">>>>>>>>>>>>>>>Buscando archivo:{nombre}.txt en la ubicaion:{ubicacion}")
+                    comando = f'AT+QFTPCWD=\"{ubicacion}\"' + "\r\n"
+                    print(f"comando:{comando}")
+
                     ser.write(comando.encode())
                     print(ser.readline())
                     Aux = ser.readline()
                     print("salio 1 "+Aux.decode())
                     time.sleep(5)
                     
-                    archivo="\"update.txt\""
-                    complemento="\"UFS:update.txt\""
+                    archivo = f"\"{nombre}.txt\""
+                    complemento= f"\"UFS:{nombre}.txt\""
                     comando="AT+QFTPGET="+archivo+","+complemento+"\r\n"
                     ser.write(comando.encode())
                     time.sleep(5)
                     print(ser.readline())
                     Reintentar = "false"
                     while True:
-                        print("dentro del while")
+                        print("descargando archivo de webhost...")
                         Aux = ser.readline()
                         print(Aux.decode())
                         if Aux == "+QFTPGET: 0,0":
@@ -516,7 +599,9 @@ class Principal_Modem:
                         leerArchivo("web", tamanio)
                         return True
             except Exception as e:
-                print("FTP.py, linea 171, Error al UbicarPathFTP: "+str(e))
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                print("FTP.py,", exc_tb.tb_lineno, " Error al UbicarPathFTP: "+str(e))
+                insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "error", f"MT_{version_MT}") # Matriz tarifaría
                 return False
             
 ##########################################################################################################################################
@@ -524,17 +609,23 @@ class Principal_Modem:
         global leerArchivo
         def leerArchivo(servidor, tamanio):
             try:
+                fecha = strftime('%Y/%m/%d').replace('/', '')[2:]
+                global nombre
                 if servidor == "web":
-                    archivo="\"update.txt\""
+                    
+                    archivo= f"\"{nombre}.txt\""
                     comando="AT+QFDWL="+archivo+"\r\n"
                     ser.write(comando.encode())
                     time.sleep(1)
-                    print("esto es el archivo: ")
+                    print("Descargando archivo de quectel...")
                     eux = ser.readlines()
-                
+                    print("esto es el archivo: ")
                     print(eux)
                     todo = ""
-                    file = open("update.txt","w")
+
+                    time.sleep(5)
+
+                    file = open(f"{nombre}.txt","w")
                     
                     i=0
                     Base64 = ""
@@ -548,9 +639,9 @@ class Principal_Modem:
                                 file.write(Base64.decode('UTF-8') + os.linesep)
                                 file.close()
                                 
-                                file = open('update.txt', 'rb') 
+                                file = open(f'{nombre}.txt', 'rb') 
                                 byte = file.read() 
-                                file.close() 
+                                file.close()
 
                                 decodeit = open('update.zip', 'wb') 
                                 decodeit.write(base64.b64decode((byte))) 
@@ -563,18 +654,20 @@ class Principal_Modem:
                     ActualizarArchivos(tamanio)
                     return True
                 elif servidor == "azure":
-                    global id_Unidad, intentos_ftp
-                    archivo= f"\"{id_Unidad}.txt\""
+                    global intentos_ftp
+                    archivo= f"\"{nombre}.txt\""
                     comando="AT+QFDWL="+archivo+"\r\n"
                     ser.write(comando.encode())
                     time.sleep(1)
-                    print("esto es el archivo: ")
+                    print("Descargando archivo de quectel...")
                     eux = ser.readlines()
-                
+                    print("esto es el archivo: ")
                     print(eux)
                     todo = ""
-                    file = open(f"{id_Unidad}.txt","w")
                     
+
+                    file = open(f"{nombre}.txt","w")
+
                     i=0
                     Base64 = ""
                     
@@ -587,7 +680,7 @@ class Principal_Modem:
                                 file.write(Base64.decode('UTF-8') + os.linesep)
                                 file.close()
                                 
-                                file = open(f'{id_Unidad}.txt', 'rb') 
+                                file = open(f'{nombre}.txt', 'rb') 
                                 byte = file.read() 
                                 file.close() 
 
@@ -602,7 +695,9 @@ class Principal_Modem:
                     ActualizarArchivos(tamanio)
                     return True
             except Exception as e:
-                print("FTP.py, linea 171, Error al leer archivo: "+str(e))
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                print("FTP.py,", exc_tb.tb_lineno, " Error al leer archivo: "+str(e))
+                insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "error", f"MT_{nombre}") # Matriz tarifaría
                 return False
             
 
@@ -618,78 +713,178 @@ class Principal_Modem:
 
         global ActualizarArchivos
         def ActualizarArchivos(tamanio_esperado):
-            global id_Unidad, intentos_ftp
+            global nombre, intentos_ftp, tipo
+            fecha = strftime('%Y/%m/%d').replace('/', '')[2:]
             time.sleep(1)
             filename = 'update.zip' 
             if os.path.exists(filename):
                 try:
+                    #-------------Alejandro Valencia Revision de peso de archivo txt descargado
+                    if os.path.exists(f"/home/pi/{nombre}.txt"):
+                        tamanio_del_archivo = os.path.getsize(f"/home/pi/{nombre}.txt")
+                        if len(str(tamanio_del_archivo)) > 0:
+                            print("El tamaño del archivo txt en Bytes es: "+str(int(tamanio_del_archivo)))
+                        if len(str(tamanio_del_archivo)) > 3:
+                            print("El tamaño del archivo txt en KBytes es: "+str(int(tamanio_del_archivo)/1024))
+                        if len(str(tamanio_del_archivo)) > 6:
+                            print("El tamaño del archivo txt en MBytes es: "+str(int(tamanio_del_archivo)/1024/1024))
+                    else:
+                        print(f"No se puede leer el tamaño del archivo: {nombre}.txt")
+                    time.sleep(5)
+
                     print("Descomprimiendo...")
                     subprocess.run('pwd', shell=True)
                     subprocess.run('rm -rf update.txt', shell=True)
-                    subprocess.run(f'rm -rf {id_Unidad}.txt', shell=True)
+                    subprocess.run(f'rm -rf {nombre}.txt', shell=True)
                     subprocess.run("mv -f /home/pi/update.zip /home/pi/actualizacion/",shell=True)
-                    subprocess.run("unzip /home/pi/actualizacion/update.zip",shell=True)
+                    if os.path.exists("/home/pi/update/"):
+                                    subprocess.run('rm -rf /home/pi/update/', shell=True)
+                    subprocess.run("unzip -o /home/pi/actualizacion/update.zip",shell=True)
+                    time.sleep(5)
                     print(".zip descomprimido")
                     if os.path.exists("/home/pi/update/"):
                         print("Carpeta descomprimida: update")
-                        print("Verificamos el tamaño del archivo...")
-                        tamanio_del_archivo = subprocess.run("du -s update", stdout=subprocess.PIPE, shell=True).stdout.decode()[:4]
-                        print("El tamaño del archivo zip es: "+str(tamanio_del_archivo))
-                        if int(tamanio_del_archivo) >= tamanio_esperado:
-                            print(f"El tamaño del archivo zip {tamanio_del_archivo} es mayor a "+str(tamanio_esperado))
-                            print("Procedemos a mover los archivos...")
-                            subprocess.run('rm -rf /home/pi/actualizacion/update.zip', shell=True)
-                            #subprocess.run("sudo cp -r /home/pi/Urban_Urbano/ /home/pi/antigua/",shell=True)
-                            subprocess.run('rm -rf /home/pi/Urban_Urbano', shell=True)
-                            subprocess.run("mv -f /home/pi/update /home/pi/Urban_Urbano",shell=True)
-                            if os.path.exists("/home/pi/Urban_Urbano/verificar_carpeta.py"):
-                                subprocess.run("mv -f /home/pi/Urban_Urbano/verificar_carpeta.py /home/pi/actualizacion/",shell=True)
-                                print("Archivo verificar_carpeta.py movido")
-                            
-                            print(ser.readline())
-                            Aux = ser.readline()
-                            print(Aux.decode())
-                            eliminar_archivos = "AT+QFDEL=\"update.txt\"\r\n"
-                            ser.write(eliminar_archivos.encode())
-                            print(ser.readline())
-                            Aux = ser.readline()
-                            print(Aux.decode())
-                            ser.flushInput()
-                            ser.flushOutput()
-                            
-                            print(ser.readline())
-                            Aux = ser.readline()
-                            print(Aux.decode())
-                            eliminar_archivos = f"AT+QFDEL=\"{id_Unidad}.txt\"\r\n"
-                            ser.write(eliminar_archivos.encode())
-                            print(ser.readline())
-                            Aux = ser.readline()
-                            print(Aux.decode())
-                            Aux = ser.readline()
-                            print(Aux.decode())
-                            ser.flushInput()
-                            ser.flushOutput()
-                            
-                            print("#############################################")
-                            print("Actualización completada")
-                            print("#############################################")
-                            time.sleep(8)
+                        
+                        print(f"El tamaño del archivo zip {tamanio_del_archivo} es mayor a "+str(tamanio_esperado))
+                        print("Procedemos a mover los archivos de upate a urban_urbano...")
+                        subprocess.run('rm -rf /home/pi/actualizacion/update.zip', shell=True)
+                        #subprocess.run("sudo cp -r /home/pi/Urban_Urbano/ /home/pi/antigua/",shell=True)
+                        #------------------Alejandro Valencia Actualizacion de archivos
+                        if tipo == "Completo":
+                            #Actualizacion por formato completo
+                            if os.path.exists("/home/pi/antigua/"):
+                                subprocess.run('rm -rf /home/pi/antigua/', shell=True)
+                            print("Moviendo carpeta Urban_Urbano a carpeta antigua...")
+                            subprocess.run('mv -f /home/pi/Urban_Urbano/ /home/pi/antigua/', shell=True)
+                            print("Haciendo que carpeta update sea nueva Urban_Urbano...")
+                            subprocess.run('mv -f /home/pi/update/ /home/pi/Urban_Urbano/', shell=True)
+                            print("Regresando archivos originales, manteniendo los actualizados...")
+                            subprocess.run('cp -rn /home/pi/antigua/* /home/pi/Urban_Urbano/', shell=True)
+                            time.sleep(5)
+                            print("Eliminando carpeta antigua...")
+                            subprocess.run('rm -rf /home/pi/antigua/', shell=True)
+                            #Dando permisos a carpeta db
+                            subprocess.run('sudo chmod 777 /home/pi/Urban_Urbano/db/*', shell=True)
+
+                        elif tipo == "Parcial":
+                            #Actualizacion de algunos archivos especificos
+                            print("Copiando archivos de update a Urban_Urbano")
+                            subprocess.run('cp -rf /home/pi/update/* /home/pi/Urban_Urbano/', shell=True)
+                            print("Eliminando carpeta update...")
+                            subprocess.run('rm -rf /home/pi/update/', shell=True)
+                        #---------------------------------------------------------------
+                        #subprocess.run('rm -rf /home/pi/Urban_Urbano', shell=True)
+                        #subprocess.run("mv -f /home/pi/update /home/pi/Urban_Urbano",shell=True)
+                        if os.path.exists("/home/pi/Urban_Urbano/verificar_carpeta.py"):
+                            subprocess.run("mv -f /home/pi/Urban_Urbano/verificar_carpeta.py /home/pi/actualizacion/",shell=True)
+                            print("Archivo verificar_carpeta.py movido")
+                        
+                        print(ser.readline())
+                        Aux = ser.readline()
+                        print(Aux.decode())
+                        eliminar_archivos = "AT+QFDEL=\"update.txt\"\r\n"
+                        ser.write(eliminar_archivos.encode())
+                        print(ser.readline())
+                        Aux = ser.readline()
+                        print(Aux.decode())
+                        ser.flushInput()
+                        ser.flushOutput()
+                        
+                        print(ser.readline())
+                        Aux = ser.readline()
+                        print(Aux.decode())
+                        eliminar_archivos = f"AT+QFDEL=\"{nombre}.txt\"\r\n"
+                        ser.write(eliminar_archivos.encode())
+                        print(ser.readline())
+                        Aux = ser.readline()
+                        print(Aux.decode())
+                        Aux = ser.readline()
+                        print(Aux.decode())
+                        ser.flushInput()
+                        ser.flushOutput()
+                        
+                        print("#############################################")
+                        #print("Actualización completada, Reiniciando boletera...")
+                        print("Actualización completada...")
+                        print("#############################################")
+                        time.sleep(8)
+                        
+                        if tipo == "Completo":
                             subprocess.run("sudo reboot", shell=True)
-                            return True
-                        else:
-                            print("El tamaño del archivo zip es menor al esperado")
-                            print(f"El tamaño del archivo zip {tamanio_del_archivo} es menor a "+str(tamanio_esperado))
+                        elif tipo == "Parcial":
+                            variables_globales.version_de_MT = nombre
+                            insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "MT", variables_globales.version_de_MT) # Matriz tarifaría
+                        
+                        return True
+                    #-----------------------------------------------------------------------------------------------------------INICIA PARCHE
+                    elif len(glob.glob("/home/pi/*.db")) > 0:
+                        print(f"No existe la carpeta descomprimida como /home/pi/update/")
+                        print("Existe un archivo descomprimido del tipo .db")
+                        time.sleep(5)
+                        subprocess.run('rm -rf /home/pi/actualizacion/update.zip', shell=True)
+                        #Revisa si el archivo es el necesario
+                        ruta = "/home/pi/"
+                        destino = "/home/pi/Urban_Urbano/db"
+                        for archivo in os.listdir(ruta):
+                            # Verifica si el archivo es un archivo regular (no es una carpeta)
+                            if os.path.isfile(os.path.join(ruta, archivo)):
+                                if "matrices_tarifarias" in archivo and archivo.endswith(".db"):
+                                    nombre_archivo = archivo
+                                    print("El nombre del archivo es:", nombre_archivo)
+                                    ruta_origen = os.path.join(ruta, nombre_archivo)
+                                    ruta_destino = os.path.join(destino, "matrices_tarifarias.db")
+                                    shutil.move(ruta_origen, ruta_destino)
+
+                                    print(ser.readline())
+                                    Aux = ser.readline()
+                                    print(Aux.decode())
+                                    eliminar_archivos = "AT+QFDEL=\"update.txt\"\r\n"
+                                    ser.write(eliminar_archivos.encode())
+                                    print(ser.readline())
+                                    Aux = ser.readline()
+                                    print(Aux.decode())
+                                    ser.flushInput()
+                                    ser.flushOutput()
+                                    
+                                    print(ser.readline())
+                                    Aux = ser.readline()
+                                    print(Aux.decode())
+                                    eliminar_archivos = f"AT+QFDEL=\"{nombre}.txt\"\r\n"
+                                    ser.write(eliminar_archivos.encode())
+                                    print(ser.readline())
+                                    Aux = ser.readline()
+                                    print(Aux.decode())
+                                    Aux = ser.readline()
+                                    print(Aux.decode())
+                                    ser.flushInput()
+                                    ser.flushOutput()
+                                    
+                                    variables_globales.version_de_MT = nombre
+                                    insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "MT", variables_globales.version_de_MT) # Matriz tarifaría
+                                    
+                                    print("#############################################")
+                                    print("Actualización completada...")
+                                    print("#############################################")
+                                    time.sleep(8)
+                                    #subprocess.run("sudo reboot", shell=True)
+                                    return True
+                    #------------------------------------------------------------------------------------------------TERMINA PARCHE
                     else:
                         print(f"No existe la carpeta descomprimida como /home/pi/update/")
-                        return False
+                        print("No existe un archivo descomprimido del tipo .db")
+                        subprocess.run('rm -rf /home/pi/actualizacion/update.zip', shell=True)
                     print("#############################################")
                     print("Algo fallo")
                     print("#############################################")
+                    insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "error", f"MT_{nombre}") # Matriz tarifaría
                     return False
                 except Exception as e:
-                    print(e)
+                    exc_type, exc_obj, exc_tb = sys.exc_info()
+                    print("FTP.py,", exc_tb.tb_lineno + str(e))
+                    insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "error", f"MT_{nombre}") # Matriz tarifaría
                     return False
             else:
                 print ("No se encontró el archivo")
                 time.sleep(1)
+                insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "error", f"MT_{nombre}") # Matriz tarifaría
                 return False

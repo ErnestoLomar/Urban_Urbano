@@ -47,7 +47,7 @@ class Rutas(QWidget):
             self.ruta = self.servicio_info[0] + "-" + self.servicio_info[1] + "-" + self.servicio_info[2]
             self.de = str(self.origen_de_servicio[3])
             self.geocerca_numero_uno = obtener_geocerca_de_servicio(self.origen_de_servicio[3])
-            print("Geocerca numero uno: "+str(self.geocerca_numero_uno))
+            #print("Geocerca numero uno: "+str(self.geocerca_numero_uno))
             variables_globales.geocerca = f"{self.geocerca_numero_uno[0]},{self.geocerca_numero_uno[1]}"
             self.bandera = False
             self.turno = turno

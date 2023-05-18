@@ -3,7 +3,7 @@ from PyQt5.QtGui import QMouseEvent
 import time
 import logging
 import subprocess
-from asignaciones_queries import obtener_asignacion_por_folio_de_viaje
+from asignaciones_queries import obtener_asignacion_por_folio_de_viaje, obtener_ultima_asignacion
 from PyQt5.QtCore import QSettings
 import variables_globales as vg
 import datetime
@@ -24,6 +24,12 @@ class DeteccionGeocercasWorker(QObject):
                 from abrir_ventanas import AbrirVentanas
             except Exception as e:
                 print(e)
+                
+            try:
+                ultima_asignacion = obtener_ultima_asignacion()
+                print("La ultima asignacion es: ", ultima_asignacion)
+            except Exception as e:
+                print("Ocurrió un error al obtener la ultima asignacion: ", e)
             
             while True:
                 
@@ -41,11 +47,12 @@ class DeteccionGeocercasWorker(QObject):
                     hora_actual = fecha_actual[(int(indice) - 2):(int(indice) + 6)]
                     #print("LA HORA ACTUAL RPI ES: ", hora_actual)
                     
+                    '''
                     #Obtenemos la trama dos del viaje actual
                     if len(self.settings.value('folio_de_viaje')) > 0:
                         trama_dos_del_viaje = obtener_asignacion_por_folio_de_viaje(self.settings.value('folio_de_viaje'))
                     else:
-                        trama_dos_del_viaje = obtener_asignacion_por_folio_de_viaje(vg.folio_asignacion)
+                        trama_dos_del_viaje = obtener_asignacion_por_folio_de_viaje(vg.folio_asignacion)'''
                     
                     #Obtenemos la fecha del dia de hoy mediante la librería datetime
                     hoy = datetime.datetime.now().date()
@@ -57,7 +64,7 @@ class DeteccionGeocercasWorker(QObject):
                     fecha_ayer = hoy - datetime.timedelta(days=1)
                     
                     # Organizamos la trama 2
-                    fecha_completa_trama_dos = str(str(trama_dos_del_viaje).split(",")).replace("'","").replace('"','').replace("[","").replace("]","").replace("(","").replace(")","").replace(" ","").split(",")
+                    fecha_completa_trama_dos = str(str(ultima_asignacion).split(",")).replace("'","").replace('"','').replace("[","").replace("]","").replace("(","").replace(")","").replace(" ","").split(",")
                     fecha_de_trama_dos = str(fecha_completa_trama_dos[5]).replace("-","/")
                     hora_trama_dos = str(fecha_completa_trama_dos[6])
                     
@@ -101,12 +108,16 @@ class DeteccionGeocercasWorker(QObject):
                         # `cerrar_turno`).
                         if (fecha_formateada_trama_dos <= fecha_formateada_hace_dos_dias) or (fecha_formateada_trama_dos <= fecha_formateada_ayer and int(hora_trama_dos[:2]) <= 2):
                             print("El inicio de viaje es de hace dos dias o mas, o hace un dia pero antes de las 2am.")
+                            logging.info("El inicio de viaje es de hace dos dias o mas, o hace un dia pero antes de las 2am.")
                             AbrirVentanas.cerrar_vuelta.cargar_datos()
                             AbrirVentanas.cerrar_vuelta.show()
                             AbrirVentanas.cerrar_vuelta.terminar_vuelta(AbrirVentanas.cerrar_vuelta, False)
                             AbrirVentanas.cerrar_turno.cargar_datos()
                             AbrirVentanas.cerrar_turno.show()
                             AbrirVentanas.cerrar_turno.cerrar_turno(AbrirVentanas.cerrar_turno)
+                            variables_globales.detectando_geocercas_hilo = True
+                            self.finished.emit()
+                            break
                     
                     elif int(hora_actual[:2]) > 2:
                         
@@ -119,12 +130,16 @@ class DeteccionGeocercasWorker(QObject):
                         # likely used to close out a trip and end a work shift.
                         if fecha_formateada_trama_dos <= fecha_formateada_ayer:
                             print("El inicio de viaje tiene de diferencia un dia o mas de estar abierto.")
+                            logging.info("El inicio de viaje tiene de diferencia un dia o mas de estar abierto.")
                             AbrirVentanas.cerrar_vuelta.cargar_datos()
                             AbrirVentanas.cerrar_vuelta.show()
                             AbrirVentanas.cerrar_vuelta.terminar_vuelta(AbrirVentanas.cerrar_vuelta, False)
                             AbrirVentanas.cerrar_turno.cargar_datos()
                             AbrirVentanas.cerrar_turno.show()
                             AbrirVentanas.cerrar_turno.cerrar_turno(AbrirVentanas.cerrar_turno)
+                            variables_globales.detectando_geocercas_hilo = True
+                            self.finished.emit()
+                            break
                 except Exception as e:
                     print(e)
                 

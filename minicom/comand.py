@@ -208,7 +208,7 @@ class Principal_Modem:
         ser.readline()
         ser.write(comando.encode())
         print(ser.readline())
-        time.sleep(3)
+        time.sleep(2)
         respuesta = ser.readline()
         print("Respuesta: "+str(respuesta))
         respuesta = ser.readline()
@@ -223,7 +223,7 @@ class Principal_Modem:
         ser.readline()
         ser.write(comando.encode())
         print(ser.readline())
-        time.sleep(3)
+        time.sleep(2)
         respuesta = ser.readline()
         print("Respuesta: "+str(respuesta))
         respuesta = ser.readline()
@@ -295,7 +295,7 @@ class Principal_Modem:
                     logging.info(resultado)
                     print("\x1b[1;32m"+"Leyendo: "+str(resultado))
                     i = i+1
-                    if 'QIURC:' in resultado or 'RC' in resultado or 'IURC' in resultado:
+                    if 'QIURC:' in resultado or 'RC' in resultado or 'IURC' in resultado or "recv" in resultado:
                         pass
                     else:
                         if Aux != b'\r\n' and Aux != b'':
@@ -308,7 +308,7 @@ class Principal_Modem:
                                 "enviado": True,
                                 "accion": resultado
                             }
-                    if i == 35:
+                    if i == 20:
                         variables_globales.conexion_servidor = "NO"
                         return {
                             "enviado": False

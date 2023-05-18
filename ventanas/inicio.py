@@ -20,7 +20,6 @@ import subprocess
 from time import strftime
 import faulthandler
 import logging
-from rpi_backlight import Backlight
 
 # Importar subdirectorios
 sys.path.insert(1, '/home/pi/Urban_Urbano/db')
@@ -97,8 +96,15 @@ class Ventana(QWidget):
             self.label_num_ver.setText(respuesta['state_num_version'])
 
             self.inicializar()
-            self.Brillo.setValue(100)
-            self.Brillo.valueChanged.connect(self.scrollbar_value_changed)
+            try:
+                from rpi_backlight import Backlight
+                self.backlight = Backlight()
+                self.Brillo.setValue(100)
+                self.Brillo.valueChanged.connect(self.scrollbar_value_changed)
+            except Exception as e:
+                print("Ocurrió algo al ejecutar la herramienta de brillo: ", e)
+                self.backlight = None
+                self.Brillo.hide()
             #Creamos instancias de ventanas
             
             #Creamos los hilos
@@ -348,7 +354,7 @@ class Ventana(QWidget):
             fecha_hora = subprocess.check_output(['date', '+%Y/%m/%d %H:%M:%S']).decode().strip()
 
             # Obtener la fecha en formato Y/m/d
-            fecha = subprocess.check_output(['date', '+%Y/%m/%d']).decode().strip()
+            fecha = subprocess.check_output(['date', '+%d-%m-%Y']).decode().strip()
 
             # Obtener la hora en formato H:M:S
             hora = subprocess.check_output(['date', '+%H:%M:%S']).decode().strip()
@@ -471,9 +477,12 @@ class Ventana(QWidget):
             print("Error al obtener la mac: " + str(e))
             
     def scrollbar_value_changed(self, value):
-        backlight = Backlight()
-        if value >= 10:
-            backlight.brightness =value
+        try:
+            if self.backlight != None:
+                if value >= 10:
+                    self.backlight.brightness =value
+        except Exception as e:
+            print("Ocurrió algo al ejecutar la función del brillo: ", e)
             
     def apagar_sistema(self, event):
         try:

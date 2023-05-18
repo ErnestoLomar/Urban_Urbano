@@ -161,10 +161,10 @@ class LeerMinicomWorker(QObject):
                     self.intentos_conexion_gps+=1
                     self.contador_servidor = 0
                     
-                if self.contador_servidor == 4 or self.contador_servidor == 8 or self.contador_servidor >= 12:
+                if self.contador_servidor == 0 or self.contador_servidor == 4 or self.contador_servidor == 8 or self.contador_servidor >= 12:
                     try:
                         print("\x1b[1;32m"+"Verificando si hay datos en la BD por enviar...")
-                        for j in range(3):
+                        for j in range(6):
                             total_de_asignaciones_no_enviadas = obtener_todas_las_asignaciones_no_enviadas()
                             fin_de_viajes_no_enviados = obtener_estado_de_viajes_no_enviados()
                             total_de_ventas_no_enviadas = obtener_estado_de_todas_las_ventas_no_enviadas()
@@ -577,7 +577,7 @@ class LeerMinicomWorker(QObject):
             print("\x1b[1;32m"+'numero de intentos'+ str(int(self.intentos_envio) + 1))
             if enviado != True:
                 self.intentos_envio = self.intentos_envio + 1
-                if self.intentos_envio == 4:
+                if self.intentos_envio == 2:
                     try:
                         logging.info('Creando una nueva conexion con el socket')
                         print("\x1b[1;33m"+"Creando un nuevo socket......")
@@ -595,7 +595,7 @@ class LeerMinicomWorker(QObject):
                             modem.abrir_puerto()
                         except Exception as e:
                             print("\x1b[1;31;47m"+"LeerMinicom.py, linea 186: "+str(e)+'\033[0;m')"""
-                elif self.intentos_envio == 6:
+                elif self.intentos_envio == 4:
                     try:
                         logging.info('Reiniciando el quectel')
                         print("\x1b[1;33m"+"Reiniciando el quectel......")
@@ -622,7 +622,7 @@ class LeerMinicomWorker(QObject):
                             subprocess.run("sudo reboot", shell=True)
                         except Exception as e:
                             print("\x1b[1;31;47m"+"LeerMinicom.py, linea 196: "+str(e)+'\033[0;m')"""
-                elif self.intentos_envio == 10:
+                elif self.intentos_envio == 6:
                     self.intentos_envio = 0
             else:
                 self.intentos_envio = 0
@@ -872,6 +872,7 @@ class LeerMinicomWorker(QObject):
                                 print("\x1b[1;32m"+"Trama de estadistica enviada")
                                 print("\x1b[1;32m"+"#############################################")
                                 logging.info("Trama de estadistica enviada")
+                                self.realizar_accion(result)
                             except Exception as e:
                                 print("LeerMinicom.py, linea 376: "+str(e))
                         else:

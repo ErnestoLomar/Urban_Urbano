@@ -159,7 +159,7 @@ class VentanaChofer(QWidget):
                         self.settings.setValue('servicio', self.servicio)
                         self.settings.setValue('pension', self.pension_selec)
                         self.settings.setValue('turno', self.comboBox_turno.currentText())
-                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora)
+                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", str(fecha).replace("/","-"), hora)
                         folio = self.crear_folio()
                         
                         # Revisamos que el folio se haya incrementado.
@@ -230,7 +230,7 @@ class VentanaChofer(QWidget):
                         ultima_asignacion = obtener_ultima_asignacion()
                         print("La ultima asignacion es: ", ultima_asignacion)
                         
-                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha, hora)
+                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", str(fecha).replace("/","-"), hora)
                         folio = self.crear_folio()
                         
                         # Revisamos que el folio se haya incrementado.

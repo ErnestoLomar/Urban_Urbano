@@ -95,24 +95,33 @@ class corte(QWidget):
                 print("No se importaron las librerias de impresora")
             
             hecho = imprimir_ticket_de_corte(self.idUnidad, imprimir)
-            hora = strftime('%H:%M:%S')
-            fecha = str(strftime('%d-%m-%Y')).replace('/', '-')
+            hora = variables_globales.hora_actual
+            fecha = str(variables_globales.fecha_actual).replace('/', '-')
             csn_init = str(self.settings.value('csn_chofer'))
             self.settings.setValue('respaldo_csn_chofer', csn_init)
             
             if hecho:
+                
                 ultima_venta_bd = obtener_ultimo_folio_de_item_venta()
-                total_de_boletos_db = obtener_total_de_ventas_por_folioviaje_y_fecha(self.settings.value('folio_de_viaje'), fecha)
-                print("El total de boletos en la base de datos es: "+str(len(total_de_boletos_db)))
-                logging.info(f"El total de boletos en la base de datos es: {len(total_de_boletos_db)}")
                 print("Ultima venta en la base de datos es: "+str(ultima_venta_bd))
                 logging.info(f"Ultima venta en la base de datos es: {ultima_venta_bd}")
+                
+                if (len(self.settings.value('folio_de_viaje')) != 0):
+                    total_de_boletos_db = obtener_total_de_ventas_por_folioviaje_y_fecha(self.settings.value('folio_de_viaje'), fecha)
+                elif (len(variables_globales.folio_asignacion) != 0):
+                    total_de_boletos_db = obtener_total_de_ventas_por_folioviaje_y_fecha(variables_globales.folio_asignacion, fecha)
+                    
+                print("El total de boletos en la base de datos es: "+str(len(total_de_boletos_db)))
+                logging.info(f"El total de boletos en la base de datos es: {len(total_de_boletos_db)}")
+                
                 total_de_folio_aforo_efectivo = int(self.settings.value('info_estudiantes').split(',')[0]) + int(self.settings.value('info_normales').split(',')[0]) + int(self.settings.value('info_chicos').split(',')[0]) + int(self.settings.value('info_ad_mayores').split(',')[0])
                 print("El total de boletos en el aforo es: "+str(total_de_folio_aforo_efectivo))
                 logging.info(f"El total de boletos en el aforo es: {total_de_folio_aforo_efectivo}")
+                
                 if ultima_venta_bd != None:
                     print("Ultima folio de venta en la bd: "+str(ultima_venta_bd[1]))
                     logging.info(f"Ultima folio de venta en la bd: {ultima_venta_bd[1]}")
+                    
                     if len(total_de_boletos_db) != total_de_folio_aforo_efectivo:
                         print("La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")
                         logging.info(f"La cantidad de boletos en la base de datos no coincide con la cantidad de boletos en el aforo.")

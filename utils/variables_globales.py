@@ -38,6 +38,7 @@ fecha_actual = ""
 hora_actual = ""
 fecha_completa_actual = ""
 
+
 from enum import Enum
 # La clase VentanaActual es una enumeración de los posibles valores de la variable ventana_actual
 class VentanaActual(Enum):

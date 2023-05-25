@@ -49,13 +49,13 @@ class Actualizar(QWidget):
                     self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(255, 0, 0);')
                     self.label_info_2.setText("")
                     self.label_info.setText("No se completo la configuración de FTP")
-                    time.sleep(60)
+                    time.sleep(10)
                     self.close()
             else:
                     self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(255, 0, 0);')
                     self.label_info_2.setText("")
                     self.label_info.setText("No se completo la verificación de la memoria UFS")
-                    time.sleep(60)
+                    time.sleep(10)
                     self.close()
         except Exception as e:
             print(e)

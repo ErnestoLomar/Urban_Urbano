@@ -556,7 +556,7 @@ class LeerMinicomWorker(QObject):
                                     try:
                                         ventana_actualzar = Actualizar()
                                         ventana_actualzar.show()
-                                        ventana_actualzar.actualizar_raspberrypi(int(datos[2]), str(datos[1]))
+                                        ventana_actualzar.actualizar_raspberrypi(str(datos[2]).replace("\n","").replace("\r",""), str(datos[1]))
                                     except Exception as e:
                                         print(f"No se logro hacer la actualizacion de la matriz tarifaría: {e}")
                                         logging.info(f"No se logro hacer la actualizacion de la matriz tarifaría: {e}")

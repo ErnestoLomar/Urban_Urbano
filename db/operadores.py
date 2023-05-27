@@ -24,7 +24,7 @@ def obtener_operador_por_UID(UID):
     try:
         con = sqlite3.connect(URI)
         cur = con.cursor()
-        cur.execute("SELECT * FROM informacion WHERE UID = ?", (UID,))
+        cur.execute("SELECT * FROM informacion WHERE UID = ? LIMIT 1", (UID,))
         operador = cur.fetchone()
         con.close()
         return operador

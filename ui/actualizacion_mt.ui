@@ -58,7 +58,7 @@
 color: rgb(255, 0, 0)</string>
    </property>
    <property name="text">
-    <string>Revisando si existe una matriz tarifaria reciente</string>
+    <string>Revisando si existen cambios en la matriz tarifaria,</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>

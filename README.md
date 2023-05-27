@@ -4,6 +4,8 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.26:
+  - Correcciones de matriz tarifaría.
 - v1.25:
   - Actualizando geocercas de *Monte Alto_1*, *La Morita_3*, *Independencia_1* y *Electricistas_1*.
 - v1.24:

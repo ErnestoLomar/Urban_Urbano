@@ -807,12 +807,12 @@ class Principal_Modem:
                         #print("Actualización completada, Reiniciando boletera...")
                         print("Actualización completada...")
                         print("#############################################")
-                        time.sleep(8)
                         
                         if tipo == "Completo":
                             subprocess.run("sudo reboot", shell=True)
                         elif tipo == "Parcial":
                             variables_globales.version_de_MT = nombre
+                            print("La version de MT en vg es: ", variables_globales.version_de_MT)
                             insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "MT", variables_globales.version_de_MT) # Matriz tarifaría
                         
                         return True
@@ -860,12 +860,12 @@ class Principal_Modem:
                                     ser.flushOutput()
                                     
                                     variables_globales.version_de_MT = nombre
+                                    print("La version de MT en vg es: ", variables_globales.version_de_MT)
                                     insertar_estadisticas_boletera(str(datos_de_la_unidad[1]), fecha, variables_globales.hora_actual, "MT", variables_globales.version_de_MT) # Matriz tarifaría
                                     
                                     print("#############################################")
                                     print("Actualización completada...")
                                     print("#############################################")
-                                    time.sleep(8)
                                     #subprocess.run("sudo reboot", shell=True)
                                     return True
                     #------------------------------------------------------------------------------------------------TERMINA PARCHE

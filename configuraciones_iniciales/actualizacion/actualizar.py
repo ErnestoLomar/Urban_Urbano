@@ -16,8 +16,7 @@ import time
 import logging
 
 #Se hacen las importaciones necesarias
-from FTP import verificar_memoria_UFS, ConfigurarFTP, IniciarSesionFTP, ActualizarArchivos
-import subprocess
+from FTP import verificar_memoria_UFS, ConfigurarFTP
 
 class Actualizar(QWidget):
     
@@ -49,13 +48,13 @@ class Actualizar(QWidget):
                     self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(255, 0, 0);')
                     self.label_info_2.setText("")
                     self.label_info.setText("No se completo la configuración de FTP")
-                    time.sleep(10)
+                    time.sleep(5)
                     self.close()
             else:
                     self.label_info.setStyleSheet('font: 18pt "MS Shell Dlg 2"; color: rgb(255, 0, 0);')
                     self.label_info_2.setText("")
                     self.label_info.setText("No se completo la verificación de la memoria UFS")
-                    time.sleep(10)
+                    time.sleep(5)
                     self.close()
         except Exception as e:
             print(e)

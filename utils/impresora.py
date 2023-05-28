@@ -290,7 +290,7 @@ try:
                     for i in range(2):
                         instancia_impresora.text(f"Fv: {trama_dos_del_viaje[6]}  Sw: {vg.version_del_software}\n")
                         
-                        # Hacemos varias verificaciones para poder mostrar el Nombre de empleado en el ticket.
+                        # Hacemos varias verificaciones para poder mostrar el nombre y numero de empleado en el ticket.
                         if len(vg.nombre_de_operador) > 0:
                             if len (vg.numero_de_operador) > 0:
                                 instancia_impresora.text(f"Empleado: {vg.numero_de_operador} {vg.nombre_de_operador}\n")
@@ -348,16 +348,23 @@ try:
                 for i in range(2):
                     instancia_impresora.text(f"Fv: {str(trama_dos_del_viaje[6])}  Sw: {vg.version_del_software}\n")
                     
-                    # Hacemos varias verificaciones para poder mostrar el Nombre de empleado en el ticket.
+                    # Hacemos varias verificaciones para poder mostrar el nombre y numero de empleado en el ticket.
                     if len(vg.nombre_de_operador) > 0:
-                        instancia_impresora.text(f"Nombre de empleado: {vg.nombre_de_operador}\n")
+                        if len (vg.numero_de_operador) > 0:
+                            instancia_impresora.text(f"Empleado: {vg.numero_de_operador} {vg.nombre_de_operador}\n")
+                        else:
+                            operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                            if operador != None:
+                                instancia_impresora.text(f"Empleado: {operador[1]} {operador[2]}\n")
+                            else:
+                                instancia_impresora.text(f"Empleado: {vg.nombre_de_operador}\n")
                     else:
                         operador = obtener_operador_por_UID(settings.value('csn_chofer'))
                         if operador != None:
-                            instancia_impresora.text(f"Nombre de empleado: {operador[2]}\n")
+                            instancia_impresora.text(f"Empleado: {operador[1]} {operador[2]}\n")
                         else:
                             if len(vg.numero_de_operador) > 0:
-                                instancia_impresora.text(f"Numero de empleado: {vg.numero_de_operador}\n")
+                                instancia_impresora.text(f"Empleado: {vg.numero_de_operador}\n")
                             else:
                                 instancia_impresora.text(f"Operador de Reciente Ingreso\n")
                                 instancia_impresora.text(f"UID: {settings.value('csn_chofer')}\n")

@@ -80,10 +80,16 @@ class DeteccionGeocercasWorker(QObject):
                     fecha_formateada_hace_dos_dias = fecha_datetime_hace_dos_dias.strftime("%d/%m/%Y")
                     fecha_formateada_ayer = fecha_datetime_ayer.strftime("%d/%m/%Y")
                     
-                    #print("La fecha de la trama dos formateada es: ", fecha_formateada_trama_dos)
-                    #print("La fecha de hoy formateada es: ", fecha_formateada_hoy)
-                    #print("La fecha de hace dos dias formateada es: ", fecha_formateada_hace_dos_dias)
-                    #print("La fecha de ayer es: ", fecha_formateada_ayer)
+                    # Fechas formateadas en YY-MM-DD
+                    fecha_formateada_trama_dos = int(str(fecha_datetime_trama_dos.strftime("%Y/%m/%d")).replace("/",""))
+                    fecha_formateada_hoy = int(str(fecha_datetime_hoy.strftime("%Y/%m/%d")).replace("/",""))
+                    fecha_formateada_hace_dos_dias = int(str(fecha_datetime_hace_dos_dias.strftime("%Y/%m/%d")).replace("/",""))
+                    fecha_formateada_ayer = int(str(fecha_datetime_ayer.strftime("%Y/%m/%d")).replace("/",""))
+                    
+                    print("La fecha de la trama dos formateada es: ", fecha_formateada_trama_dos)
+                    print("La fecha de hoy formateada es: ", fecha_formateada_hoy)
+                    print("La fecha de hace dos dias formateada es: ", fecha_formateada_hace_dos_dias)
+                    print("La fecha de ayer es: ", fecha_formateada_ayer)
                     
                     '''
                     # Crear un objeto QMouseEvent

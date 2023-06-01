@@ -74,11 +74,12 @@ class DeteccionGeocercasWorker(QObject):
                     fecha_datetime_hace_dos_dias = datetime.datetime.strptime(str(fecha_hace_dos_dias).replace("-","/"), "%Y/%m/%d")
                     fecha_datetime_ayer = datetime.datetime.strptime(str(fecha_ayer).replace("-","/"), "%Y/%m/%d")
                     
+                    '''
                     # Ya que las tenemos en formato datetime les damos formato dia/mes/año
                     fecha_formateada_trama_dos = fecha_datetime_trama_dos.strftime("%d/%m/%Y")
                     fecha_formateada_hoy = fecha_datetime_hoy.strftime("%d/%m/%Y")
                     fecha_formateada_hace_dos_dias = fecha_datetime_hace_dos_dias.strftime("%d/%m/%Y")
-                    fecha_formateada_ayer = fecha_datetime_ayer.strftime("%d/%m/%Y")
+                    fecha_formateada_ayer = fecha_datetime_ayer.strftime("%d/%m/%Y")'''
                     
                     # Fechas formateadas en YY-MM-DD
                     fecha_formateada_trama_dos = int(str(fecha_datetime_trama_dos.strftime("%Y/%m/%d")).replace("/",""))

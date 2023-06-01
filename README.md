@@ -4,6 +4,8 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.28:
+  - Quitando servicios 673 y 674 de la pension de Haciendas.
 - v1.27:
   - Arreglando bug de la comparación de fechas en el primer día del mes.
 - v1.26:

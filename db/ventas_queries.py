@@ -140,6 +140,14 @@ def obtener_total_de_ventas_por_folioviaje_y_fecha(folio_viaje,fecha):
     conexion.close()
     return resultado
 
+def obtener_total_de_ventas_por_folioviaje(folio_viaje):
+    conexion = sqlite3.connect(URI)
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM item_venta WHERE folio_viaje = ?", (folio_viaje))
+    resultado = cursor.fetchall()
+    conexion.close()
+    return resultado
+
 def obtener_estado_de_todas_las_ventas_no_enviadas():
     conexion = sqlite3.connect(URI)
     cursor = conexion.cursor()

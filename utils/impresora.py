@@ -11,7 +11,7 @@ import sys
 sys.path.insert(1, '/home/pi/Urban_Urbano/db')
 
 from operadores import obtener_operador_por_UID
-from ventas_queries import obtener_ultimo_folio_de_item_venta, obtener_total_de_ventas_por_folioviaje_y_fecha
+from ventas_queries import obtener_ultimo_folio_de_item_venta, obtener_total_de_ventas_por_folioviaje
 from asignaciones_queries import obtener_asignacion_por_folio_de_viaje, obtener_ultima_asignacion
 
 try:
@@ -216,9 +216,9 @@ try:
             logging.info(f"Ultima venta en la base de datos es: {ultima_venta_bd}")
             
             if (len(settings.value('folio_de_viaje')) != 0):
-                total_de_boletos_db = obtener_total_de_ventas_por_folioviaje_y_fecha(settings.value('folio_de_viaje'), fecha)
+                total_de_boletos_db = obtener_total_de_ventas_por_folioviaje(settings.value('folio_de_viaje'))
             elif (len(vg.folio_asignacion) != 0):
-                total_de_boletos_db = obtener_total_de_ventas_por_folioviaje_y_fecha(vg.folio_asignacion, fecha)
+                total_de_boletos_db = obtener_total_de_ventas_por_folioviaje(vg.folio_asignacion)
             
             if len(total_de_boletos_db) != 0:
                 

@@ -4,6 +4,14 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.30:
+  - Arreglando bug de que a todas las auto_asignaciones se les coloca el mismo folio de viaje.
+  - Agregando la fecha como parámetro a la funcion *aniadir_folio_de_viaje_a_auto_asignacion*.
+  - Arreglando bug de que no se puede cerrar el viaje, por problemas de impresión de ticket.
+  - Modificando ventana de *FUERADEVIGENCIA* a *TARJETAINVALIDA* cuando la vigencia de la tarjeta no corresponde con los parámetros esperados.
+  - Agregando mejoras de código en el archivo *impresora.py* y *corte.py*.
+  - Arreglando bug de doble UID vació, cuando se apaga la boletera en la ventana de Chofer y cuando se inicia nuevamente la boletera el UID se pasa a vació. lo que ocasiona la doble coma en la trama 2.
+  - En inicio.py se agrego la opción de que cuando se inicie el sistema en la ventana de chofer el valor del UID guardado en el .ini se guarde en variables globales.
 - v1.29:
   - Arreglando bug de que se imprimen los folios incorrectos.
 - v1.28:

@@ -137,6 +137,7 @@ class Ventana(QWidget):
                 
                 if ventana_actual == str("chofer"):
                     logging.info('Se abrirá Ventana de chofer')
+                    variables_globales.csn_chofer = csn_chofer
                     self.ventana_servicio = VentanaChofer(AbrirVentanas.cerrar_vuelta.close_signal, AbrirVentanas.cerrar_vuelta.close_signal_pasaje)
                     self.ventana_servicio.show()
                     #self.ventana_servicio.activateWindow()

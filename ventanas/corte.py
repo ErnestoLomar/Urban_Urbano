@@ -99,6 +99,7 @@ class corte(QWidget):
             fecha = str(variables_globales.fecha_actual).replace('/', '-')
             csn_init = str(self.settings.value('csn_chofer'))
             self.settings.setValue('respaldo_csn_chofer', csn_init)
+            total_de_boletos_db = ""
             
             if hecho:
                 

@@ -44,7 +44,8 @@ class VentanaChofer(QWidget):
             #Realizamos configuración de la ventana chofer.
             self.settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat)
             self.settings.setValue('ventana_actual', "chofer")
-            self.settings.setValue('csn_chofer', vg.csn_chofer)
+            if len(vg.csn_chofer) != 0:
+                self.settings.setValue('csn_chofer', vg.csn_chofer)
             self.setWindowFlags(Qt.FramelessWindowHint)
             self.setGeometry(0,0,800, 480)
             self.inicializar_comboBox()
@@ -180,7 +181,7 @@ class VentanaChofer(QWidget):
                                 self.settings.setValue('folio_de_viaje', folio_de_viaje)
                                 print("Folio de viaje: ", folio_de_viaje)
                                 logging.info(f"Folio de viaje: {folio_de_viaje}")
-                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje)
+                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje, str(fecha).replace("/","-"))
                                 self.rutas = Rutas(self.turno, self.servicio, self.close_signal, self.close_signal_pasaje)
                                 self.rutas.setGeometry(0, 0, 800, 440)
                                 self.rutas.setWindowFlags(Qt.FramelessWindowHint)
@@ -249,7 +250,7 @@ class VentanaChofer(QWidget):
                                 self.settings.setValue('folio_de_viaje', folio_de_viaje)
                                 print("Folio de viaje: ", folio_de_viaje)
                                 logging.info(f"Folio de viaje: {folio_de_viaje}")
-                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje)
+                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje, str(fecha).replace("/","-"))
                                 self.rutas = Rutas(self.turno, self.comboBox_servicio.currentText(), self.close_signal, self.close_signal_pasaje)
                                 self.rutas.setGeometry(0, 0, 800, 440)
                                 self.rutas.setWindowFlags(Qt.FramelessWindowHint)

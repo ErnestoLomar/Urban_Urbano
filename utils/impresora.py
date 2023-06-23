@@ -210,6 +210,7 @@ try:
             settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat)
             fecha = str(vg.fecha_actual).replace('/', '-')
             total_a_liquidar_bd = 0.0
+            total_de_boletos_db = ""
             
             ultima_venta_bd = obtener_ultimo_folio_de_item_venta()
             print("Ultima venta en la base de datos es: "+str(ultima_venta_bd))
@@ -351,21 +352,39 @@ try:
                     # Hacemos varias verificaciones para poder mostrar el nombre y numero de empleado en el ticket.
                     if len(vg.nombre_de_operador) > 0:
                         if len (vg.numero_de_operador) > 0:
+                            # Si el nombre y número de operador están guardados se imprimen
                             instancia_impresora.text(f"Empleado: {vg.numero_de_operador} {vg.nombre_de_operador}\n")
                         else:
+                            # Si el nombre de operador esta guardado pero no el numero
+                            # se procede a buscar el operador en la base de datos interna.
                             operador = obtener_operador_por_UID(settings.value('csn_chofer'))
                             if operador != None:
+                                # Si se encuentra el operador en la base de datos conforme el UID
+                                # de la tarjeta, se imprimen los datos del operador
                                 instancia_impresora.text(f"Empleado: {operador[1]} {operador[2]}\n")
                             else:
+                                # Si no se encuentra el operador en la base de datos
+                                # se imprime en el ticket solamente el nombre del operador-
                                 instancia_impresora.text(f"Empleado: {vg.nombre_de_operador}\n")
                     else:
+                        # Si no se encuentra guardado el nombre de operador, lo buscamos
+                        # en la base de datos interna.
                         operador = obtener_operador_por_UID(settings.value('csn_chofer'))
                         if operador != None:
+                            # Si se encuentra el operador en la base de datos conforme el UID
+                            # de la tarjeta, se imprimen los datos del operador.
                             instancia_impresora.text(f"Empleado: {operador[1]} {operador[2]}\n")
                         else:
+                            # Si no se encuentra el operador en la base de datos
                             if len(vg.numero_de_operador) > 0:
+                                # Si no se encuentra el operador en la base de datos
+                                # revisamos si tenemos guardado el numero de operador
+                                # si es asi, entonces imprimimos solo el numero de operador.
                                 instancia_impresora.text(f"Empleado: {vg.numero_de_operador}\n")
                             else:
+                                # Si no se encuentra el operador en la base de datos y no tenemos
+                                # el numero de operador guardado entonces procedemos a imprimir
+                                # el UID de la tarjeta.
                                 instancia_impresora.text(f"Operador de Reciente Ingreso\n")
                                 instancia_impresora.text(f"UID: {settings.value('csn_chofer')}\n")
                                 

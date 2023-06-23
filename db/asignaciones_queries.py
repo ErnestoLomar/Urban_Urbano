@@ -177,11 +177,11 @@ def modificar_folio_auto_asignacion(folio, id):
         print(e)
         logging.info(e)
 
-def aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje):
+def aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje, fecha):
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
-        cursor.execute("UPDATE auto_asignacion SET folio_de_viaje = ? WHERE folio = ?", (folio_de_viaje, folio))
+        cursor.execute("UPDATE auto_asignacion SET folio_de_viaje = ? WHERE folio = ? AND fecha = ?", (folio_de_viaje, folio, fecha,))
         conexion.commit()
         conexion.close()
         return True

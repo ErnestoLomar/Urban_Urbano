@@ -152,7 +152,7 @@ class LeerTarjetaWorker(QObject):
                                         time.sleep(2)
                                         GUI.close()
                                 else:
-                                    GUI = VentanaEmergente("FUERADEVIGENCIA", "")
+                                    GUI = VentanaEmergente("TARJETAINVALIDA", "")
                                     GUI.show()
                                     for i in range(5):
                                         GPIO.output(12, True)

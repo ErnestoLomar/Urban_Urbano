@@ -7,6 +7,7 @@ import time
 from PyQt5.QtCore import QSettings
 import variables_globales as vg
 import sys
+import subprocess
 
 sys.path.insert(1, '/home/pi/Urban_Urbano/db')
 
@@ -208,7 +209,10 @@ try:
     def imprimir_ticket_de_corte(idUnidad, imprimir):
         try:
             settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat)
-            fecha = str(vg.fecha_actual).replace('/', '-')
+            if len(str(vg.fecha_actual)) > 0:
+                fecha = str(vg.fecha_actual).replace('/', '-')
+            else:
+                fecha = subprocess.check_output(['date', '+%d-%m-%Y']).decode().strip()
             total_a_liquidar_bd = 0.0
             total_de_boletos_db = ""
             
@@ -289,33 +293,11 @@ try:
                 try:
                     # Hacemos la impresión de los dos tickets de liquidación.
                     for i in range(2):
-                        instancia_impresora.text(f"Fv: {trama_dos_del_viaje[6]}  Sw: {vg.version_del_software}\n")
                         
-                        # Hacemos varias verificaciones para poder mostrar el nombre y numero de empleado en el ticket.
-                        if len(vg.nombre_de_operador) > 0:
-                            if len (vg.numero_de_operador) > 0:
-                                instancia_impresora.text(f"Empleado: {vg.numero_de_operador} {vg.nombre_de_operador}\n")
-                            else:
-                                operador = obtener_operador_por_UID(settings.value('csn_chofer'))
-                                if operador != None:
-                                    instancia_impresora.text(f"Empleado: {operador[1]} {operador[2]}\n")
-                                else:
-                                    instancia_impresora.text(f"Empleado: {vg.nombre_de_operador}\n")
-                        else:
-                            operador = obtener_operador_por_UID(settings.value('csn_chofer'))
-                            if operador != None:
-                                instancia_impresora.text(f"Empleado: {operador[1]} {operador[2]}\n")
-                            else:
-                                if len(vg.numero_de_operador) > 0:
-                                    instancia_impresora.text(f"Empleado: {vg.numero_de_operador}\n")
-                                else:
-                                    instancia_impresora.text(f"Operador de Reciente Ingreso\n")
-                                    instancia_impresora.text(f"UID: {settings.value('csn_chofer')}\n")
-                                    
+                        #GENERAL
+                        instancia_impresora.text("GENERAL\n")
+                        instancia_impresora.text(f"Fv: {trama_dos_del_viaje[6]}  Sw: {vg.version_del_software}\n")
                         instancia_impresora.text(f"Ultimo folio: {ultima_venta_bd[1]}\n")
-                        inicio_de_viaje_a_mostrar = str(trama_dos_del_viaje[4]) + " " + str(trama_dos_del_viaje[5])
-                        instancia_impresora.text(f"Inicio de viaje: {inicio_de_viaje_a_mostrar}\n")
-                        instancia_impresora.text(f"Fin de viaje (impresion): {fecha} {hora_actual}\n")
                         instancia_impresora.text(f"Unidad: {idUnidad}    Serv: {settings.value('servicio')}\n")
                         instancia_impresora.text(f"Estud:        {str(settings.value('info_estudiantes')).split(',')[0]}  $       {str(settings.value('info_estudiantes')).split(',')[1]}\n")
                         instancia_impresora.text(f"Normal:       {str(settings.value('info_normales')).split(',')[0]}  $       {str(settings.value('info_normales')).split(',')[1]}\n")
@@ -323,11 +305,205 @@ try:
                         instancia_impresora.text(f"Ad.May:       {str(settings.value('info_ad_mayores')).split(',')[0]}  $       {str(settings.value('info_ad_mayores')).split(',')[1]}\n")
                         instancia_impresora.text(f"Total a liquidar: $ {total_a_liquidar_bd}\n")
                         instancia_impresora.text(f"Total de folios: {total_de_folio_aforo_efectivo}\n")
+                        instancia_impresora.text("\n")
+                        
+                        #INICIO DE VIAJE
+                        instancia_impresora.text("INICIO DE VIAJE\n")
+                        inicio_de_viaje_a_mostrar = str(trama_dos_del_viaje[4]) + " " + str(trama_dos_del_viaje[5])
+                        instancia_impresora.text(f"Fecha y hora: {inicio_de_viaje_a_mostrar}\n")
+                        
+                        # Hacemos varias verificaciones para poder mostrar el nombre y numero de empleado en el ticket.
+                        if len(vg.nombre_de_operador_inicio) > 0:
+                            if len(vg.numero_de_operador_inicio) > 0:
+                                instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio} {vg.nombre_de_operador_inicio}\n")
+                            else:
+                                operador = None
+                                if len(settings.value('numero_de_operador_inicio')) != 0:
+                                    instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')} {vg.nombre_de_operador_inicio}\n")
+                                elif len(settings.value('csn_chofer')) != 0:
+                                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien abrio: {vg.nombre_de_operador_inicio}\n")
+                                elif len(vg.csn_chofer) != 0:
+                                    operador = obtener_operador_por_UID(vg.csn_chofer)
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien abrio: {vg.nombre_de_operador_inicio}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {vg.nombre_de_operador_inicio}\n")
+                        else:
+                            if len(settings.value('nombre_de_operador_inicio')) != 0:
+                                if len(vg.numero_de_operador_inicio) > 0:
+                                    instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio} {settings.value('nombre_de_operador_inicio')}\n")
+                                else:
+                                    operador = None
+                                    if len(settings.value('numero_de_operador_inicio')) != 0:
+                                        instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')} {settings.value('nombre_de_operador_inicio')}\n")
+                                    elif len(settings.value('csn_chofer')) != 0:
+                                        operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                        if operador != None:
+                                            instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                        else:
+                                            instancia_impresora.text(f"Quien abrio: {settings.value('nombre_de_operador_inicio')}\n")
+                                    elif len(vg.csn_chofer) != 0:
+                                        operador = obtener_operador_por_UID(vg.csn_chofer)
+                                        if operador != None:
+                                            instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                        else:
+                                            instancia_impresora.text(f"Quien abrio: {settings.value('nombre_de_operador_inicio')}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien abrio: {settings.value('nombre_de_operador_inicio')}\n")
+                            elif len(vg.numero_de_operador_inicio) > 0:
+                                operador = None
+                                if len(settings.value('csn_chofer')) != 0:
+                                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio}\n")
+                                elif len(vg.csn_chofer) != 0:
+                                    operador = obtener_operador_por_UID(vg.csn_chofer)
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio}\n")
+                            elif len(settings.value('numero_de_operador_inicio')) > 0:
+                                operador = None
+                                if len(settings.value('csn_chofer')) != 0:
+                                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')}\n")
+                                elif len(vg.csn_chofer) != 0:
+                                    operador = obtener_operador_por_UID(vg.csn_chofer)
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')}\n")
+                            elif len(settings.value('csn_chofer')) != 0:
+                                operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: ----------\n")
+                            elif len(vg.csn_chofer) != 0:
+                                operador = obtener_operador_por_UID(vg.csn_chofer)
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: ----------\n")
+                            else:
+                                instancia_impresora.text(f"Quien abrio: ----------\n")
+                        
+                        operador = None
+                        instancia_impresora.text("\n")
+                        
+                        #FIN DE VIAJE
+                        instancia_impresora.text("FIN DE VIAJE\n")
+                        instancia_impresora.text(f"Fecha y hora (impresion): {fecha} {hora_actual}\n")
+                        # Hacemos varias verificaciones para poder mostrar el nombre y numero de empleado en el ticket.
+                        if len(vg.nombre_de_operador_final) > 0:
+                            if len(vg.numero_de_operador_final) > 0:
+                                instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final} {vg.nombre_de_operador_final}\n")
+                            else:
+                                operador = None
+                                if len(settings.value('numero_de_operador_final')) != 0:
+                                    instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')} {vg.nombre_de_operador_final}\n")
+                                elif len(settings.value('csn_chofer')) != 0:
+                                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien cerro: {vg.nombre_de_operador_final}\n")
+                                elif len(vg.csn_chofer) != 0:
+                                    operador = obtener_operador_por_UID(vg.csn_chofer)
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien cerro: {vg.nombre_de_operador_final}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {vg.nombre_de_operador_final}\n")
+                        else:
+                            if len(settings.value('nombre_de_operador_final')) != 0:
+                                if len(vg.numero_de_operador_final) > 0:
+                                    instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final} {settings.value('nombre_de_operador_final')}\n")
+                                else:
+                                    operador = None
+                                    if len(settings.value('numero_de_operador_final')) != 0:
+                                        instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')} {settings.value('nombre_de_operador_final')}\n")
+                                    elif len(settings.value('csn_chofer')) != 0:
+                                        operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                        if operador != None:
+                                            instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                        else:
+                                            instancia_impresora.text(f"Quien cerro: {settings.value('nombre_de_operador_final')}\n")
+                                    elif len(vg.csn_chofer) != 0:
+                                        operador = obtener_operador_por_UID(vg.csn_chofer)
+                                        if operador != None:
+                                            instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                        else:
+                                            instancia_impresora.text(f"Quien cerro: {settings.value('nombre_de_operador_final')}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien cerro: {settings.value('nombre_de_operador_final')}\n")
+                            elif len(vg.numero_de_operador_final) > 0:
+                                operador = None
+                                if len(settings.value('csn_chofer')) != 0:
+                                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final}\n")
+                                elif len(vg.csn_chofer) != 0:
+                                    operador = obtener_operador_por_UID(vg.csn_chofer)
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final}\n")
+                            elif len(settings.value('numero_de_operador_final')) > 0:
+                                operador = None
+                                if len(settings.value('csn_chofer')) != 0:
+                                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')}\n")
+                                elif len(vg.csn_chofer) != 0:
+                                    operador = obtener_operador_por_UID(vg.csn_chofer)
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')}\n")
+                            elif len(settings.value('csn_chofer')) != 0:
+                                operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: ----------\n")
+                            elif len(vg.csn_chofer) != 0:
+                                operador = obtener_operador_por_UID(vg.csn_chofer)
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: ----------\n")
+                            else:
+                                instancia_impresora.text(f"Quien cerro: ----------\n")
                         instancia_impresora.cut()
                         logging.info(f"Tickets de corte impresos correctamente.")
                     return True
                 except Exception as e:
-                    print("Ocurrió algo al hacer la impresión de los tickets de liquidación")
+                    print("Ocurrió algo al hacer la impresión de los tickets de liquidaciónA: ", str(e))
                     logging.info("Ocurrió algo al hacer la impresión de los tickets de liquidación")
             else:
                 # Creamos la conexión con la impresora térmica.
@@ -347,51 +523,11 @@ try:
                     print("Ocurrió un error al obtener la ultima asignacion: ", e)
                 
                 for i in range(2):
-                    instancia_impresora.text(f"Fv: {str(trama_dos_del_viaje[6])}  Sw: {vg.version_del_software}\n")
                     
-                    # Hacemos varias verificaciones para poder mostrar el nombre y numero de empleado en el ticket.
-                    if len(vg.nombre_de_operador) > 0:
-                        if len (vg.numero_de_operador) > 0:
-                            # Si el nombre y número de operador están guardados se imprimen
-                            instancia_impresora.text(f"Empleado: {vg.numero_de_operador} {vg.nombre_de_operador}\n")
-                        else:
-                            # Si el nombre de operador esta guardado pero no el numero
-                            # se procede a buscar el operador en la base de datos interna.
-                            operador = obtener_operador_por_UID(settings.value('csn_chofer'))
-                            if operador != None:
-                                # Si se encuentra el operador en la base de datos conforme el UID
-                                # de la tarjeta, se imprimen los datos del operador
-                                instancia_impresora.text(f"Empleado: {operador[1]} {operador[2]}\n")
-                            else:
-                                # Si no se encuentra el operador en la base de datos
-                                # se imprime en el ticket solamente el nombre del operador-
-                                instancia_impresora.text(f"Empleado: {vg.nombre_de_operador}\n")
-                    else:
-                        # Si no se encuentra guardado el nombre de operador, lo buscamos
-                        # en la base de datos interna.
-                        operador = obtener_operador_por_UID(settings.value('csn_chofer'))
-                        if operador != None:
-                            # Si se encuentra el operador en la base de datos conforme el UID
-                            # de la tarjeta, se imprimen los datos del operador.
-                            instancia_impresora.text(f"Empleado: {operador[1]} {operador[2]}\n")
-                        else:
-                            # Si no se encuentra el operador en la base de datos
-                            if len(vg.numero_de_operador) > 0:
-                                # Si no se encuentra el operador en la base de datos
-                                # revisamos si tenemos guardado el numero de operador
-                                # si es asi, entonces imprimimos solo el numero de operador.
-                                instancia_impresora.text(f"Empleado: {vg.numero_de_operador}\n")
-                            else:
-                                # Si no se encuentra el operador en la base de datos y no tenemos
-                                # el numero de operador guardado entonces procedemos a imprimir
-                                # el UID de la tarjeta.
-                                instancia_impresora.text(f"Operador de Reciente Ingreso\n")
-                                instancia_impresora.text(f"UID: {settings.value('csn_chofer')}\n")
-                                
+                    # GENERAL
+                    instancia_impresora.text("General:")
+                    instancia_impresora.text(f"Fv: {trama_dos_del_viaje[6]}  Sw: {vg.version_del_software}\n")
                     instancia_impresora.text(f"Ultimo folio: 0\n")
-                    inicio_de_viaje_a_mostrar = str(trama_dos_del_viaje[4]) + " " + str(trama_dos_del_viaje[5])
-                    instancia_impresora.text(f"Inicio de viaje: {inicio_de_viaje_a_mostrar}\n")
-                    instancia_impresora.text(f"Fin de viaje (impresion): {fecha} {hora_actual}\n")
                     instancia_impresora.text(f"Unidad: {idUnidad}    Serv: {settings.value('servicio')}\n")
                     instancia_impresora.text(f"Estud:        {str(settings.value('info_estudiantes')).split(',')[0]}  $       {str(settings.value('info_estudiantes')).split(',')[1]}\n")
                     instancia_impresora.text(f"Normal:       {str(settings.value('info_normales')).split(',')[0]}  $       {str(settings.value('info_normales')).split(',')[1]}\n")
@@ -399,6 +535,199 @@ try:
                     instancia_impresora.text(f"Ad.May:       {str(settings.value('info_ad_mayores')).split(',')[0]}  $       {str(settings.value('info_ad_mayores')).split(',')[1]}\n")
                     instancia_impresora.text(f"Total a liquidar: $ {total_a_liquidar_bd}\n")
                     instancia_impresora.text(f"Total de folios: 0\n")
+                    instancia_impresora.text("\n")
+                    
+                    #INICIO DE VIAJE
+                    instancia_impresora.text("INICIO DE VIAJE\n")
+                    inicio_de_viaje_a_mostrar = str(trama_dos_del_viaje[4]) + " " + str(trama_dos_del_viaje[5])
+                    instancia_impresora.text(f"Fecha y hora: {inicio_de_viaje_a_mostrar}\n")
+                    # Hacemos varias verificaciones para poder mostrar el nombre y numero de empleado en el ticket.
+                    if len(vg.nombre_de_operador_inicio) > 0:
+                        if len(vg.numero_de_operador_inicio) > 0:
+                            instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio} {vg.nombre_de_operador_inicio}\n")
+                        else:
+                            operador = None
+                            if len(settings.value('numero_de_operador_inicio')) != 0:
+                                instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')} {vg.nombre_de_operador_inicio}\n")
+                            elif len(settings.value('csn_chofer')) != 0:
+                                operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {vg.nombre_de_operador_inicio}\n")
+                            elif len(vg.csn_chofer) != 0:
+                                operador = obtener_operador_por_UID(vg.csn_chofer)
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {vg.nombre_de_operador_inicio}\n")
+                            else:
+                                instancia_impresora.text(f"Quien abrio: {vg.nombre_de_operador_inicio}\n")
+                    else:
+                        if len(settings.value('nombre_de_operador_inicio')) != 0:
+                            if len(vg.numero_de_operador_inicio) > 0:
+                                instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio} {settings.value('nombre_de_operador_inicio')}\n")
+                            else:
+                                operador = None
+                                if len(settings.value('numero_de_operador_inicio')) != 0:
+                                    instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')} {settings.value('nombre_de_operador_inicio')}\n")
+                                elif len(settings.value('csn_chofer')) != 0:
+                                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien abrio: {settings.value('nombre_de_operador_inicio')}\n")
+                                elif len(vg.csn_chofer) != 0:
+                                    operador = obtener_operador_por_UID(vg.csn_chofer)
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien abrio: {settings.value('nombre_de_operador_inicio')}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {settings.value('nombre_de_operador_inicio')}\n")
+                        elif len(vg.numero_de_operador_inicio) > 0:
+                            operador = None
+                            if len(settings.value('csn_chofer')) != 0:
+                                operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio}\n")
+                            elif len(vg.csn_chofer) != 0:
+                                operador = obtener_operador_por_UID(vg.csn_chofer)
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio}\n")
+                            else:
+                                instancia_impresora.text(f"Quien abrio: {vg.numero_de_operador_inicio}\n")
+                        elif len(settings.value('numero_de_operador_inicio')) > 0:
+                            operador = None
+                            if len(settings.value('csn_chofer')) != 0:
+                                operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')}\n")
+                            elif len(vg.csn_chofer) != 0:
+                                operador = obtener_operador_por_UID(vg.csn_chofer)
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')}\n")
+                            else:
+                                instancia_impresora.text(f"Quien abrio: {settings.value('numero_de_operador_inicio')}\n")
+                        elif len(settings.value('csn_chofer')) != 0:
+                            operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                            if operador != None:
+                                instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                            else:
+                                instancia_impresora.text(f"Quien abrio: ----------\n")
+                        elif len(vg.csn_chofer) != 0:
+                            operador = obtener_operador_por_UID(vg.csn_chofer)
+                            if operador != None:
+                                instancia_impresora.text(f"Quien abrio: {operador[1]} {operador[2]}\n")
+                            else:
+                                instancia_impresora.text(f"Quien abrio: ----------\n")
+                        else:
+                            instancia_impresora.text(f"Quien abrio: ----------\n")
+                    
+                    operador = None
+                    instancia_impresora.text("\n")
+                    
+                    #FIN DE VIAJE
+                    instancia_impresora.text("FIN DE VIAJE\n")
+                    instancia_impresora.text(f"Fecha y hora (impresion): {fecha} {hora_actual}\n")
+                    # Hacemos varias verificaciones para poder mostrar el nombre y numero de empleado en el ticket.
+                    if len(vg.nombre_de_operador_final) > 0:
+                        if len(vg.numero_de_operador_final) > 0:
+                            instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final} {vg.nombre_de_operador_final}\n")
+                        else:
+                            operador = None
+                            if len(settings.value('numero_de_operador_final')) != 0:
+                                instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')} {vg.nombre_de_operador_final}\n")
+                            elif len(settings.value('csn_chofer')) != 0:
+                                operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {vg.nombre_de_operador_final}\n")
+                            elif len(vg.csn_chofer) != 0:
+                                operador = obtener_operador_por_UID(vg.csn_chofer)
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {vg.nombre_de_operador_final}\n")
+                            else:
+                                instancia_impresora.text(f"Quien cerro: {vg.nombre_de_operador_final}\n")
+                    else:
+                        if len(settings.value('nombre_de_operador_final')) != 0:
+                            if len(vg.numero_de_operador_final) > 0:
+                                instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final} {settings.value('nombre_de_operador_final')}\n")
+                            else:
+                                operador = None
+                                if len(settings.value('numero_de_operador_final')) != 0:
+                                    instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')} {settings.value('nombre_de_operador_final')}\n")
+                                elif len(settings.value('csn_chofer')) != 0:
+                                    operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien cerro: {settings.value('nombre_de_operador_final')}\n")
+                                elif len(vg.csn_chofer) != 0:
+                                    operador = obtener_operador_por_UID(vg.csn_chofer)
+                                    if operador != None:
+                                        instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                    else:
+                                        instancia_impresora.text(f"Quien cerro: {settings.value('nombre_de_operador_final')}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {settings.value('nombre_de_operador_final')}\n")
+                        elif len(vg.numero_de_operador_final) > 0:
+                            operador = None
+                            if len(settings.value('csn_chofer')) != 0:
+                                operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final}\n")
+                            elif len(vg.csn_chofer) != 0:
+                                operador = obtener_operador_por_UID(vg.csn_chofer)
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final}\n")
+                            else:
+                                instancia_impresora.text(f"Quien cerro: {vg.numero_de_operador_final}\n")
+                        elif len(settings.value('numero_de_operador_final')) > 0:
+                            operador = None
+                            if len(settings.value('csn_chofer')) != 0:
+                                operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')}\n")
+                            elif len(vg.csn_chofer) != 0:
+                                operador = obtener_operador_por_UID(vg.csn_chofer)
+                                if operador != None:
+                                    instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                                else:
+                                    instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')}\n")
+                            else:
+                                instancia_impresora.text(f"Quien cerro: {settings.value('numero_de_operador_final')}\n")
+                        elif len(settings.value('csn_chofer')) != 0:
+                            operador = obtener_operador_por_UID(settings.value('csn_chofer'))
+                            if operador != None:
+                                instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                            else:
+                                instancia_impresora.text(f"Quien cerro: ----------\n")
+                        elif len(vg.csn_chofer) != 0:
+                            operador = obtener_operador_por_UID(vg.csn_chofer)
+                            if operador != None:
+                                instancia_impresora.text(f"Quien cerro: {operador[1]} {operador[2]}\n")
+                            else:
+                                instancia_impresora.text(f"Quien cerro: ----------\n")
+                        else:
+                            instancia_impresora.text(f"Quien cerro: ----------\n")
                     instancia_impresora.cut()
                     logging.info(f"Tickets de corte impresos correctamente.")
                 return True

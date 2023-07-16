@@ -44,6 +44,7 @@ class VentanaChofer(QWidget):
             #Realizamos configuración de la ventana chofer.
             self.settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat)
             self.settings.setValue('ventana_actual', "chofer")
+            #vg.ventana_actual = "chofer"
             if len(vg.csn_chofer) != 0:
                 self.settings.setValue('csn_chofer', vg.csn_chofer)
             self.setWindowFlags(Qt.FramelessWindowHint)
@@ -141,12 +142,14 @@ class VentanaChofer(QWidget):
             # Obtenemos la fecha actual de la raspberry
             
             # Ejecutar el comando date y obtener la salida
-            result = subprocess.run(['date', '+%d/%m/%Y'], stdout=subprocess.PIPE)
+            #result = subprocess.run(['date', '+%d/%m/%Y'], stdout=subprocess.PIPE)
 
             # Decodificar la salida en formato de cadena de caracteres
-            fecha = datetime.datetime.strptime(str(result.stdout.decode('utf-8').strip()), "%d/%m/%Y").strftime("%d/%m/%Y")
+            #fecha = datetime.datetime.strptime(str(result.stdout.decode('utf-8').strip()), "%d/%m/%Y").strftime("%d/%m/%Y")
             
-            print("La fecha actual de la raspberry es: ", fecha)
+            fecha_vg = str(vg.fecha_actual).replace('/', '-')
+            
+            print("La fecha actual de la raspberry es: ", fecha_vg)
 
             if self.pension_selec != "":
                 if self.servicio != "":
@@ -160,7 +163,7 @@ class VentanaChofer(QWidget):
                         self.settings.setValue('servicio', self.servicio)
                         self.settings.setValue('pension', self.pension_selec)
                         self.settings.setValue('turno', self.comboBox_turno.currentText())
-                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", str(fecha).replace("/","-"), hora)
+                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha_vg, hora)
                         folio = self.crear_folio()
                         
                         # Revisamos que el folio se haya incrementado.
@@ -181,7 +184,7 @@ class VentanaChofer(QWidget):
                                 self.settings.setValue('folio_de_viaje', folio_de_viaje)
                                 print("Folio de viaje: ", folio_de_viaje)
                                 logging.info(f"Folio de viaje: {folio_de_viaje}")
-                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje, str(fecha).replace("/","-"))
+                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje, fecha_vg)
                                 self.rutas = Rutas(self.turno, self.servicio, self.close_signal, self.close_signal_pasaje)
                                 self.rutas.setGeometry(0, 0, 800, 440)
                                 self.rutas.setWindowFlags(Qt.FramelessWindowHint)
@@ -197,6 +200,16 @@ class VentanaChofer(QWidget):
                                 vg.csn_chofer = ""
                                 self.settings.setValue('ventana_actual', "")
                                 self.settings.setValue('csn_chofer', "")
+                                
+                                vg.numero_de_operador_inicio = ""
+                                vg.numero_de_operador_final = ""
+                                vg.nombre_de_operador_inicio = ""
+                                vg.nombre_de_operador_final = ""
+                                self.settings.setValue('numero_de_operador_inicio', "")
+                                self.settings.setValue('numero_de_operador_final', "")
+                                self.settings.setValue('nombre_de_operador_inicio', "")
+                                self.settings.setValue('nombre_de_operador_final', "")
+                                
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
@@ -212,6 +225,16 @@ class VentanaChofer(QWidget):
                         vg.csn_chofer = ""
                         self.settings.setValue('ventana_actual', "")
                         self.settings.setValue('csn_chofer', "")
+                        
+                        vg.numero_de_operador_inicio = ""
+                        vg.numero_de_operador_final = ""
+                        vg.nombre_de_operador_inicio = ""
+                        vg.nombre_de_operador_final = ""
+                        self.settings.setValue('numero_de_operador_inicio', "")
+                        self.settings.setValue('numero_de_operador_final', "")
+                        self.settings.setValue('nombre_de_operador_inicio', "")
+                        self.settings.setValue('nombre_de_operador_final', "")
+                        
                         for i in range(5):
                             GPIO.output(12, True)
                             time.sleep(0.055)
@@ -231,7 +254,7 @@ class VentanaChofer(QWidget):
                         ultima_asignacion = obtener_ultima_asignacion()
                         print("La ultima asignacion es: ", ultima_asignacion)
                         
-                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", str(fecha).replace("/","-"), hora)
+                        guardar_auto_asignacion(self.settings.value('csn_chofer'), f"{self.settings.value('servicio')},{self.settings.value('pension')}", fecha_vg, hora)
                         folio = self.crear_folio()
                         
                         # Revisamos que el folio se haya incrementado.
@@ -250,7 +273,7 @@ class VentanaChofer(QWidget):
                                 self.settings.setValue('folio_de_viaje', folio_de_viaje)
                                 print("Folio de viaje: ", folio_de_viaje)
                                 logging.info(f"Folio de viaje: {folio_de_viaje}")
-                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje, str(fecha).replace("/","-"))
+                                aniadir_folio_de_viaje_a_auto_asignacion(folio, folio_de_viaje, fecha_vg)
                                 self.rutas = Rutas(self.turno, self.comboBox_servicio.currentText(), self.close_signal, self.close_signal_pasaje)
                                 self.rutas.setGeometry(0, 0, 800, 440)
                                 self.rutas.setWindowFlags(Qt.FramelessWindowHint)
@@ -266,6 +289,16 @@ class VentanaChofer(QWidget):
                                 vg.csn_chofer = ""
                                 self.settings.setValue('ventana_actual', "")
                                 self.settings.setValue('csn_chofer', "")
+                                
+                                vg.numero_de_operador_inicio = ""
+                                vg.numero_de_operador_final = ""
+                                vg.nombre_de_operador_inicio = ""
+                                vg.nombre_de_operador_final = ""
+                                self.settings.setValue('numero_de_operador_inicio', "")
+                                self.settings.setValue('numero_de_operador_final', "")
+                                self.settings.setValue('nombre_de_operador_inicio', "")
+                                self.settings.setValue('nombre_de_operador_final', "")
+                                
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
@@ -281,6 +314,16 @@ class VentanaChofer(QWidget):
                         vg.csn_chofer = ""
                         self.settings.setValue('ventana_actual', "")
                         self.settings.setValue('csn_chofer', "")
+                        
+                        vg.numero_de_operador_inicio = ""
+                        vg.numero_de_operador_final = ""
+                        vg.nombre_de_operador_inicio = ""
+                        vg.nombre_de_operador_final = ""
+                        self.settings.setValue('numero_de_operador_inicio', "")
+                        self.settings.setValue('numero_de_operador_final', "")
+                        self.settings.setValue('nombre_de_operador_inicio', "")
+                        self.settings.setValue('nombre_de_operador_final', "")
+                        
                         for i in range(5):
                             GPIO.output(12, True)
                             time.sleep(0.055)
@@ -292,6 +335,16 @@ class VentanaChofer(QWidget):
                 vg.csn_chofer = ""
                 self.settings.setValue('ventana_actual', "")
                 self.settings.setValue('csn_chofer', "")
+                
+                vg.numero_de_operador_inicio = ""
+                vg.numero_de_operador_final = ""
+                vg.nombre_de_operador_inicio = ""
+                vg.nombre_de_operador_final = ""
+                self.settings.setValue('numero_de_operador_inicio', "")
+                self.settings.setValue('numero_de_operador_final', "")
+                self.settings.setValue('nombre_de_operador_inicio', "")
+                self.settings.setValue('nombre_de_operador_final', "")
+                
                 for i in range(5):
                     GPIO.output(12, True)
                     time.sleep(0.055)
@@ -299,6 +352,21 @@ class VentanaChofer(QWidget):
                     time.sleep(0.055)
         except Exception as e:
             print(e)
+            
+            self.servicio = ""
+            vg.csn_chofer = ""
+            self.settings.setValue('ventana_actual', "")
+            self.settings.setValue('csn_chofer', "")
+            
+            vg.numero_de_operador_inicio = ""
+            vg.numero_de_operador_final = ""
+            vg.nombre_de_operador_inicio = ""
+            vg.nombre_de_operador_final = ""
+            self.settings.setValue('numero_de_operador_inicio', "")
+            self.settings.setValue('numero_de_operador_final', "")
+            self.settings.setValue('nombre_de_operador_inicio', "")
+            self.settings.setValue('nombre_de_operador_final', "")
+            
             for i in range(5):
                 GPIO.output(12, True)
                 time.sleep(0.055)
@@ -326,6 +394,16 @@ class VentanaChofer(QWidget):
             vg.csn_chofer = ""
             self.settings.setValue('ventana_actual', "")
             self.settings.setValue('csn_chofer', "")
+            
+            vg.numero_de_operador_inicio = ""
+            vg.numero_de_operador_final = ""
+            vg.nombre_de_operador_inicio = ""
+            vg.nombre_de_operador_final = ""
+            self.settings.setValue('numero_de_operador_inicio', "")
+            self.settings.setValue('numero_de_operador_final', "")
+            self.settings.setValue('nombre_de_operador_inicio', "")
+            self.settings.setValue('nombre_de_operador_final', "")
+            
             self.close()
         except Exception as e:
             print(e)

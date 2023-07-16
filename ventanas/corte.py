@@ -65,6 +65,7 @@ class corte(QWidget):
     def cargar_datos(self):
         try:
             self.settings.setValue('ventana_actual', "corte")
+            #variables_globales.ventana_actual = "corte"
             self.label_head.setText(f"{self.idUnidad} {str(self.settings.value('servicio')[6:])}") # Obneter todos los datos del servicio, etc, desde el archivo de settings.
             self.label_vuelta.setText(f"Vuelta {str(self.settings.value('vuelta'))}")
             
@@ -150,7 +151,6 @@ class corte(QWidget):
                     print*("El folio de asignacion no se reinicia")
                     logging.info("El folio de asignacion no se reinicia")
                     variables_globales.folio_asignacion = 0
-                variables_globales.numero_de_operador = ""
                 self.settings.setValue('origen_actual', "")
                 self.settings.setValue('folio_de_viaje', "")
                 self.settings.setValue('pension', "")
@@ -190,6 +190,10 @@ class corte(QWidget):
         try:
             self.settings.setValue('csn_chofer_dos', "")
             self.settings.setValue('ventana_actual', "servicios_transbordos")
+            variables_globales.numero_de_operador_final = ""
+            variables_globales.nombre_de_operador_final = ""
+            self.settings.setValue('numero_de_operador_final', "")
+            self.settings.setValue('nombre_de_operador_final', "")
             self.close()
         except Exception as e:
             logging.info(f"Error en la ventana corte: {e}")

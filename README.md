@@ -4,6 +4,16 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v1.31:
+  - Agregando la opción de que cuando inicie el sistema o se actualice se le otorguen permisos de administrador a todos los archivos.
+  - Se agregaron 3 intentos al momento de actualizar el sistema.
+  - Se agregó un candado para los 3 bytes de archivos al momento de la actualización por FTP.
+  - Se agrego una comparación de conexión con el servidor en la actualización FTP.
+  - Se agrego la opción de que se pueda imprimir en el ticket el empleado que inicio el viaje y el que lo cerro.
+  - Se reorganizo la estructura del ticket de corte en tres nuevas secciones, #General, #Inicio de viaje y #Fin de viaje.
+  - En la ventana de corte se quito la opción de que se viera la vigencia de la tarjeta.
+  - Se cambio la manera en la que se guarda la hora en la trama 2.
+  - Se agregaron dos nuevas tramas 9, #ElegirServicio y #DentroServicio.
 - v1.30:
   - Arreglando bug de que a todas las auto_asignaciones se les coloca el mismo folio de viaje.
   - Agregando la fecha como parámetro a la funcion *aniadir_folio_de_viaje_a_auto_asignacion*.

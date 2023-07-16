@@ -38,7 +38,7 @@ from LeerMinicom import LeerMinicomWorker
 from LeerTarjeta import LeerTarjetaWorker
 from ActualizarIconos import ActualizarIconosWorker
 from servicios import Rutas
-from queries import obtener_datos_aforo, insertar_aforo
+from queries import obtener_datos_aforo, insertar_aforo, insertar_estadisticas_boletera
 from enviar_vuelta import EnviarVuelta
 
 if not os.path.exists("/home/pi/Urban_Urbano/logs"):
@@ -72,13 +72,14 @@ class Ventana(QWidget):
             uic.loadUi("/home/pi/Urban_Urbano/ui/inicio.ui", self)
             self.settings = QSettings('/home/pi/Urban_Urbano/ventanas/settings.ini', QSettings.IniFormat) #Cargamos el archivo de configuración
             crear_tablas() #Creamos las tablas de la base de datos
+            self.unidad = obtener_datos_aforo()
             try:
-                self.label_unidad.setText(str(obtener_datos_aforo()[1]))
-                self.label_socket.setText(str(obtener_datos_aforo()[2]))
+                self.label_unidad.setText(str(self.unidad[1]))
+                self.label_socket.setText(str(self.unidad[2]))
             except Exception as e:
                 logging.info('No se pudo cargar el aforo, lo añadimos manualmente')
                 insertar_aforo(1,21000,8150,0.0, False, 0.0)
-                self.label_unidad.setText(str(obtener_datos_aforo()[1]))
+                self.label_unidad.setText(str(self.unidad[1]))
             self.label_ser_pc.hide()
             self.label_5.hide()
             self.label_datos_info.hide()
@@ -126,6 +127,17 @@ class Ventana(QWidget):
             turno = self.settings.value('turno')
             geocerca = self.settings.value('geocerca')
             folio_de_viaje = self.settings.value('folio_de_viaje')
+            
+            nombre_de_operador_inicio = self.settings.value('nombre_de_operador_inicio')
+            numero_de_operador_inicio = self.settings.value('numero_de_operador_inicio')
+            nombre_de_operador_final = self.settings.value('nombre_de_operador_final')
+            numero_de_operador_final = self.settings.value('numero_de_operador_final')
+            
+            fecha = strftime('%Y/%m/%d').replace('/', '')[2:]
+            
+            fecha_actual = str(subprocess.run("date", stdout=subprocess.PIPE, shell=True))
+            indice = fecha_actual.find(":")
+            hora = str(fecha_actual[(int(indice) - 2):(int(indice) + 6)]).replace(":","")
                                 
             if ventana_actual is not None and ventana_actual != str(""):
                 
@@ -136,13 +148,31 @@ class Ventana(QWidget):
                         self.activateWindow()
                 
                 if ventana_actual == str("chofer"):
-                    logging.info('Se abrirá Ventana de chofer')
-                    variables_globales.csn_chofer = csn_chofer
-                    self.ventana_servicio = VentanaChofer(AbrirVentanas.cerrar_vuelta.close_signal, AbrirVentanas.cerrar_vuelta.close_signal_pasaje)
-                    self.ventana_servicio.show()
+                    logging.info('Se debería de abrir la Ventana de chofer')
+                    self.settings.setValue('ventana_actual', "")
+                    if len(str(csn_chofer)) > 0:
+                        print("El CSN guardado es: ", csn_chofer)
+                        insertar_estadisticas_boletera(str(self.unidad[1]), fecha, hora, "ElegirServicio", f"{csn_chofer}")
+                    else:
+                        insertar_estadisticas_boletera(str(self.unidad[1]), fecha, hora, "ElegirServicio", f"SINCSN")
+                    self.settings.setValue('csn_chofer', "")
+                    #variables_globales.csn_chofer = csn_chofer
+                    #self.ventana_servicio = VentanaChofer(AbrirVentanas.cerrar_vuelta.close_signal, AbrirVentanas.cerrar_vuelta.close_signal_pasaje)
+                    #self.ventana_servicio.show()
                     #self.ventana_servicio.activateWindow()
                 elif ventana_actual == 'servicios_transbordos':
                     logging.info('Se abrirá Ventana de servicios_transbordos')
+                    if len(str(csn_chofer)) > 0:
+                        print("El CSN guardado es: ", csn_chofer)
+                        insertar_estadisticas_boletera(str(self.unidad[1]), fecha, hora, "DentroServicio", f"{csn_chofer}")
+                    else:
+                        insertar_estadisticas_boletera(str(self.unidad[1]), fecha, hora, "DentroServicio", f"SINCSN")
+                    
+                    variables_globales.numero_de_operador_inicio = numero_de_operador_inicio
+                    variables_globales.nombre_de_operador_inicio = nombre_de_operador_inicio
+                    variables_globales.numero_de_operador_final = numero_de_operador_final
+                    variables_globales.nombre_de_operador_final = nombre_de_operador_final
+                    
                     variables_globales.vuelta = vuelta
                     variables_globales.servicio = servicio
                     variables_globales.pension = pension
@@ -156,6 +186,12 @@ class Ventana(QWidget):
                     #self.rutas.activateWindow()
                     
                 elif ventana_actual == str("corte"):
+                    
+                    variables_globales.numero_de_operador_inicio = numero_de_operador_inicio
+                    variables_globales.nombre_de_operador_inicio = nombre_de_operador_inicio
+                    variables_globales.numero_de_operador_final = numero_de_operador_final
+                    variables_globales.nombre_de_operador_final = nombre_de_operador_final
+                    
                     variables_globales.vuelta = vuelta
                     variables_globales.servicio = servicio
                     variables_globales.pension = pension
@@ -255,9 +291,6 @@ class Ventana(QWidget):
             self.flash_3g(res['signal_3g'])
             self.servidor_ok(res['servidor'])
             self.verificar_datos_pendientes(res['datos_pendientes'])
-            fecha = strftime("%Y/%m/%d")
-            hora = strftime("%H:%M:%S")
-            self.obtener_hora()
             if (res['gps'] == "error"):
                 logging.info('No se pudo cargar el gps')
                 self.flash_gps("error")

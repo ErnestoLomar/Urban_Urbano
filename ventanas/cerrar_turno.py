@@ -16,6 +16,7 @@ from queries import obtener_datos_aforo
 from chofer import VentanaChofer
 import logging
 import RPi.GPIO as GPIO
+import subprocess
 
 #Librerías propias
 import variables_globales
@@ -66,6 +67,15 @@ class CerrarTurno(QWidget):
             self.settings.setValue('ventana_actual', "")
             self.settings.setValue('csn_chofer', "")
             variables_globales.csn_chofer = ""
+            variables_globales.numero_de_operador_inicio = ""
+            variables_globales.numero_de_operador_final = ""
+            variables_globales.nombre_de_operador_inicio = ""
+            variables_globales.nombre_de_operador_final = ""
+            self.settings.setValue('numero_de_operador_inicio', "")
+            self.settings.setValue('numero_de_operador_final', "")
+            self.settings.setValue('nombre_de_operador_inicio', "")
+            self.settings.setValue('nombre_de_operador_final', "")
+            subprocess.run('sudo sh -c "sync; echo 3 > /proc/sys/vm/drop_caches"', shell=True)
             GPIO.output(33, False)
         except Exception as e:
             print(e)
@@ -81,6 +91,11 @@ class CerrarTurno(QWidget):
             self.registrar_usuario = VentanaChofer(AbrirVentanas.cerrar_vuelta.close_signal, AbrirVentanas.cerrar_vuelta.close_signal_pasaje)
             self.registrar_usuario.show()
             self.settings.setValue('servicio', "")
+            variables_globales.numero_de_operador_final = ""
+            variables_globales.nombre_de_operador_final = ""
+            self.settings.setValue('numero_de_operador_final', "")
+            self.settings.setValue('nombre_de_operador_final', "")
+            subprocess.run('sudo sh -c "sync; echo 3 > /proc/sys/vm/drop_caches"', shell=True)
         except Exception as e:
             print(e)
             logging.info(f"Error al cambiar la ruta: {e}")

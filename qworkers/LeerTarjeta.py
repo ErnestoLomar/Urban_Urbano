@@ -114,15 +114,27 @@ class LeerTarjetaWorker(QObject):
                                     print("Fecha vigencia tarjeta: "+vigenciaTarjeta[:6])
                                     if vigenciaActual <= vigenciaTarjeta[:6]:
                                         print("Tarjeta vigente")
-                                        vg.vigencia_de_tarjeta = vigenciaTarjeta
-                                        vg.numero_de_operador = datos_completos_tarjeta[12:17]
-                                        vg.nombre_de_operador = datos_completos_tarjeta[17:41].replace("*"," ").replace("."," ").replace("-"," ").replace("_"," ")
-                                        vg.csn_chofer_respaldo = csn
-                                        print("Numero de operador: "+vg.numero_de_operador)
-                                        print("El nombre del operador es: ",vg.nombre_de_operador)
                                         csn = self.lib.ev2IsPresent().decode(encoding="utf8", errors='ignore')
                                         time.sleep(0.01)
                                         if len(csn) == 14:
+                                            vg.vigencia_de_tarjeta = vigenciaTarjeta
+                                            print("La ventana actual es: ", self.settings.value('ventana_actual'))
+                                            if str(self.settings.value('ventana_actual')) != "chofer" and str(self.settings.value('ventana_actual')) != "corte" and str(self.settings.value('ventana_actual')) != "enviar_vuelta" and str(self.settings.value('ventana_actual')) != "cerrar_turno":
+                                                if len(vg.numero_de_operador_inicio) > 0 or len(self.settings.value('numero_de_operador_inicio')) > 0:
+                                                    vg.numero_de_operador_final = datos_completos_tarjeta[12:17] # OBSERVACION: Si el valor obtenido es un entero se toma como bien la variable.
+                                                    vg.nombre_de_operador_final = datos_completos_tarjeta[17:41].replace("*"," ").replace("."," ").replace("-"," ").replace("_"," ")
+                                                    self.settings.setValue('numero_de_operador_final', f"{datos_completos_tarjeta[12:17]}")
+                                                    self.settings.setValue('nombre_de_operador_final', f"{datos_completos_tarjeta[17:41].replace('*',' ').replace('.',' ').replace('-',' ').replace('_',' ')}")
+                                                    print("Numero de operador de final es: "+vg.numero_de_operador_final)
+                                                    print("El nombre del operador de final es: ",vg.nombre_de_operador_final)
+                                                else:
+                                                    vg.numero_de_operador_inicio = datos_completos_tarjeta[12:17] # OBSERVACION: Si el valor obtenido es un entero se toma como bien la variable.
+                                                    vg.nombre_de_operador_inicio = datos_completos_tarjeta[17:41].replace("*"," ").replace("."," ").replace("-"," ").replace("_"," ")
+                                                    self.settings.setValue('numero_de_operador_inicio', f"{datos_completos_tarjeta[12:17]}")
+                                                    self.settings.setValue('nombre_de_operador_inicio', f"{datos_completos_tarjeta[17:41].replace('*',' ').replace('.',' ').replace('-',' ').replace('_',' ')}")
+                                                    print("Numero de operador de inicio es: "+vg.numero_de_operador_inicio)
+                                                    print("El nombre del operador de inicio es: ",vg.nombre_de_operador_inicio)
+                                            vg.csn_chofer_respaldo = csn
                                             self.progress.emit(csn)
                                             GPIO.output(12, True)
                                             time.sleep(0.1)

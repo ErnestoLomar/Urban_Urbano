@@ -57,6 +57,9 @@ class QuectelWorker(QObject):
             
             
             try:
+                # Damos los permisos de administrador a los archivos
+                subprocess.run('sudo chmod -R a+rwx /home/pi/Urban_Urbano/', shell=True) #Carpeta recursiva
+                
                 # Verificamos que todas las tablas necesarias estén creadas.
                 crear_tablas()
                 

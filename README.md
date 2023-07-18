@@ -11,6 +11,7 @@ Linea cronológica:
   - Se agrego una comparación de conexión con el servidor en la actualización FTP.
   - Se agrego la opción de que se pueda imprimir en el ticket el empleado que inicio el viaje y el que lo cerro.
   - Se reorganizo la estructura del ticket de corte en tres nuevas secciones, #General, #Inicio de viaje y #Fin de viaje.
+  - El folio auto incrementable del folio de viaje se cambio a 40. 
   - En la ventana de corte se quito la opción de que se viera la vigencia de la tarjeta.
   - Se cambio la manera en la que se guarda la hora en la trama 2.
   - Se agregaron dos nuevas tramas 9, #ElegirServicio y #DentroServicio.

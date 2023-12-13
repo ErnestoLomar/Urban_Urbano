@@ -17,16 +17,14 @@ from time import strftime
 import logging
 import time
 import RPi.GPIO as GPIO
-import subprocess
 #import usb.core
 
 sys.path.insert(1, '/home/pi/Urban_Urbano/db')
 
 #Librerías propias
 from ventas_queries import insertar_venta, insertar_item_venta, obtener_ultimo_folio_de_item_venta
-from queries import obtener_datos_aforo, insertar_estadisticas_boletera
+from queries import obtener_datos_aforo
 import variables_globales as vg
-from emergentes import VentanaEmergente
 
 try:
     GPIO.setmode(GPIO.BOARD)
@@ -62,7 +60,7 @@ class Pasajero:
 
 
 class VentanaPasaje(QWidget):
-    def __init__(self, precio, de: str, hacia: str, precio_preferente, close_signal, servicio_o_transbordo: str, id_tabla, ruta, tramo, cerrar_ventana_servicios):
+    def __init__(self, precio, de: str, hacia: str, precio_preferente, close_signal, servicio_o_transbordo: str, id_tabla, ruta, tramo):
         super().__init__()
         try:
             uic.loadUi("/home/pi/Urban_Urbano/ui/pasaje.ui", self)
@@ -71,7 +69,6 @@ class VentanaPasaje(QWidget):
             self.origen = de
             self.destino = hacia
             self.close_signal = close_signal
-            self.cerrar_servicios = cerrar_ventana_servicios
             self.precio = precio
             self.precio_preferente = precio_preferente
             self.personas_normales = Pasajero("personas_normales", self.precio)
@@ -85,7 +82,7 @@ class VentanaPasaje(QWidget):
             #vg.vendiendo_boleto = True
 
             #Realizamos configuraciones de la ventana pasaje.
-            self.close_signal.connect(self.close_me)
+            self.close_signal.connect(self.close_me) 
             self.inicializar_labels()
             self.label_de.setText("De: " + str(de.split("_")[0]))
             self.label_hacia.setText("A: "+ str(hacia.split("_")[0]))
@@ -172,21 +169,6 @@ class VentanaPasaje(QWidget):
             
             self.close_me()
             
-            
-            if len(vg.folio_asignacion) <= 1:
-                
-                self.ve = VentanaEmergente("VOID", "No existe viaje", 4.5)
-                self.ve.show()
-                for i in range(5):
-                    GPIO.output(12, True)
-                    time.sleep(0.055)
-                    GPIO.output(12, False)
-                    time.sleep(0.055)
-                
-                self.cerrar_servicios.emit()
-                
-                return
-            
             try:
                 from impresora import imprimir_boleto_normal_pasaje, imprimir_boleto_con_qr_pasaje
             except Exception as e:
@@ -201,13 +183,6 @@ class VentanaPasaje(QWidget):
 
             full_date = strftime("%Y/%m/%d %H:%M:%S")
             fecha = str(strftime('%d-%m-%Y')).replace('/', '-')
-            
-            fecha_estadistica = strftime('%Y/%m/%d').replace('/', '')[2:]
-                
-            # Procedemos a obtener la hora de la boletera
-            fecha_actual_estadistica = str(subprocess.run("date", stdout=subprocess.PIPE, shell=True))
-            indice = fecha_actual_estadistica.find(":")
-            hora_estadistica = str(fecha_actual_estadistica[(int(indice) - 2):(int(indice) + 6)]).replace(":","")
             
             try:
 
@@ -225,6 +200,20 @@ class VentanaPasaje(QWidget):
                                 if ultimo_folio_de_venta == folio:
                                     logging.info("Folio repetido por reiniciar_folios 0")
                                     folio = ultimo_folio_de_venta[1] + 1
+                                '''
+                                print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
+                                print(int(self.settings.value('reiniciar_folios')) == 0)
+                                if int(self.settings.value('reiniciar_folios')) == 0:
+                                    folio = ultimo_folio_de_venta[1] + 1
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 0")
+                                        folio = ultimo_folio_de_venta[1] + 1
+                                else:
+                                    folio = 1
+                                    self.settings.setValue('reiniciar_folios', 0)
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 1")
+                                        folio = ultimo_folio_de_venta[1] + 1'''
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -240,16 +229,13 @@ class VentanaPasaje(QWidget):
                                 self.settings.setValue('total_de_folios', f"{int(self.settings.value('total_de_folios')) + 1}")
                                 logging.info("Boleto de estudiante impreso")
                             else:
-                                insertar_estadisticas_boletera(str(self.Unidad), fecha_estadistica, hora_estadistica, "BMI", f"SE")
                                 logging.info("No se pudo imprimir el boleto, error al imprimir el boleto")
-                                
-                                self.ve = VentanaEmergente("IMPRESORA", "", 4.5)
-                                self.ve.show()
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
                                     GPIO.output(12, False)
                                     time.sleep(0.055)
+                                time.sleep(.5)
                 
                     if normales.total_pasajeros > 0:
                         for i in range(normales.total_pasajeros):
@@ -259,6 +245,20 @@ class VentanaPasaje(QWidget):
                                 if ultimo_folio_de_venta == folio:
                                     logging.info("Folio repetido por reiniciar_folios 0")
                                     folio = ultimo_folio_de_venta[1] + 1
+                                '''
+                                print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
+                                print(int(self.settings.value('reiniciar_folios')) == 0)
+                                if int(self.settings.value('reiniciar_folios')) == 0:
+                                    folio = ultimo_folio_de_venta[1] + 1
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 0")
+                                        folio = ultimo_folio_de_venta[1] + 1
+                                else:
+                                    folio = 1
+                                    self.settings.setValue('reiniciar_folios', 0)
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 1")
+                                        folio = ultimo_folio_de_venta[1] + 1'''
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -274,16 +274,13 @@ class VentanaPasaje(QWidget):
                                 self.settings.setValue('total_de_folios', f"{int(self.settings.value('total_de_folios')) + 1}")
                                 logging.info("Boleto normal impreso")
                             else:
-                                insertar_estadisticas_boletera(str(self.Unidad), fecha_estadistica, hora_estadistica, "BMI", f"SN")
                                 logging.info("No se pudo imprimir el boleto, error al imprimir el boleto")
-                                
-                                self.ve = VentanaEmergente("IMPRESORA", "", 4.5)
-                                self.ve.show()
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
                                     GPIO.output(12, False)
                                     time.sleep(0.055)
+                                time.sleep(.5)
 
                     if chicos.total_pasajeros > 0:
                         for i in range(chicos.total_pasajeros):
@@ -293,6 +290,20 @@ class VentanaPasaje(QWidget):
                                 if ultimo_folio_de_venta == folio:
                                     logging.info("Folio repetido por reiniciar_folios 0")
                                     folio = ultimo_folio_de_venta[1] + 1
+                                '''
+                                print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
+                                print(int(self.settings.value('reiniciar_folios')) == 0)
+                                if int(self.settings.value('reiniciar_folios')) == 0:
+                                    folio = ultimo_folio_de_venta[1] + 1
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 0")
+                                        folio = ultimo_folio_de_venta[1] + 1
+                                else:
+                                    folio = 1
+                                    self.settings.setValue('reiniciar_folios', 0)
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 1")
+                                        folio = ultimo_folio_de_venta[1] + 1'''
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -308,16 +319,13 @@ class VentanaPasaje(QWidget):
                                 self.settings.setValue('total_de_folios', f"{int(self.settings.value('total_de_folios')) + 1}")
                                 logging.info("Boleto chico impreso")
                             else:
-                                insertar_estadisticas_boletera(str(self.Unidad), fecha_estadistica, hora_estadistica, "BMI", f"SM")
                                 logging.info("No se pudo imprimir el boleto, error al imprimir el boleto")
-                                
-                                self.ve = VentanaEmergente("IMPRESORA", "", 4.5)
-                                self.ve.show()
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
                                     GPIO.output(12, False)
                                     time.sleep(0.055)
+                                time.sleep(.5)
                     
                     if mayores.total_pasajeros > 0:
                         for i in range(mayores.total_pasajeros):
@@ -327,6 +335,20 @@ class VentanaPasaje(QWidget):
                                 if ultimo_folio_de_venta == folio:
                                     logging.info("Folio repetido por reiniciar_folios 0")
                                     folio = ultimo_folio_de_venta[1] + 1
+                                '''
+                                print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
+                                print(int(self.settings.value('reiniciar_folios')) == 0)
+                                if int(self.settings.value('reiniciar_folios')) == 0:
+                                    folio = ultimo_folio_de_venta[1] + 1
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 0")
+                                        folio = ultimo_folio_de_venta[1] + 1
+                                else:
+                                    folio = 1
+                                    self.settings.setValue('reiniciar_folios', 0)
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 1")
+                                        folio = ultimo_folio_de_venta[1] + 1'''
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -342,16 +364,13 @@ class VentanaPasaje(QWidget):
                                 self.settings.setValue('total_de_folios', f"{int(self.settings.value('total_de_folios')) + 1}")
                                 logging.info("Boleto adulto mayor impreso")
                             else:
-                                insertar_estadisticas_boletera(str(self.Unidad), fecha_estadistica, hora_estadistica, "BMI", f"SA")
                                 logging.info("No se pudo imprimir el boleto, error al imprimir el boleto")
-                                
-                                self.ve = VentanaEmergente("IMPRESORA", "", 4.5)
-                                self.ve.show()
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
                                     GPIO.output(12, False)
                                     time.sleep(0.055)
+                                time.sleep(.5)
 
                 else:
                     if estudiantes.total_pasajeros > 0:
@@ -363,6 +382,20 @@ class VentanaPasaje(QWidget):
                                 if ultimo_folio_de_venta == folio:
                                     logging.info("Folio repetido por reiniciar_folios 0")
                                     folio = ultimo_folio_de_venta[1] + 1
+                                '''
+                                print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
+                                print(int(self.settings.value('reiniciar_folios')) == 0)
+                                if int(self.settings.value('reiniciar_folios')) == 0:
+                                    folio = ultimo_folio_de_venta[1] + 1
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 0")
+                                        folio = ultimo_folio_de_venta[1] + 1
+                                else:
+                                    folio = 1
+                                    self.settings.setValue('reiniciar_folios', 0)
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 1")
+                                        folio = ultimo_folio_de_venta[1] + 1'''
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -378,16 +411,14 @@ class VentanaPasaje(QWidget):
                                 self.settings.setValue('total_de_folios', f"{int(self.settings.value('total_de_folios')) + 1}")
                                 logging.info("Boleto con QR de estudiante impreso")
                             else:
-                                insertar_estadisticas_boletera(str(self.Unidad), fecha_estadistica, hora_estadistica, "BMI", f"TE")
                                 logging.info("No se pudo imprimir el boleto, error al imprimir el boleto")
-                                
-                                self.ve = VentanaEmergente("IMPRESORA", "", 4.5)
-                                self.ve.show()
+                                print("No se pudo imprimir el boleto, error al imprimir el boleto")
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
                                     GPIO.output(12, False)
                                     time.sleep(0.055)
+                                time.sleep(.5)
                 
                     if normales.total_pasajeros > 0:
                         for i in range(normales.total_pasajeros):
@@ -397,6 +428,20 @@ class VentanaPasaje(QWidget):
                                 if ultimo_folio_de_venta == folio:
                                     logging.info("Folio repetido por reiniciar_folios 0")
                                     folio = ultimo_folio_de_venta[1] + 1
+                                '''
+                                print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
+                                print(int(self.settings.value('reiniciar_folios')) == 0)
+                                if int(self.settings.value('reiniciar_folios')) == 0:
+                                    folio = ultimo_folio_de_venta[1] + 1
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 0")
+                                        folio = ultimo_folio_de_venta[1] + 1
+                                else:
+                                    folio = 1
+                                    self.settings.setValue('reiniciar_folios', 0)
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 1")
+                                        folio = ultimo_folio_de_venta[1] + 1'''
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -412,16 +457,13 @@ class VentanaPasaje(QWidget):
                                 self.settings.setValue('total_de_folios', f"{int(self.settings.value('total_de_folios')) + 1}")
                                 logging.info("Boleto con QR de normal impreso")
                             else:
-                                insertar_estadisticas_boletera(str(self.Unidad), fecha_estadistica, hora_estadistica, "BMI", f"TN")
                                 logging.info("No se pudo imprimir el boleto, error al imprimir el boleto")
-                                
-                                self.ve = VentanaEmergente("IMPRESORA", "", 4.5)
-                                self.ve.show()
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
                                     GPIO.output(12, False)
                                     time.sleep(0.055)
+                                time.sleep(.5)
 
                     if chicos.total_pasajeros > 0:
                         for i in range(chicos.total_pasajeros):
@@ -431,6 +473,20 @@ class VentanaPasaje(QWidget):
                                 if ultimo_folio_de_venta == folio:
                                     logging.info("Folio repetido por reiniciar_folios 0")
                                     folio = ultimo_folio_de_venta[1] + 1
+                                '''
+                                print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
+                                print(int(self.settings.value('reiniciar_folios')) == 0)
+                                if int(self.settings.value('reiniciar_folios')) == 0:
+                                    folio = ultimo_folio_de_venta[1] + 1
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 0")
+                                        folio = ultimo_folio_de_venta[1] + 1
+                                else:
+                                    folio = 1
+                                    self.settings.setValue('reiniciar_folios', 0)
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 1")
+                                        folio = ultimo_folio_de_venta[1] + 1'''
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -446,16 +502,13 @@ class VentanaPasaje(QWidget):
                                 self.settings.setValue('total_de_folios', f"{int(self.settings.value('total_de_folios')) + 1}")
                                 logging.info("Boleto con QR de chico impreso")
                             else:
-                                insertar_estadisticas_boletera(str(self.Unidad), fecha_estadistica, hora_estadistica, "BMI", f"TM")
                                 logging.info("No se pudo imprimir el boleto, error al imprimir el boleto")
-                                
-                                self.ve = VentanaEmergente("IMPRESORA", "", 4.5)
-                                self.ve.show()
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
                                     GPIO.output(12, False)
                                     time.sleep(0.055)
+                                time.sleep(.5)
                     
                     if mayores.total_pasajeros > 0:
                         for i in range(mayores.total_pasajeros):
@@ -465,6 +518,20 @@ class VentanaPasaje(QWidget):
                                 if ultimo_folio_de_venta == folio:
                                     logging.info("Folio repetido por reiniciar_folios 0")
                                     folio = ultimo_folio_de_venta[1] + 1
+                                '''
+                                print("El valor de reiniciar_folios: ",self.settings.value('reiniciar_folios'))
+                                print(int(self.settings.value('reiniciar_folios')) == 0)
+                                if int(self.settings.value('reiniciar_folios')) == 0:
+                                    folio = ultimo_folio_de_venta[1] + 1
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 0")
+                                        folio = ultimo_folio_de_venta[1] + 1
+                                else:
+                                    folio = 1
+                                    self.settings.setValue('reiniciar_folios', 0)
+                                    if int(self.settings.value('total_de_folios')) == folio:
+                                        logging.info("Folio repetido por reiniciar_folios 1")
+                                        folio = ultimo_folio_de_venta[1] + 1'''
                             else:
                                 folio = 1
                             hora = strftime("%H:%M:%S")
@@ -480,16 +547,13 @@ class VentanaPasaje(QWidget):
                                 self.settings.setValue('total_de_folios', f"{int(self.settings.value('total_de_folios')) + 1}")
                                 logging.info("Boleto con QR de mayor impreso")
                             else:
-                                insertar_estadisticas_boletera(str(self.Unidad), fecha_estadistica, hora_estadistica, "BMI", f"TA")
                                 logging.info("No se pudo imprimir el boleto, error al imprimir el boleto")
-                                
-                                self.ve = VentanaEmergente("IMPRESORA", "", 4.5)
-                                self.ve.show()
                                 for i in range(5):
                                     GPIO.output(12, True)
                                     time.sleep(0.055)
                                     GPIO.output(12, False)
                                     time.sleep(0.055)
+                                time.sleep(.5)
             except Exception as e:
                 print(e)
                 for i in range(5):

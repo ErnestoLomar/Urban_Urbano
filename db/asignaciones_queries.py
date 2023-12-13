@@ -44,7 +44,6 @@ tabla_estado_del_viaje = '''CREATE TABLE IF NOT EXISTS estado_del_viaje (
         hora_inicio TIME,
         total_de_folio_aforo_efectivo INTEGER,
         total_de_folio_aforo_tarjeta INTEGER,
-        total_de_aforo_efectivo INTEGER,
         folio_de_viaje VARCHAR(100) default 'por_aniadir',
         check_servidor VARCHAR(100) default 'NO'
 )'''
@@ -447,11 +446,11 @@ def actualizar_asignacion_check_servidor(estado, id):
         print(e)
         logging.info(e)
 
-def guardar_estado_del_viaje(csn_chofer, servicio_pension, fecha, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, total_efectivo,folio_de_viaje):
+def guardar_estado_del_viaje(csn_chofer, servicio_pension, fecha, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, folio_de_viaje):
     try:
         conexion = sqlite3.connect(URI,check_same_thread=False)
         cursor = conexion.cursor()
-        cursor.execute("INSERT INTO estado_del_viaje (csn_chofer, servicio_pension, fecha, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, total_de_aforo_efectivo,folio_de_viaje) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (csn_chofer, servicio_pension, fecha, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, total_efectivo, folio_de_viaje))
+        cursor.execute("INSERT INTO estado_del_viaje (csn_chofer, servicio_pension, fecha, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, folio_de_viaje) VALUES (?, ?, ?, ?, ?, ?, ?)", (csn_chofer, servicio_pension, fecha, hora_inicio, total_de_folio_aforo_efectivo, total_de_folio_aforo_tarjeta, folio_de_viaje))
         conexion.commit()
         conexion.close()
         return True

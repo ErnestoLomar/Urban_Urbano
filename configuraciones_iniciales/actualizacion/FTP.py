@@ -39,11 +39,11 @@ except:
     
 #configuracion FTP Azure
 cuenta_azure = "\"account\""
-usuario_FTP_azure = "\"Bolftp\""
-contra_FTP_azure = "\"vXW4N3$hp@\""
-host_FTP_azure = "\"44.224.205.143\""
+usuario_FTP_azure = "\"Abraham\""
+contra_FTP_azure = "\"May0admin2022*\""
+host_FTP_azure = "\"20.106.77.209\""
 conf_conexion_FTP_azure = "AT+QFTPCFG="+cuenta_azure+","+usuario_FTP_azure+","+contra_FTP_azure
-conexion_FTP_azure = "AT+QFTPOPEN="+host_FTP_azure+",22"
+conexion_FTP_azure = "AT+QFTPOPEN="+host_FTP_azure+",21"
 
 #configuracion FTP webhost
 cuenta_webhost = "\"account\""
@@ -119,99 +119,90 @@ class Principal_Modem:
                 print("comand.py, linea 311: "+str(e))
 
         def inicializar_configuraciones_quectel(self):
-            ###########################
-            ######   Ernesto   ########
-            ###########################
             try:
-                print("\x1b[1;32m"+"#####################################")
+
+                print("#####################################")
                 ser.readline()
                 ser.readline()
                 ser.flushInput()
                 ser.flushOutput()
                 comando = "AT+CPIN?\r\n"
                 ser.write(comando.encode())
-                i = 0
-                while True:    
-                    respuesta = ser.readline()
-                    print(respuesta.decode())
-                    if 'READY' in respuesta.decode() or 'OK' in respuesta.decode():
-                        ser.flushInput()
-                        ser.flushOutput()
-                        break
-                    elif i == 5 or 'ERROR' in respuesta.decode():
-                        print("\x1b[1;33m"+"No se pudo inicializar AT+CPIN")
-                        time.sleep(1)
-                        break
-                    i = i + 1
-                    time.sleep(.5)
-                print("\x1b[1;32m"+"#####################################\n")
-                
+                print(ser.readline())
+                time.sleep(1.5)
+                respuesta = ser.readline()
+                if 'READY' in respuesta.decode():
+                    print(respuesta)
+                    ser.flushInput()
+                    ser.flushOutput()
+                else:
+                    print("No se pudo inicializar AT+CPIN")
+                    print(respuesta)
+                    time.sleep(1)
+                    #self.reiniciar_SIM()
+                print("#####################################\n")
+
+                ser.flushInput()
+                ser.flushOutput()
                 comando = "AT+CREG?\r\n"
                 ser.readline()
                 ser.write(comando.encode())
-                i = 0
-                while True:    
-                    respuesta = ser.readline()
-                    print(respuesta.decode())
-                    if ',1' in respuesta.decode() or ',5' in respuesta.decode() or 'OK' in respuesta.decode():
-                        ser.flushInput()
-                        ser.flushOutput()
-                        break
-                    elif i == 5 or 'ERROR' in respuesta.decode():
-                        print("No se pudo inicializar AT+CREG?")
-                        time.sleep(1)
-                        break
-                    i = i + 1
-                    time.sleep(.5)
-                print("\x1b[1;32m"+"#####################################\n")
-                
+                print(ser.readline())
+                time.sleep(1.5)
+                respuesta = ser.readline()
+                if ',1' in respuesta.decode() or ',5' in respuesta.decode():
+                    print(respuesta)
+                    ser.flushInput()
+                    ser.flushOutput()
+                else:
+                    print("No se pudo inicializar AT+CREG?")
+                    print(respuesta)
+                    time.sleep(1)
+                    #self.reiniciar_SIM()
+                print("#####################################\n")
+
                 ser.flushInput()
                 ser.flushOutput()
                 comando = "AT+CGREG?\r\n"
                 ser.readline()
                 ser.write(comando.encode())
-                i = 0
-                while True:    
-                    respuesta = ser.readline()
-                    print(respuesta.decode())
-                    if ',1' in respuesta.decode() or ',5' in respuesta.decode() or 'OK' in respuesta.decode():
-                        ser.flushInput()
-                        ser.flushOutput()
-                        break
-                    elif i == 5 or 'ERROR' in respuesta.decode():
-                        print("\x1b[1;33m"+"No se pudo inicializar AT+CGREG?")
-                        time.sleep(.5)
-                        break
-                    i = i + 1
+                print(ser.readline())
+                time.sleep(1.5)
+                respuesta = ser.readline()
+                if ',1' in respuesta.decode() or ',5' in respuesta.decode():
+                    print(respuesta)
+                    ser.flushInput()
+                    ser.flushOutput()
+                else:
+                    print("No se pudo inicializar AT+CGREG?")
+                    print(respuesta)
                     time.sleep(1)
-                print("\x1b[1;32m"+"#####################################\n")
+                    #self.reiniciar_SIM()
+                print("#####################################\n")
                 
                 ser.flushInput()
                 ser.flushOutput()
                 comando = "AT+CCID\r\n"
                 ser.readline()
                 ser.write(comando.encode())
-                i = 0
-                while True:    
+                print(ser.readline())
+                time.sleep(1.5)
+                respuesta = ser.readline()
+                if '+CCID' in respuesta.decode():
+                    print(respuesta)
+                    print(str(respuesta.decode()).replace("+CCID","").replace(" ",""))
+                    variables_globales.sim_id = str(respuesta.decode()).replace("+CCID","").replace(" ","").replace(":","")
                     respuesta = ser.readline()
-                    print(respuesta.decode())
-                    if '+CCID:' in respuesta.decode():
-                        print(respuesta)
-                        print(str(respuesta.decode()).replace("+CCID","").replace(" ","").replace("\r\n","").replace(":","").replace("AT",""))
-                        variables_globales.sim_id = str(respuesta.decode()).replace("+CCID","").replace(" ","").replace(":","").replace("\r\n","")
-                        respuesta = ser.readline()
-                        print(respuesta)
-                        respuesta = ser.readline()
-                        print(respuesta)
-                        ser.flushInput()
-                        ser.flushOutput()
-                        break
-                    elif i == 10 or 'ERROR' in respuesta.decode():
-                        print("\x1b[1;33m"+"No se pudo inicializar AT+CGREG?")
-                        time.sleep(1)
-                        break
-                    i = i + 1
-                    time.sleep(.5)
+                    print(respuesta)
+                    respuesta = ser.readline()
+                    print(respuesta)
+                    ser.flushInput()
+                    ser.flushOutput()
+                else:
+                    print("No se pudo inicializar AT+CCID")
+                    print(respuesta)
+                    time.sleep(1)
+                    #self.reiniciar_SIM()
                 print("#####################################\n")
 
                 ser.flushInput()
@@ -219,42 +210,39 @@ class Principal_Modem:
                 comando = "AT+QICSGP=1,1,\"internet.itelcel.com\",\"\",\"\",1\r\n"
                 ser.readline()
                 ser.write(comando.encode())
-                i = 0
-                while True:    
-                    respuesta = ser.readline()
-                    print(respuesta.decode())
-                    if 'OK' in respuesta.decode():
-                        ser.flushInput()
-                        ser.flushOutput()
-                        break
-                    elif i == 10 or 'ERROR' in respuesta.decode():
-                        print("\x1b[1;33m"+"No se pudo inicializar AT+QICSGP")
-                        time.sleep(1)
-                        break
-                    i = i + 1
+                print(ser.readline())
+                time.sleep(1.5)
+                respuesta = ser.readline()
+                if 'OK' in respuesta.decode():
+                    print(respuesta)
+                    ser.flushInput()
+                    ser.flushOutput()
+                else:
+                    print("No se pudo inicializar AT+QICSGP")
+                    print(respuesta)
                     time.sleep(1)
-                print("\x1b[1;32m"+"#####################################\n")
+                    #self.reiniciar_SIM()
+                print("#####################################\n")
 
                 ser.flushInput()
                 ser.flushOutput()
                 comando = "AT+QIACT=1\r\n"
                 ser.readline()
                 ser.write(comando.encode())
-                i = 0
-                while True:    
-                    respuesta = ser.readline()
-                    print(respuesta.decode())
-                    if 'OK' in respuesta.decode():
-                        ser.flushInput()
-                        ser.flushOutput()
-                        break
-                    elif i == 10 or 'ERROR' in respuesta.decode():
-                        print("\x1b[1;33m"+"No se pudo inicializar AT+QIACT=1")
-                        time.sleep(1)
-                        break
-                    i = i + 1
+                print(ser.readline())
+                time.sleep(2)
+                ser.readline()
+                respuesta = ser.readline()
+                if 'OK' in respuesta.decode():
+                    print(respuesta)
+                    ser.flushInput()
+                    ser.flushOutput()
+                else:
+                    print("No se pudo inicializar AT+QIACT=1")
+                    print(respuesta)
                     time.sleep(1)
-                print("\x1b[1;32m"+"#####################################")
+                    #self.reiniciar_SIM()
+                print("#####################################")
                 
                 print("Procedemos a iniciar sesión del GPS")
                 ser.flushInput()
@@ -520,7 +508,7 @@ class Principal_Modem:
                 global id_Unidad,nombre,ubicacion,version_MT,tipo
                 if version_MT == False:
                     nombre = id_Unidad
-                    ubicacion = "/Actualizaciones/Software/"
+                    ubicacion = "/Actualizaciones/"
                     tipo = "Completo"
                 else:
                     nombre = str(version_MT)

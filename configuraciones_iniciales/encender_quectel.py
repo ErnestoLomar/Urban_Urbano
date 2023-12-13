@@ -45,8 +45,11 @@ class Configuraciones(QWidget):
     def reportProgressQuectel(self, res: bool):
         try:
             if res:
+                print("El hilo a terminado")
                 self.close()
                 subprocess.run("sudo python3 /home/pi/Urban_Urbano/ventanas/inicio.py",shell=True)
+            else:
+                print("El hilo aun no termina")
         except Exception as e:
             print("Error en el hilo del QuectelWorker: "+str(e))
 

@@ -4,7 +4,7 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
-- v2.43:
+- v2.44:
   - Se corrigió bug de la actualización parcial de archivos en FTP
   - Se añadió la base de datos asignación.db para que no ocurriera un bug en la creación de trama 4.
 - v2.43:

@@ -480,7 +480,7 @@ class LeerMinicomWorker(QObject):
                                         logging.info("Actualizando raspberry por petición del servidor")
                                         ventana_actualzar = Actualizar()
                                         ventana_actualzar.show()
-                                        ventana_actualzar.actualizar_raspberrypi(int(datos[1]))
+                                        ventana_actualzar.actualizar_raspberrypi(int(datos[1]), False)
                                 except Exception as e:
                                     print("LeerMinicom.py, linea 258: "+str(e))
                         else:

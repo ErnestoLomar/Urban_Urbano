@@ -510,9 +510,12 @@ def obtener_estado_de_todos_los_viajes_no_enviados():
     except Exception as e:
         print(e)
         logging.info(e)
-
-# sql like example: SELECT * FROM actualizacion WHERE operacion LIKE '%actualizacion%'
-crear_tabla_actualizacion()
-crear_tabla_auto_asignacion()
-crear_tabla_asignacion()
-crear_tabla_estado_del_viaje()
+        
+def crear_tablas_asignacion():
+    try:
+        crear_tabla_actualizacion()
+        crear_tabla_auto_asignacion()
+        crear_tabla_asignacion()
+        crear_tabla_estado_del_viaje()
+    except Exception as e:
+        print("Ocurrio algo al crear las BD asignacion: ", e)

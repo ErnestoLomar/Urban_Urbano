@@ -422,6 +422,8 @@ class Principal_Modem:
                     ret = IniciarSesionFTP("web", tamanio)
                     return ret
                 elif servidor == "azure":
+                    
+                    # Se empiezan a hacer las configuraciones de la conexion FTP con Azure
                     cone=conf_conexion_FTP_azure+"\r\n"
                     print("esto es cone "+cone)
                     ser.write(cone.encode())
@@ -696,8 +698,9 @@ class Principal_Modem:
                     time.sleep(1)
                     print("Descargando archivo de quectel...")
                     eux = ser.readlines()
-                    print("esto es el archivo: ")
-                    print(eux)
+                    #print("esto es el archivo: ")
+                    #print(eux)
+                    print("Ya se descargo el archivo")
                     todo = ""
 
                     time.sleep(5)
@@ -781,7 +784,7 @@ class Principal_Modem:
                         if len(str(tamanio_del_archivo)) > 6:
                             print(">>>>>> El tamaño del archivo txt en MBytes es: "+str(int(tamanio_del_archivo)/1024/1024))
 
-                        if(tamanio + 3 != tamanio_del_archivo):
+                        if(int(tamanio) + 3 != tamanio_del_archivo):
                             print(f"El tamaño de los archivos no coinciden")
                             if tamanio > tamanio_del_archivo:
                                 print(f"El archivo descargado es menor por {tamanio - tamanio_del_archivo} Bytes")
@@ -836,12 +839,13 @@ class Principal_Modem:
 
                     #-------------//////
                     print("Descomprimiendo...")
+                    #Verificamos en que ubicacion 
                     subprocess.run('pwd', shell=True)
                     subprocess.run('rm -rf update.txt', shell=True)
                     subprocess.run(f'rm -rf {nombre}.txt', shell=True)
                     subprocess.run("mv -f /home/pi/update.zip /home/pi/actualizacion/",shell=True)
                     if os.path.exists("/home/pi/update/"):
-                                    subprocess.run('rm -rf /home/pi/update/', shell=True)
+                        subprocess.run('rm -rf /home/pi/update/', shell=True)
                     subprocess.run("unzip -o /home/pi/actualizacion/update.zip",shell=True)
                     time.sleep(5)
                     print(".zip descomprimido")

@@ -5,6 +5,9 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 
 Linea cronológica:
 - v2.43:
+  - Se corrigió bug de la actualización parcial de archivos en FTP
+  - Se añadió la base de datos asignación.db para que no ocurriera un bug en la creación de trama 4.
+- v2.43:
   - Se mejoro la eliminación de archivos UFS.
   - Se corrigió bug de bucle infinito en "Descargando archivo de azure".
 - v2.32:

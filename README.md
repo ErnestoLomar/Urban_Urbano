@@ -7,6 +7,7 @@ Linea cronológica:
 - v2.51:
   - Se implemento la nueva matriz tarifaria
   - Hubo cambios en las geocercas.
+  - Se aniadieron nuevos servicios a la base de datos de servicios_pensiones.
 - v2.50:
   - Se mejoro el FTP por Alejandro.
 - v2.49:

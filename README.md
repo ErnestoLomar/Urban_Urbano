@@ -4,6 +4,8 @@ Software de validador para camiones de transporte urbano para la empresa Urban d
 **Autor: Ernesto Lomar**
 
 Linea cronológica:
+- v2.53:
+  - Nueva versión de .so mejorada.
 - v2.52:
   - Se inicio el pin 13 en HIGH al iniciar el sistema.
 - v2.51:
